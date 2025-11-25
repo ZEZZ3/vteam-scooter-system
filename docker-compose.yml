@@ -1,0 +1,65 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongo:27017/scooterdb
+      STRIPE_KEY: ${STRIPE_KEY:-test_dummy}
+      API_BASE: http://backend:3000
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  admin-webb:
+    build: ./admin-webb
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  user-webb:
+    build: ./user-webb
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  user-mobile:
+    build: ./user-mobile
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  bike:
+    build: ./bike
+    environment:
+      API_BASE: http://backend:3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  simulation:
+    build: ./simulation
+    environment:
+      API_BASE: http://backend:3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
