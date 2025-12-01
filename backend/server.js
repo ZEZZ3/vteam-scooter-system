@@ -1,13 +1,5 @@
-import express from "express";
-import cors from "cors";
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
+const app = require("./app");
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`API listening on http://localhost:${port}`));
+let server = app.listen(port, () => {console.log(`API running on port ${port}`);});
+
+module.exports = server;

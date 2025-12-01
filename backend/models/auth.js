@@ -116,6 +116,7 @@ const auth = {
     login: async function(res, body) {
         const mail = body.mail;
         const password = body.password;
+ 
 
         if (!mail || !password) {
             return res.status(401).json({
@@ -134,9 +135,7 @@ const auth = {
             db = await database.getDb("users");
 
             const user = await db.collection.findOne({ mail });
-
             if (user) {
-                //console.log(user)
                 return auth.comparePasswords(
                     res,
                     password,
@@ -180,7 +179,7 @@ const auth = {
             }
 
             if (result) {
-                let payload = { mail: user.mail };
+                let payload = { mail: user.mail, role: user.role };
                 let jwtToken = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
                 return res.json({

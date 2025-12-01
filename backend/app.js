@@ -9,11 +9,11 @@ const morgan = require("morgan");
 const cors = require("cors");
 
 const users = require("./routes/v1/users.js");
-const bikes = require("./routes/v1/users.js");
+/* const bikes = require("./routes/v1/users.js");
 const city = require("./routes/v1/users.js");
 const history = require("./routes/v1/users.js");
 const payment = require("./routes/v1/users.js");
-const rent = require("./routes/v1/users.js");
+const rent = require("./routes/v1/users.js"); */
 
 const app = express();
 
@@ -27,12 +27,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-app.use('api/v1/users', users);
-app.use('api/v1/bikes', bikes);
+app.use('/api/v1/users', users);
+/* app.use('api/v1/bikes', bikes);
 app.use('api/v1/city', city);
 app.use('api/v1/history', history);
 app.use('api/v1/payment', payment);
-app.use('api/v1/rent', rent);
+app.use('api/v1/rent', rent); */
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {
