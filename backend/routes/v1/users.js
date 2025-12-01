@@ -5,16 +5,15 @@ const auth = require("../models/auth.js");
 const users = require("../models/users.js");
 
 // login
-router.post('/login',
-    (req, res, next) => auth.checkToken(req, res, next),
-    //(req, res) => documents.getAllDocumentsForUser(res, req)
-);
+router.post('/login', (req, res) => {
+    auth.login(res, req.body);
+});
 
 // register
-router.post('/register',
-    (req, res, next) => auth.checkToken(req, res, next),
-    //(req, res) => documents.getAllDocumentsForUser(res, req)
-);
+router.post('/register', (req, res) => {
+    auth.register(res, req.body);
+});
+
 
 // GET api/v1/users/
 // Get all users
@@ -64,3 +63,5 @@ router.get('/:id',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => users.verifyUser(res, req)
 );
+
+module.exports = router;
