@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
-const auth = require("../models/auth.js");
-const users = require("../models/users.js");
+const auth = require("../../models/auth.js");
+const users = require("../../models/users.js");
 
 // login
 router.post('/login', (req, res) => {

@@ -3,18 +3,32 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "NODE_ENV='test' jest --detectOpenHandles",
+    "test": "jest --detectOpenHandles",
     "start": "node server.js",
     "production": "NODE_ENV='production' node server.js",
     "dev": "NODE_ENV='test' nodemon server.js",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/jest.setup.js"
+    ],
+    "globalTeardown": "<rootDir>/test/jest.teardown.js"
+  },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
     "express": "^4.19.2",
     "jest": "^30.2.0",
-    "nodemon": "^3.1.11"
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.0.0",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.1.4",
+    "validator": "^13.15.23"
   }
 }

@@ -1,10 +1,7 @@
-const database = require("../db/database.js");
 const ObjectId = require('mongodb').ObjectId;
 const database = require("../database/database.js");
 const bcrypt = require('bcryptjs');
 const validator = require("validator");
-
-
 
 const users = {
 
@@ -170,6 +167,58 @@ const users = {
                 await db.client.close();
             }
         });
+    },
+
+    /**
+     * Gets a single user by ID. If user doesnt have admin role, they can only view their own user data.
+     * Admins are not restricted.
+     */
+    getSingleUser: async function (res, req) {
+        const requestedID = req.params.id;
+        
+        if (req.user.role !== "admin") {
+            if (req.user._id !== ObjectId(requestedID)) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `GET api/v1/users/${requestedID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this data."
+                    }
+                });            
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("users");
+            const user = await db.collection.findOne({email:req.user.mail});
+
+            if (!user || user.lenght === 0) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `GET api/v1/users/${requestedID}`,
+                        title: "Not found",
+                        message: "No data found."
+                    }
+                });
+            }
+
+            return res.status(200).json({ data: user });
+        } catch (e) {
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    path: `GET api/v1/users/${requestedID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            await db.client.close();
+        }
     },
 };
 
