@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "NODE_ENV='test' jest --detectOpenHandles",
     "start": "node server.js",
     "production": "NODE_ENV='production' node server.js",
     "dev": "NODE_ENV='test' nodemon server.js",

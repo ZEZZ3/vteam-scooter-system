@@ -3,13 +3,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { ObjectId } = require("mongodb");
 const crypto = require("crypto");
+const validator = require("validator");
 
 const jwtSecret = process.env.JWT_SECRET;
 
 const auth = {
 
     register: async function(res, body) {
-        const email = body.email;
+        const mail = body.mail;
         const password = body.password;
         const firstName = body.firstName;
         const lastName = body.lastName;
@@ -23,14 +24,24 @@ const auth = {
         const verificationToken = crypto.randomBytes(32).toString("hex");
         const tokenValidity = Date.now() + 1000 * 60 * 30; // 30 min
 
-        if (!email || !password) {
+        if (!mail || !password) {
             return res.status(401).json({
                 error: {
                     status: 401,
-                    type: "POST",
-                    source: "/register",
+                    source: "POST api/v1/users/register",
                     title: "Email or password missing",
                     detail: "Email or password missing in request"
+                }
+            });
+        }
+
+        if (!validator.isEmail(mail)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    source: "POST api/v1/users/register",
+                    title: "Not a valid email",
+                    detail: "Email has to be in a valid format."
                 }
             });
         }
@@ -40,8 +51,7 @@ const auth = {
                 return res.status(500).json({
                     error: {
                         status: 500,
-                        type: "POST",
-                        source: "/register",
+                        source: "POST api/v1/users/register",
                         title: "bcrypt error",
                         detail: "bcrypt error"
                     }
@@ -53,21 +63,20 @@ const auth = {
             try {
                 db = await database.getDb("users");
 
-                const exists = await db.collection.findOne( { email } );
+                const exists = await db.collection.findOne( { mail } );
                 if (exists) {
                     return res.status(400).json({
                         error: {
                             status: 400,
-                            type: "POST",
-                            source: "/register",
+                            source: "POST api/v1/users/register",
                             title: "User already exists",
-                            detail: `User already registered: ${email}`
+                            detail: `User already registered: ${mail}`
                         }
                     });
                 }
 
                 await db.collection.insertOne({
-                    email,
+                    mail,
                     password: hash,
                     firstName,
                     lastName,
@@ -79,7 +88,7 @@ const auth = {
                     role,
                     verified,
                     verificationToken,
-                    tokenValidity,
+                    tokenExpires: new Date(tokenValidity),
                     createdAt: new Date()
                 });
 
@@ -93,8 +102,7 @@ const auth = {
                 return res.status(500).json({
                     error: {
                         status: 500,
-                        type: "POST",
-                        source: "/register",
+                        source: "POST api/v1/users/register",
                         title: "Database error",
                         detail: e.message
                     }
@@ -106,15 +114,14 @@ const auth = {
     },
 
     login: async function(res, body) {
-        const email = body.email;
+        const mail = body.mail;
         const password = body.password;
 
-        if (!email || !password) {
+        if (!mail || !password) {
             return res.status(401).json({
                 error: {
                     status: 401,
-                    type: "POST",
-                    source: "/login",
+                    source: "POST api/v1/users/login",
                     title: "Email or password missing",
                     detail: "Email or password missing in request"
                 }
@@ -126,7 +133,7 @@ const auth = {
         try {
             db = await database.getDb("users");
 
-            const user = await db.collection.findOne({ email });
+            const user = await db.collection.findOne({ mail });
 
             if (user) {
                 //console.log(user)
@@ -139,8 +146,7 @@ const auth = {
                 return res.status(401).json({
                     error: {
                         status: 401,
-                        type: "POST",
-                        source: "/login",
+                        source: "POST api/v1/users/login",
                         title: "User not found",
                         detail: "User with provided email not found."
                     }
@@ -150,8 +156,7 @@ const auth = {
             return res.status(500).json({
                 error: {
                     status: 500,
-                    type: "POST",
-                    source: "/login",
+                    source: "POST api/v1/users/login",
                     title: "Database error",
                     detail: e.message
                 }
@@ -167,8 +172,7 @@ const auth = {
                 return res.status(500).json({
                     error: {
                         status: 500,
-                        type: "internal",
-                        source: "/login",
+                        source: "api/v1/users/login",
                         title: "bcrypt error",
                         detail: "bcrypt error"
                     }
@@ -176,7 +180,7 @@ const auth = {
             }
 
             if (result) {
-                let payload = { email: user.email };
+                let payload = { mail: user.mail };
                 let jwtToken = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
                 return res.json({
@@ -192,8 +196,7 @@ const auth = {
             return res.status(401).json({
                 error: {
                     status: 401,
-                    type: "internal",
-                    source: "/login",
+                    source: "api/v1/users/login",
                     title: "Wrong password",
                     detail: "Password is incorrect."
                 }
@@ -211,7 +214,6 @@ const auth = {
                     return res.status(500).json({
                         error: {
                             status: 500,
-                            type: "internal",
                             source: req.path,
                             title: "Failed authentication",
                             detail: err.message
@@ -220,7 +222,7 @@ const auth = {
                 }
 
                 req.user = {};
-                req.user.email = decoded.email;
+                req.user.mail = decoded.mail;
 
                 return next();
             });
@@ -228,7 +230,6 @@ const auth = {
             return res.status(401).json({
                 error: {
                     status: 401,
-                    type: "internal",
                     source: req.path,
                     title: "No token",
                     detail: "No token provided in request headers"
@@ -237,6 +238,7 @@ const auth = {
         }
     },
 
+    /*
     deregister: async function(res, body) {
         const email = body.email;
         const password = body.password;
@@ -245,8 +247,7 @@ const auth = {
             return res.status(401).json({
                 error: {
                     status: 401,
-                    type: "DELETE",
-                    source: "/deregister",
+                    source: "DELETE api/v1/deregister",
                     title: "Email or password missing",
                     detail: "Email or password missing in request"
                 }
@@ -265,8 +266,7 @@ const auth = {
                 return res.status(404).json({
                     error: {
                         status: 404,
-                        type: "DELETE",
-                        source: "/deregister",
+                        source: "DELETE api/v1/deregister",
                         title: "User not found",
                         detail: `Couldnt find user: ${email}`
                     }
@@ -277,8 +277,7 @@ const auth = {
                 return res.status(401).json({
                     error: {
                         status: 401,
-                        type: "DELETE",
-                        source: "/deregister",
+                        source: "DELETE api/v1/deregister",
                         title: "Wrong password",
                         detail: "Incorrect password given, could not deregister."
                     }
@@ -290,8 +289,7 @@ const auth = {
             return res.status(500).json({
                 error: {
                     status: 500,
-                    type: "DELETE",
-                    source: "/deregister",
+                    source: "DELETE api/v1/deregister",
                     title: "Database error",
                     detail: e.message
                 }
@@ -301,7 +299,7 @@ const auth = {
             await db.client.close();
         }
 
-    },
+    }, */
 };
 
 module.exports = auth;
