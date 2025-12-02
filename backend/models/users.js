@@ -231,6 +231,90 @@ const users = {
             await db.client.close();
         }
     },
+
+    /**
+     * Update a user by ID. If user doesnt have admin role, they can only update their own user data.
+     * Admins are not restricted.
+     */
+    updateSingleUser: async function (res, req) {
+
+        const requestedID = req.params.id;
+
+        const {
+            firstName,
+            lastName,
+            adress,
+            postcode,
+            city,
+            phone,
+            password
+        } = req.body;
+
+        if (req.user.role !== "admin") {
+            if (req.user.id !== requestedID) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `GET api/v1/users/${requestedID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this data."
+                    }
+                });
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("users");
+
+            const newData = {
+                firstName,
+                lastName,
+                adress,
+                postcode,
+                city,
+                phone,
+                password
+            }
+
+            if (password) {
+                newData.password = await bcrypt.hash(password, 10);
+            }
+
+            const response = await db.collection.findOneAndUpdate(
+                {_id: new ObjectId(requestedID) },
+                { $set: newData },
+                { returnDocument: "after" }
+            );
+
+            if (!response.value) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `PUT api/v1/users/${requestedID}`,
+                        title: "Not found",
+                        message: `User with id '${requestedID}' not found.`
+                    }
+                });
+            }
+
+            delete response.value.password;
+
+            return res.status(200).json({ data: response.value });
+        } catch (e) {
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    path: `GET api/v1/users/${requestedID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            await db.client.close();
+        }
+    }
 };
 
 module.exports = users;
