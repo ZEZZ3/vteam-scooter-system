@@ -25,9 +25,9 @@ const auth = {
         const tokenValidity = Date.now() + 1000 * 60 * 30; // 30 min
 
         if (!mail || !password) {
-            return res.status(401).json({
+            return res.status(400).json({
                 error: {
-                    status: 401,
+                    status: 400,
                     source: "POST api/v1/users/register",
                     title: "Email or password missing",
                     detail: "Email or password missing in request"
@@ -65,9 +65,9 @@ const auth = {
 
                 const exists = await db.collection.findOne( { mail } );
                 if (exists) {
-                    return res.status(400).json({
+                    return res.status(409).json({
                         error: {
-                            status: 400,
+                            status: 409,
                             source: "POST api/v1/users/register",
                             title: "User already exists",
                             detail: `User already registered: ${mail}`
@@ -91,6 +91,7 @@ const auth = {
                     tokenExpires: new Date(tokenValidity),
                     createdAt: new Date()
                 });
+
 
                 return res.status(201).json({
                     data: {
