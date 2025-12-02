@@ -1,11 +1,11 @@
-## Status
+## API Functionality Status
 
 | Uri                                     |  GET | POST | PUT | PATCH | DELETE | Tested |
 |-----------------------------------------|:----:|:----:|:---:|:-----:|:------:|:------:|
 | /v1/users                               |  Yes | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/login                         |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/register                      |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
-| /v1/users/{id}                          |  No  | No   | No  |  No   |  No    |   No   |
+| /v1/users/{id}                          |  Yes |  -   | Yes |  No   |  No    |   No   |
 | /v1/users/verify?token=...              |  No  | -    | -   |  -    |  -     |   No   |
 | /v1/rent/{bikeid}                       |  No  | No   | -   |  -    |  -     |   No   |
 | /v1/payment                             |  -   | -    | -   |  -    |  -     |   -    |
