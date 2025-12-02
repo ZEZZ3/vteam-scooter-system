@@ -10,6 +10,27 @@ let customerToken = "";
 let adminID = "";
 let adminToken = "";
 
+async function loginHelper(mail, password, admin) {
+    const response = await request(server)
+        .post('/api/v1/users/login')
+        .send({ mail: mail, password: password});
+
+    if (response.body) {
+
+        if (admin) {
+            adminToken = response.body.data.token;
+            const decode = jwt.verify(adminToken, process.env.JWT_SECRET);
+            adminID = decode.id;
+        } else {
+            customerToken = response.body.data.token;
+            const decode = jwt.verify(customerToken, process.env.JWT_SECRET);
+            customerID = decode.id;
+        }
+    }
+    return response;
+
+}
+
 describe('Users', () => {
 
     describe('POST api/v1/users/login', () => {
@@ -55,40 +76,20 @@ describe('Users', () => {
         });
 
         test('SUCCESS LOGIN: ADMIN', async () => {
-            const response = await request(server)
-                .post('/api/v1/users/login')
-                .send({ mail: "admin@test.com", password: process.env.TEST_PASSWORD});
+            const response = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
 
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.data.type).toEqual("success");
-
-            adminToken = response.body.data.token;
             expect(adminToken).toBeDefined();
-
-            const decode = jwt.verify(adminToken, process.env.JWT_SECRET);
-            expect(decode).toHaveProperty("mail", "admin@test.com");
-            expect(decode).toHaveProperty("role", "admin");
-
-            adminID = decode.id;
             expect(adminID).toBeDefined();
         });
 
         test('SUCCESS LOGIN: CUSTOMER', async () => {
-            const response = await request(server)
-                .post('/api/v1/users/login')
-                .send({ mail: "user@test.com", password: process.env.TEST_PASSWORD});
+            const response = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false);
 
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.data.type).toEqual("success");
-
-            customerToken = response.body.data.token;
             expect(customerToken).toBeDefined();
-
-            const decode = jwt.verify(customerToken, process.env.JWT_SECRET);
-            expect(decode).toHaveProperty("mail", "user@test.com");
-            expect(decode).toHaveProperty("role", "customer");
-
-            customerID = decode.id;
             expect(customerID).toBeDefined();
         });
     });
@@ -396,7 +397,9 @@ describe('Users', () => {
             expect(response.body.data.message).toEqual("User successfully registered.")
 
             const db = await database.getDb("users")
+
             const user = await db.collection.findOne({ mail: "test2@test.com"});
+
             expect(user).toBeDefined()
             expect(user.mail).toEqual(userInfo.mail);
             expect(user.password).not.toEqual(userInfo.password);
@@ -408,8 +411,79 @@ describe('Users', () => {
             expect(user.phone).toEqual(userInfo.phone);
             expect(user.role).toEqual("customer");
             expect(user.balance).toEqual(0);
+            expect(user.verified).toEqual(false);
+            expect(user.verificationToken).toBeDefined();
 
             await db.client.close();
+        });
+    });
+
+    describe('GET api/v1/users/:id', () => {
+        test('200 OK: ADMIN GET ADMIN WITH ID', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+
+            const response = await request(server)
+                .get(`/api/v1/users/${adminID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(200);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data._id).toEqual(adminID);
+            expect(response.body.data.mail).toEqual("admin@test.com");
+        });
+
+        test('200 OK: ADMIN GET CUSTOMER WITH ID', async () => {
+
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const response = await request(server)
+                .get(`/api/v1/users/${customerID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(200);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data._id).toEqual(customerID);
+            expect(response.body.data.mail).toEqual("user@test.com");
+        });
+
+        test('200 OK: CUSTOMER GET SELF WITH ID', async () => {
+            const _ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const response = await request(server)
+                .get(`/api/v1/users/${customerID}`)
+                .set({ "x-access-token": `${customerToken}` })
+                .expect(200);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data._id).toEqual(customerID);
+            expect(response.body.data.mail).toEqual("user@test.com");
+        });
+
+        test('403 FORBIDDEN: CUSTOMER GET ELSE WITH ID', async () => {
+            const _ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+            const __ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+
+            const response = await request(server)
+                .get(`/api/v1/users/${adminID}`)
+                .set({ "x-access-token": `${customerToken}` })
+                .expect(403);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Forbidden");
+        });
+
+        test('404 NOT FOUND: USER', async () => {
+            const _ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+            const __ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const notID = "aaaabbbbccccddddeeeeffff";
+            const response = await request(server)
+                .get(`/api/v1/users/${notID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(404);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Not found");
         });
 
     });

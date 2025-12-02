@@ -177,7 +177,6 @@ const auth = {
                     }
                 });
             }
-
             if (result) {
                 let payload = { mail: user.mail, role: user.role, id: user._id };
                 let jwtToken = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
@@ -223,6 +222,7 @@ const auth = {
                 req.user = {};
                 req.user.mail = decoded.mail;
                 req.user.role = decoded.role;
+                req.user.id = decoded.id
 
                 return next();
             });

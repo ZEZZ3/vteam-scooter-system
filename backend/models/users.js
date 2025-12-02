@@ -188,7 +188,7 @@ const users = {
         const requestedID = req.params.id;
 
         if (req.user.role !== "admin") {
-            if (req.user._id !== ObjectId(requestedID)) {
+            if (req.user.id !== requestedID) {
                 return res.status(403).json({
                     error: {
                         status: 403,
@@ -204,15 +204,15 @@ const users = {
 
         try {
             db = await database.getDb("users");
-            const user = await db.collection.findOne({email:req.user.mail});
+            const user = await db.collection.findOne({_id: new ObjectId(requestedID)});
 
-            if (!user || user.lenght === 0) {
+            if (!user) {
                 return res.status(404).json({
                     error: {
                         status: 404,
                         path: `GET api/v1/users/${requestedID}`,
                         title: "Not found",
-                        message: "No data found."
+                        message: `User with id '${requestedID}' not found.`
                     }
                 });
             }
