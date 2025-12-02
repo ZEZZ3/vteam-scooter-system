@@ -116,12 +116,11 @@ const auth = {
     login: async function(res, body) {
         const mail = body.mail;
         const password = body.password;
- 
 
         if (!mail || !password) {
-            return res.status(401).json({
+            return res.status(400).json({
                 error: {
-                    status: 401,
+                    status: 400,
                     source: "POST api/v1/users/login",
                     title: "Email or password missing",
                     detail: "Email or password missing in request"
@@ -179,7 +178,7 @@ const auth = {
             }
 
             if (result) {
-                let payload = { mail: user.mail, role: user.role };
+                let payload = { mail: user.mail, role: user.role, id: user._id };
                 let jwtToken = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
                 return res.json({
@@ -222,6 +221,7 @@ const auth = {
 
                 req.user = {};
                 req.user.mail = decoded.mail;
+                req.user.role = decoded.role;
 
                 return next();
             });
