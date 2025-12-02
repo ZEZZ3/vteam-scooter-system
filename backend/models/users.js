@@ -18,7 +18,7 @@ const users = {
                     title: "Forbidden",
                     message: "Admin role required"
                 }
-            });            
+            });
         }
 
         let db;
@@ -67,28 +67,39 @@ const users = {
                     title: "Forbidden",
                     message: "Admin role required"
                 }
-            });            
+            });
         }
 
-        const mail = body.mail;
-        const password = body.password;
-        const firstName = body.firstName;
-        const lastName = body.lastName;
-        const adress = body.adress;
-        const postcode = body.postcode;
-        const city = body.city;
-        const phone = body.phone;
+        const mail = req.body.mail;
+        const password = req.body.password;
+        const firstName = req.body.firstName;
+        const lastName = req.body.lastName;
+        const adress = req.body.adress;
+        const postcode = req.body.postcode;
+        const city = req.body.city;
+        const phone = req.body.phone;
         const balance = 0;
-        const role = body.role;
+        const role = req.body.role;
         const verified = true;
 
         if (!mail || !password) {
-            return res.status(401).json({
+            return res.status(400).json({
                 error: {
-                    status: 401,
-                    source: "POST api/v1/users/register",
+                    status: 400,
+                    source: "POST api/v1/users/",
                     title: "Email or password missing",
                     detail: "Email or password missing in request"
+                }
+            });
+        }
+
+        if (role !== "admin" && role !== "customer") {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    source: "POST api/v1/users/",
+                    title: "Not a valid role",
+                    detail: "Role can only be customer or admin"
                 }
             });
         }
@@ -97,7 +108,7 @@ const users = {
             return res.status(400).json({
                 error: {
                     status: 400,
-                    source: "POST api/v1/users/register",
+                    source: "POST api/v1/users/",
                     title: "Not a valid email",
                     detail: "Email has to be in a valid format."
                 }
@@ -126,7 +137,7 @@ const users = {
                     return res.status(400).json({
                         error: {
                             status: 400,
-                            source: "POST api/v1/users/register",
+                            source: "POST api/v1/users/",
                             title: "User already exists",
                             detail: `User already registered: ${mail}`
                         }
@@ -175,7 +186,7 @@ const users = {
      */
     getSingleUser: async function (res, req) {
         const requestedID = req.params.id;
-        
+
         if (req.user.role !== "admin") {
             if (req.user._id !== ObjectId(requestedID)) {
                 return res.status(403).json({
@@ -185,7 +196,7 @@ const users = {
                         title: "Forbidden",
                         message: "You dont have access to this data."
                     }
-                });            
+                });
             }
         }
 
