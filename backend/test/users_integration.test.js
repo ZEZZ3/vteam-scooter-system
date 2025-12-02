@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const server = require('./../app.js');
 const jwt = require("jsonwebtoken");
+const database = require("../database/database")
 
 let customerID = "";
 let customerToken = "";
@@ -10,47 +11,6 @@ let adminID = "";
 let adminToken = "";
 
 describe('Users', () => {
-    describe('POST /register', () => {
-        /* test('201 OK CREATE', async () => {
-            const response = await request(server)
-                .post('/register')
-                .send({ email: testEmail, password: testPwd })
-                .expect(201);
-            //console.log(response.body.data.message)
-            expect(response.body.data.message).toEqual("User successfully registered.");
-        });
-
-        test('400 BAD REQUEST USER ALREADY EXISTS', async () => {
-            const response = await request(server)
-                .post('/register')
-                .send({ email: testEmail, password: testPwd })
-                .expect(400);
-
-            expect(response.body).toEqual(expect.any(Object));
-            expect(response.body.error.title).toEqual("User already exists");
-        });
-
-        test('401 UNAUTHORIZED NO EMAIL', async () => {
-            const response = await request(server)
-                .post('/register')
-                .send({ password: testPwd })
-                .expect(401);
-
-            expect(response.body).toEqual(expect.any(Object));
-            expect(response.body.error.title).toEqual("Email or password missing");
-        });
-
-        test('401 UNAUTHORIZED NO PASSWORD', async () => {
-            const response = await request(server)
-                .post('/register')
-                .send({ email: testEmail })
-                .expect(401);
-
-            expect(response.body).toEqual(expect.any(Object));
-            expect(response.body.error.title).toEqual("Email or password missing");
-        }); */
-    });
-
 
     describe('POST api/v1/users/login', () => {
 
@@ -297,14 +257,159 @@ describe('Users', () => {
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.data.message).toEqual("User successfully registered.")
 
-            const validate = await request(server)
-                .get('/api/v1/users/')
-                .set({ "x-access-token": `${adminToken}` })
-                .expect(200);
 
-            expect(validate.body).toEqual(expect.any(Object));
-            expect(validate.body.data.length).toEqual(3);
+            const db = await database.getDb("users")
+            const user = await db.collection.findOne({ mail: "test1@test.com"});
+            expect(user).toBeDefined()
+            expect(user.mail).toEqual(userInfo.mail);
+            expect(user.password).not.toEqual(userInfo.password);
+            expect(user.firstName).toEqual(userInfo.firstName);
+            expect(user.lastName).toEqual(userInfo.lastName);
+            expect(user.adress).toEqual(userInfo.adress);
+            expect(user.postcode).toEqual(userInfo.postcode);
+            expect(user.city).toEqual(userInfo.city);
+            expect(user.phone).toEqual(userInfo.phone);
+            expect(user.role).toEqual("admin");
+            expect(user.balance).toEqual(0);
 
+            await db.client.close();
+        });
+    });
+
+    describe('POST api/v1/users/register', () => {
+        test('400 BAD REQUEST: NO EMAIL', async () => {
+
+            const userInfo = {
+                password: process.env.TEST_PASSWORD,
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+                role: "admin"
+            }
+
+            const response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Email or password missing");
+        });
+
+        test('400 BAD REQUEST: NO PASSWORD', async () => {
+
+            const userInfo = {
+                mail: "test2@test.com",
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+                role: "admin"
+            }
+
+            const response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Email or password missing");
+        });
+
+        test('400 BAD REQUEST: INVALID EMAIL', async () => {
+
+            const userInfo = {
+                mail: "test2test.com",
+                password: process.env.TEST_PASSWORD,
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+                role: "admin"
+            }
+
+            const response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Not a valid email");
+        });
+
+        test('409 CONFLICT: USER ALREADY EXISTS', async () => {
+
+            const userInfo = {
+                mail: "test2@test.com",
+                password: process.env.TEST_PASSWORD,
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+                role: "admin"
+            }
+
+            let response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(201);
+
+
+            response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(409);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("User already exists");
+        });
+
+        test('201 CREATED: NEW USER REGISTERED', async () => {
+
+            const userInfo = {
+                mail: "test2@test.com",
+                password: process.env.TEST_PASSWORD,
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+                role: "admin"
+            }
+
+            const response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(201);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data.message).toEqual("User successfully registered.")
+
+            const db = await database.getDb("users")
+            const user = await db.collection.findOne({ mail: "test2@test.com"});
+            expect(user).toBeDefined()
+            expect(user.mail).toEqual(userInfo.mail);
+            expect(user.password).not.toEqual(userInfo.password);
+            expect(user.firstName).toEqual(userInfo.firstName);
+            expect(user.lastName).toEqual(userInfo.lastName);
+            expect(user.adress).toEqual(userInfo.adress);
+            expect(user.postcode).toEqual(userInfo.postcode);
+            expect(user.city).toEqual(userInfo.city);
+            expect(user.phone).toEqual(userInfo.phone);
+            expect(user.role).toEqual("customer");
+            expect(user.balance).toEqual(0);
+
+            await db.client.close();
         });
 
     });
