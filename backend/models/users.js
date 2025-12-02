@@ -383,6 +383,64 @@ const users = {
         } finally {
             await db.client.close();
         }
+    },
+
+    /**
+     * Delete a user by ID.
+     * If user doesnt have admin role, they can only delete their own user data.
+     * Admins are not restricted.
+     */
+    deleteUser: async function (res, req) {
+        const requestedID = req.params.id;
+
+        if (req.user.role !== "admin") {
+            if (req.user.id !== requestedID) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `GET api/v1/users/${requestedID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this functionality."
+                    }
+                });
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("users");
+
+
+            const response = await db.collection.deleteOne(
+                { _id: new ObjectId(requestedID) }
+            );
+
+            if (response.deletedCount === 0) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `PUT api/v1/users/${requestedID}`,
+                        title: "Not found",
+                        message: `User with id '${requestedID}' not found.`
+                    }
+                });
+            }
+
+            return res.status(200).json({ data: { message: "User has been deleted" }});
+        } catch (e) {
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    path: `GET api/v1/users/${requestedID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            await db.client.close();
+        }
+
     }
 };
 
