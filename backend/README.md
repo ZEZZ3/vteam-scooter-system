@@ -3,7 +3,7 @@
 | Uri                                     |  GET | POST | PUT | PATCH | DELETE | Tested |
 |-----------------------------------------|:----:|:----:|:---:|:-----:|:------:|:------:|
 | /v1/users                               |  Yes | Yes  | -   |  -    |  -     |   No   |
-| /v1/users/login                         |  -   | Yes  | -   |  -    |  -     |   <span style="color:green">Yes</span>  |
+| /v1/users/login                         |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/register                      |  -   | Yes  | -   |  -    |  -     |   No   |
 | /v1/users/{id}                          |  No  | No   | No  |  No   |  No    |   No   |
 | /v1/users/verify?token=...              |  No  | -    | -   |  -    |  -     |   No   |
