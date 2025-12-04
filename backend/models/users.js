@@ -281,7 +281,19 @@ const users = {
             db = await database.getDb("users");
             
             const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone"]
-            const newData = helpers.checkUpdateData(req.body, fields);
+            let newData = {}
+            try {
+                newData = helpers.checkPutData(req.body, fields);
+            } catch (e) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: `PUT api/v1/users/${requestedID}`,
+                        title: "Bad request",
+                        message: e.message
+                    }
+                });
+            }
 
             if (req.body.password) {
                 newData.password = await bcrypt.hash(req.body.password, 10);
@@ -370,7 +382,7 @@ const users = {
             db = await database.getDb("users");
 
             const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone", "password"]
-            const newData = helpers.checkUpdateData(req.body, fields);
+            const newData = helpers.checkPatchData(req.body, fields);
             
             if (newData.password) {
                 newData.password = await bcrypt.hash(newData.password, 10);

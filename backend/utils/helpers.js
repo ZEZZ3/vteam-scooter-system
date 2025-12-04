@@ -1,11 +1,24 @@
 "use strict"
 
-function checkUpdateData(body, letPass) {
+function checkPutData(body, required) {
     const newData = {}
 
-    for (const pass of letPass) {
-        if (body[pass] !== undefined) {
-            newData[pass] = body[pass];
+    for (const field of required) {
+        if (body[field] === undefined) {
+            throw new Error(`Missing field: ${field}`);            
+        }
+        newData[field] = body[field];
+    }
+
+    return newData;
+}
+
+function checkPatchData(body, required) {
+    const newData = {}
+
+    for (const field of required) {
+        if (body[field] !== undefined) {
+            newData[field] = body[field];
         }
     }
 
@@ -13,5 +26,6 @@ function checkUpdateData(body, letPass) {
 }
 
 module.exports = {
-    checkUpdateData
+    checkPutData,
+    checkPatchData
 }
