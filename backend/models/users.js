@@ -299,17 +299,6 @@ const users = {
                 newData.password = await bcrypt.hash(req.body.password, 10);
             }
 
-            if (Object.keys(newData).length === 0) {
-                return res.status(400).json({
-                    error: {
-                        status: 400,
-                        path: `PUT api/v1/users/${requestedID}`,
-                        title: "Bad request",
-                        message: "No data to update"
-                    }
-                });
-            }
-
             const response = await db.collection.findOneAndUpdate(
                 {_id: new ObjectId(requestedID) },
                 { $set: newData },
