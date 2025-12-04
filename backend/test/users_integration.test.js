@@ -789,6 +789,7 @@ describe('Users', () => {
 
         test('403 FORBIDDEN: CUSTOMER EDIT ADMIN', async () => {
             const _ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+            const __ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
 
             const updateWith = {
                 lastName: "the new last name",
@@ -824,5 +825,78 @@ describe('Users', () => {
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.error.title).toEqual("Not found");
         });
+    });
+
+    describe('DELETE api/v1/users/:id', () => {
+
+        test('200 OK: ADMIN DELETE CUSTOMER', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const response = await request(server)
+                .delete(`/api/v1/users/${customerID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(200);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data.message).toEqual("User has been deleted");
+        });
+
+        test('200 OK: CUSTOMER DELETE CUSTOMER', async () => {
+            const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const response = await request(server)
+                .delete(`/api/v1/users/${customerID}`)
+                .set({ "x-access-token": `${customerToken}` })
+                .expect(200);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data.message).toEqual("User has been deleted");
+        });
+
+        test('400 BAD REQUEST: INVALID ID', async () => {
+            const __ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            
+            const notID = "a";
+
+            const response = await request(server)
+                .delete(`/api/v1/users/${notID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Bad request");
+            expect(response.body.error.message).toEqual(`Invalid ID: ${notID}`);
+        });
+
+        test('403 FORBIDDEN: CUSTOMER DELETE ADMIN', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const response = await request(server)
+                .delete(`/api/v1/users/${adminID}`)
+                .set({ "x-access-token": `${customerToken}` })
+                .expect(403);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Forbidden");
+            expect(response.body.error.message).toEqual("You dont have access to this functionality.");
+        });
+
+        test('404 NOT FOUND: USER NOT FOUND', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+
+            const notID = "aaaabbbbccccddddeeeeffff";
+
+            const response = await request(server)
+                .delete(`/api/v1/users/${notID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(404);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Not found");
+            expect(response.body.error.message).toEqual(`User with id '${notID}' not found.`);
+        });
+
     });
 });
