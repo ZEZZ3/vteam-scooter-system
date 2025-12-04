@@ -430,12 +430,23 @@ const users = {
     deleteUser: async function (res, req) {
         const requestedID = req.params.id;
 
+        if (!ObjectId.isValid(requestedID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/users/${requestedID}`,
+                    title: "Bad request",
+                    message: `Invalid ID: ${requestedID}`
+                }
+            });            
+        }
+
         if (req.user.role !== "admin") {
             if (req.user.id !== requestedID) {
                 return res.status(403).json({
                     error: {
                         status: 403,
-                        path: `GET api/v1/users/${requestedID}`,
+                        path: `DELETE api/v1/users/${requestedID}`,
                         title: "Forbidden",
                         message: "You dont have access to this functionality."
                     }
@@ -448,7 +459,6 @@ const users = {
         try {
             db = await database.getDb("users");
 
-
             const response = await db.collection.deleteOne(
                 { _id: new ObjectId(requestedID) }
             );
@@ -457,7 +467,7 @@ const users = {
                 return res.status(404).json({
                     error: {
                         status: 404,
-                        path: `PUT api/v1/users/${requestedID}`,
+                        path: `DELETE api/v1/users/${requestedID}`,
                         title: "Not found",
                         message: `User with id '${requestedID}' not found.`
                     }
@@ -469,7 +479,7 @@ const users = {
             return res.status(500).json({
                 errors: {
                     status: 500,
-                    path: `GET api/v1/users/${requestedID}`,
+                    path: `DELETE api/v1/users/${requestedID}`,
                     title: "Database error",
                     message: e.message
                 }
