@@ -486,5 +486,128 @@ describe('Users', () => {
             expect(response.body.error.title).toEqual("Not found");
         });
 
+        test('400 BAD REQUEST: INVALID ID', async () => {
+            const _ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+            const __ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const notID = "a";
+            const response = await request(server)
+                .get(`/api/v1/users/${notID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Bad request");
+        });
+
+    });
+
+    describe('PUT api/v1/users/:id', () => {
+        test('400 BAD REQUEST: INVALID ID', async () => {
+            const __ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const notID = "a";
+            const response = await request(server)
+                .put(`/api/v1/users/${notID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Bad request");
+        });
+
+        test('400 BAD REQUEST: NO DATA TO UPDATE', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+            
+            const updateWith = {}            
+            
+            const response = await request(server)
+                .put(`/api/v1/users/${customerID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Bad request");
+            expect(response.body.error.message).toEqual("No data to update");
+        });
+
+        test('403 FORBIDDEN: CUSTOMER EDIT ADMIN', async () => {
+            const _ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const updateWith = {
+                firstName: "the new first name",
+                lastName: "the new last name",
+                adress: "the new adress",
+                postcode: "the new postcode",
+                city: "the new city",
+                phone: "the new phone",
+                password: "Test123!"
+            }
+
+            const response = await request(server)
+                .put(`/api/v1/users/${adminID}`)
+                .set({ "x-access-token": `${customerToken}` })
+                .send(updateWith)
+                .expect(403);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Forbidden");
+        });
+
+        test('404 NOT FOUND: USER NOT FOUND', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+
+            const updateWith = {
+                firstName: "the new first name",
+                lastName: "the new last name",
+                adress: "the new adress",
+                postcode: "the new postcode",
+                city: "the new city",
+                phone: "the new phone",
+                password: "Test123!"
+            }
+
+            const notID = "aaaabbbbccccddddeeeeffff";
+
+            const response = await request(server)
+                .put(`/api/v1/users/${notID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .send(updateWith)
+                .expect(404);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Not found");
+        });
+
+        test('200 OK: UPDATED', async () => {
+            const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+            const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+
+            const updateWith = {
+                firstName: "the new first name",
+                lastName: "the new last name",
+                adress: "the new adress",
+                postcode: "the new postcode",
+                city: "the new city",
+                password: "Test123!", 
+                role: "admin" // safety
+            }
+
+            const response = await request(server)
+                .put(`/api/v1/users/${customerID}`)
+                .set({ "x-access-token": `${adminToken}` })
+                .send(updateWith)
+                .expect(200);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.data.firstName).toEqual(updateWith.firstName);
+            expect(response.body.data.lastName).toEqual(updateWith.lastName);
+            expect(response.body.data.adress).toEqual(updateWith.adress);
+            expect(response.body.data.postcode).toEqual(updateWith.postcode);
+            expect(response.body.data.city).toEqual(updateWith.city);
+            expect(response.body.data.phone).toEqual("012345678");
+            expect(response.body.data.password).not.toBeDefined();
+            expect(response.body.data.role).toEqual("customer");
+        });
+
     });
 });

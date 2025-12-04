@@ -2,6 +2,7 @@ const ObjectId = require('mongodb').ObjectId;
 const database = require("../database/database.js");
 const bcrypt = require('bcryptjs');
 const validator = require("validator");
+const helpers = require("../utils/helpers.js");
 
 const users = {
 
@@ -187,6 +188,17 @@ const users = {
     getSingleUser: async function (res, req) {
         const requestedID = req.params.id;
 
+        if (!ObjectId.isValid(requestedID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `PUT api/v1/users/${requestedID}`,
+                    title: "Bad request",
+                    message: `Invalid ID: ${requestedID}`
+                }
+            });            
+        }
+
         if (req.user.role !== "admin") {
             if (req.user.id !== requestedID) {
                 return res.status(403).json({
@@ -241,46 +253,49 @@ const users = {
 
         const requestedID = req.params.id;
 
-        const {
-            firstName,
-            lastName,
-            adress,
-            postcode,
-            city,
-            phone,
-            password
-        } = req.body;
+        if (!ObjectId.isValid(requestedID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `PUT api/v1/users/${requestedID}`,
+                    title: "Bad request",
+                    message: `Invalid ID: ${requestedID}`
+                }
+            });            
+        }
 
-        if (req.user.role !== "admin") {
-            if (req.user.id !== requestedID) {
+        if (req.user.role !== "admin" && req.user.id !== requestedID) {
                 return res.status(403).json({
                     error: {
                         status: 403,
-                        path: `GET api/v1/users/${requestedID}`,
+                        path: `PUT api/v1/users/${requestedID}`,
                         title: "Forbidden",
                         message: "You dont have access to this data."
                     }
                 });
-            }
         }
 
         let db;
 
         try {
             db = await database.getDb("users");
+            
+            const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone"]
+            const newData = helpers.checkUpdateData(req.body, fields);
 
-            const newData = {
-                firstName,
-                lastName,
-                adress,
-                postcode,
-                city,
-                phone,
-                password
+            if (req.body.password) {
+                newData.password = await bcrypt.hash(req.body.password, 10);
             }
 
-            if (password) {
-                newData.password = await bcrypt.hash(password, 10);
+            if (Object.keys(newData).length === 0) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: `PUT api/v1/users/${requestedID}`,
+                        title: "Bad request",
+                        message: "No data to update"
+                    }
+                });
             }
 
             const response = await db.collection.findOneAndUpdate(
@@ -289,7 +304,7 @@ const users = {
                 { returnDocument: "after" }
             );
 
-            if (!response.value) {
+            if (!response) {
                 return res.status(404).json({
                     error: {
                         status: 404,
@@ -300,14 +315,15 @@ const users = {
                 });
             }
 
-            delete response.value.password;
+            delete response.password;
 
-            return res.status(200).json({ data: response.value });
+            return res.status(200).json({ data: response });
         } catch (e) {
+            console.log(e.message)
             return res.status(500).json({
                 errors: {
                     status: 500,
-                    path: `GET api/v1/users/${requestedID}`,
+                    path: `PUT api/v1/users/${requestedID}`,
                     title: "Database error",
                     message: e.message
                 }
@@ -326,17 +342,26 @@ const users = {
 
         const requestedID = req.params.id;
 
-        if (req.user.role !== "admin") {
-            if (req.user.id !== requestedID) {
-                return res.status(403).json({
-                    error: {
-                        status: 403,
-                        path: `GET api/v1/users/${requestedID}`,
-                        title: "Forbidden",
-                        message: "You dont have access to this data."
-                    }
-                });
-            }
+        if (!ObjectId.isValid(requestedID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `PATCH api/v1/users/${requestedID}`,
+                    title: "Bad request",
+                    message: `Invalid ID: ${requestedID}`
+                }
+            });            
+        }
+
+        if (req.user.role !== "admin" && req.user.id !== requestedID) {
+            return res.status(403).json({
+                error: {
+                    status: 403,
+                    path: `PATCH api/v1/users/${requestedID}`,
+                    title: "Forbidden",
+                    message: "You dont have access to this data."
+                }
+            });
         }
 
         let db;
@@ -344,11 +369,22 @@ const users = {
         try {
             db = await database.getDb("users");
 
-            const newData = { ...req.body }
-            delete newData.mail;
-
+            const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone", "password"]
+            const newData = helpers.checkUpdateData(req.body, fields);
+            
             if (newData.password) {
                 newData.password = await bcrypt.hash(newData.password, 10);
+            }
+
+            if (Object.keys(newData).length === 0) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: `PATCH api/v1/users/${requestedID}`,
+                        title: "Bad request",
+                        message: "No data to update"
+                    }
+                });
             }
 
             const response = await db.collection.findOneAndUpdate(
@@ -357,25 +393,25 @@ const users = {
                 { returnDocument: "after" }
             );
 
-            if (!response.value) {
+            if (!response) {
                 return res.status(404).json({
                     error: {
                         status: 404,
-                        path: `PUT api/v1/users/${requestedID}`,
+                        path: `PATCH api/v1/users/${requestedID}`,
                         title: "Not found",
                         message: `User with id '${requestedID}' not found.`
                     }
                 });
             }
 
-            delete response.value.password;
+            delete response.password;
 
-            return res.status(200).json({ data: response.value });
+            return res.status(200).json({ data: response });
         } catch (e) {
             return res.status(500).json({
                 errors: {
                     status: 500,
-                    path: `GET api/v1/users/${requestedID}`,
+                    path: `PATCH api/v1/users/${requestedID}`,
                     title: "Database error",
                     message: e.message
                 }
