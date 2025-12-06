@@ -3,6 +3,7 @@ const database = require("../database/database.js");
 const bcrypt = require('bcryptjs');
 const validator = require("validator");
 const helpers = require("../utils/helpers.js");
+const { verify } = require('jsonwebtoken');
 
 const users = {
 
@@ -487,7 +488,96 @@ const users = {
         } finally {
             await db.client.close();
         }
+    },
 
+    verifyUser: async function (res, req) {
+        const token = req.query.token;
+        
+        if (!token) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `GET api/v1/users/verify`,
+                    title: "Bad request",
+                    message: `Token is required`
+                }
+            });            
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("users");
+
+            const response = await db.collection.findOne(
+                { verificationToken: token }
+            );
+
+            if (!response) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `GET api/v1/users/verify`,
+                        title: "Not found",
+                        message: "Token not found"
+                    }
+                });
+            }
+
+            if (Date.now() > response.tokenExpires) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: `GET api/v1/users/verify`,
+                        title: "Token has expired",
+                        message: "Verification token has expired. A token is only valid for 30 minutes."
+                    }
+                });
+            }
+
+            // prob not gonna run because verification token is set to null when verified
+            if (response.verified) {
+                return res.status(200).json({
+                    data: { message: "Already verified" }
+                });                
+            }
+
+            const newData = {
+                verified: true,
+                tokenValidity: null,
+                tokenExpires: null,
+                verificationToken: null
+            }
+
+            const update = await db.collection.findOneAndUpdate(
+                { _id: new ObjectId(response._id) },
+                { $set: newData }
+            );
+
+            if (!update) {
+                return res.status(500).json({
+                    error: {
+                        status: 500,
+                        path: `GET api/v1/users/verify`,
+                        title: "Could not verify user",
+                        message: "There was a problem verifying the user."
+                    }
+                });                
+            }
+
+            return res.status(200).json({ data: { message: "User has been verified" }});
+        } catch (e) {
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    path: `GET api/v1/users/verify`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            await db.client.close();
+        }
     }
 };
 

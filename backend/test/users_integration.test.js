@@ -1,5 +1,6 @@
 process.env.NODE_ENV = 'test';
 
+const ObjectId = require('mongodb').ObjectId;
 const request = require('supertest');
 const server = require('./../app.js');
 const jwt = require("jsonwebtoken");
@@ -318,6 +319,7 @@ describe('Users', () => {
             expect(user.balance).toEqual(0);
             expect(user.verified).toEqual(false);
             expect(user.verificationToken).toBeDefined();
+            expect(user.tokenExpires).toBeDefined();
 
             await db.client.close();
         });
@@ -897,6 +899,107 @@ describe('Users', () => {
             expect(response.body.error.title).toEqual("Not found");
             expect(response.body.error.message).toEqual(`User with id '${notID}' not found.`);
         });
-
     });
+
+    describe('GET api/v1/users/verify', () => {
+
+        test('200 VERIFIED: NEW USER VERIFIED', async () => {
+
+            const userInfo = {
+                mail: "test2@test.com",
+                password: process.env.TEST_PASSWORD,
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+            }
+
+            const response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(201);
+
+            const db = await database.getDb("users")
+            const user = await db.collection.findOne({ mail: "test2@test.com"});
+            const verificationToken = user.verificationToken;
+            await db.client.close();
+
+            const verify = await request(server)
+                .get(`/api/v1/users/verify?token=${verificationToken}`)
+                .expect(200);
+
+            expect(verify.body).toEqual(expect.any(Object));
+            expect(verify.body.data.message).toEqual("User has been verified");            
+
+        });
+
+        test('400 BAD REQUEST: NO TOKEN', async () => {
+
+            const response = await request(server)
+                .get(`/api/v1/users/verify?token=`)
+                .expect(400);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Bad request");
+            expect(response.body.error.message).toEqual("Token is required");
+        });
+
+        test('400 BAD REQUEST: EXPIRED TOKEN', async () => {
+            
+            const userInfo = {
+                mail: "test2@test.com",
+                password: process.env.TEST_PASSWORD,
+                firstName: "Förnamn",
+                lastName: "Efternamn",
+                adress: "Adress",
+                postcode: "33040",
+                city: "Stad",
+                phone: "Telefon",
+            }
+
+            const response = await request(server)
+                .post('/api/v1/users/register')
+                .send(userInfo)
+                .expect(201);
+
+            const db = await database.getDb("users")
+            const user = await db.collection.findOne({ mail: "test2@test.com"});
+            
+            const newData = {
+                tokenExpires: Date.now() - 1000 * 60 * 31
+            }
+    
+            const update = await db.collection.findOneAndUpdate(
+                { _id: new ObjectId(user._id) },
+                { $set: newData }
+            );
+
+            await db.client.close();
+
+            const verificationToken = user.verificationToken;
+            
+            const verify = await request(server)
+                .get(`/api/v1/users/verify?token=${verificationToken}`)
+                .expect(400);
+
+            expect(verify.body).toEqual(expect.any(Object));
+            expect(verify.body.error.title).toEqual("Token has expired");
+            expect(verify.body.error.message).toEqual("Verification token has expired. A token is only valid for 30 minutes.");
+
+        });
+
+        test('404 NOT FOUND: UNKOWN TOKEN', async () => {
+
+            const response = await request(server)
+                .get(`/api/v1/users/verify?token=a`)
+                .expect(404);
+
+            expect(response.body).toEqual(expect.any(Object));
+            expect(response.body.error.title).toEqual("Not found");
+            expect(response.body.error.message).toEqual("Token not found");
+        });
+    });
+
 });
