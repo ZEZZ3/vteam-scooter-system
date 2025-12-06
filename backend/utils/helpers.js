@@ -1,5 +1,7 @@
 "use strict"
 
+const minBalance = 100.0;
+
 function checkPutData(body, required) {
     const newData = {}
 
@@ -36,5 +38,6 @@ function changeToIsValid(changeTo) {
 module.exports = {
     checkPutData,
     checkPatchData,
-    changeToIsValid
+    changeToIsValid,
+    minBalance
 }

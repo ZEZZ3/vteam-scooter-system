@@ -7,7 +7,7 @@
 | /v1/users/register                      |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/{id}                          |  Yes |  -   | Yes |  Yes  |  Yes   |   **Yes**  |
 | /v1/users/verify?token=...              |  Yes | -    | -   |  -    |  -     |   **Yes**  |
-| /v1/rent/{bikeid}                       |  No  | No   | -   |  -    |  -     |   No   |
+| /v1/rent/{bikeid}                       |  Yes | Yes  | -   |  -    |  -     |   No   |
 | /v1/payment                             |  -   | -    | -   |  -    |  -     |   -    |
 | /v1/payment/{userid}/{rideid}           |  No  | No   | -   |  -    |  No    |   No   |
 | /v1/payment/{userid}/fill               |  No  | -    | -   |  -    |  -     |   No   |

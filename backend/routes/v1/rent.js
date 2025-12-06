@@ -11,9 +11,16 @@ router.get('/:bikeid',
     (req, res) => rent.getRentStatus(res, req)
 );
 
-// POST api/v1/rent/:id
-// Change the status of a bike
-router.post('/:bikeid',
+// POST api/v1/rent/start/:id
+// Start a ride
+router.post('/start/:bikeid',
     (req, res, next) => auth.checkToken(req, res, next),
-    (req, res) => rent.changeStatus(res, req)
+    (req, res) => rent.startRide(res, req)
+);
+
+// POST api/v1/rent/stop/:id
+// Stop a ride
+router.post('/stop/:bikeid',
+    (req, res, next) => auth.checkToken(req, res, next),
+    (req, res) => rent.stopRide(res, req)
 );
