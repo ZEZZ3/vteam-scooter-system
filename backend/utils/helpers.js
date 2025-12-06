@@ -25,7 +25,16 @@ function checkPatchData(body, required) {
     return newData;
 }
 
+function changeToIsValid(changeTo) {
+    const valid = ["free", "rented", "unavailable"];
+    if (!valid.includes(changeTo)) {
+        return false;
+    }
+    return true;
+}
+
 module.exports = {
     checkPutData,
-    checkPatchData
+    checkPatchData,
+    changeToIsValid
 }

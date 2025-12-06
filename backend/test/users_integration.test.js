@@ -11,6 +11,14 @@ let customerToken = "";
 let adminID = "";
 let adminToken = "";
 
+const clearDatabase = require("./clearDatabase");
+const baseData = require("./baseData");
+
+beforeEach(async () => {
+    await clearDatabase();
+    await baseData.baseUserData();
+});
+
 async function loginHelper(mail, password, admin) {
     const response = await request(server)
         .post('/api/v1/users/login')
