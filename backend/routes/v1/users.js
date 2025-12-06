@@ -14,7 +14,6 @@ router.post('/register', (req, res) => {
     auth.register(res, req.body);
 });
 
-
 // GET api/v1/users/
 // Get all users
 router.get('/',
@@ -28,6 +27,12 @@ router.post('/',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => users.addUser(res, req)
 );
+
+// GET api/v1/users/verify?token=ABC
+// verify user
+router.get('/verify', (req, res) => {
+   users.verifyUser(res, req)
+});
 
 // GET api/v1/users/:id
 // get user
@@ -55,13 +60,6 @@ router.patch('/:id',
 router.delete('/:id',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => users.deleteUser(res, req)
-);
-
-// GET api/v1/users/verify?token=ABC
-// verify user
-router.get('/:id',
-    (req, res, next) => auth.checkToken(req, res, next),
-    (req, res) => users.verifyUser(res, req)
 );
 
 module.exports = router;
