@@ -135,13 +135,8 @@ const auth = {
             db = await database.getDb("users");
 
             const user = await db.collection.findOne({ mail });
-            if (user) {
-                return auth.comparePasswords(
-                    res,
-                    password,
-                    user,
-                );
-            } else {
+            
+            if (!user) {
                 return res.status(401).json({
                     error: {
                         status: 401,
@@ -151,6 +146,24 @@ const auth = {
                     }
                 });
             }
+
+            if (!user.verified) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        source: "POST api/v1/users/login",
+                        title: "User not verified",
+                        detail: "User is not verified, please verify before logging in"
+                    }
+                });
+            }            
+            
+            return auth.comparePasswords(
+                res,
+                password,
+                user,
+            );
+
         } catch (e) {
             return res.status(500).json({
                 error: {
