@@ -1,6 +1,8 @@
 "use strict"
 
 const minBalance = 100.0;
+const startingFee = 12.0;
+const minuteFee = 3.0;
 
 function checkPutData(body, required) {
     const newData = {}
