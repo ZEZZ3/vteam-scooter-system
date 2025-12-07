@@ -7,7 +7,7 @@ System för uthyrning av elsparkcyklar i flera svenska städer. Det här repot i
 - **Frontend:** Webbläsar-UI för kunder
 - **Admin:** Webbläsar-UI för drift & zoner
 - **Mobile webapp:** Mobilanpassad kundvy
-- **Database:** SQL (MySQL/PostgreSQL)
+- **Database:** SQL (MongoDB)
 - **Scooter (edge):** Enhet som rapporterar status
 - **Simulator:** Genererar testdata & last
 
