@@ -29,7 +29,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use('/api/v1/users', users);
-app.use('api/v1/rent', rent);
+app.use('/api/v1/rent', rent);
+
 /* app.use('api/v1/bikes', bikes);
 app.use('api/v1/city', city);
 app.use('api/v1/history', history);
@@ -58,7 +59,7 @@ app.use((err, req, res, next) => {
     }
 
     res.status(err.status || 500).json({
-        "errors": [
+        "error": [
             {
                 "status": err.status,
                 "title":  err.message,

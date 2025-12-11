@@ -17,7 +17,9 @@ const database = {
         const db = await client.db();
         const collection = await db.collection(collectionName);
 
-        await collection.createIndex({mail: 1}, {unique: true});
+        if (collectionName === "users") {
+            await collection.createIndex({mail: 1}, {unique: true});
+        }
 
         return {
             db: db,

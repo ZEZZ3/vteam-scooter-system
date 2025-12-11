@@ -6,21 +6,23 @@ const rent = require("../../models/rent.js");
 
 // GET api/v1/rent/:id
 // Get bikes rental status
-router.get('/:bikeid',
+router.get('/:bikeID',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => rent.getRentStatus(res, req)
 );
 
 // POST api/v1/rent/start/:id
 // Start a ride
-router.post('/start/:bikeid',
+router.post('/start/:bikeID',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => rent.startRide(res, req)
 );
 
 // POST api/v1/rent/stop/:id
 // Stop a ride
-router.post('/stop/:bikeid',
+router.post('/stop/:bikeID',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => rent.stopRide(res, req)
 );
+
+module.exports = router;
