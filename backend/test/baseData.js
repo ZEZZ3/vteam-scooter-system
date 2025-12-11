@@ -22,6 +22,7 @@ const baseData = {
                 role: "customer",
                 phone: "012345678",
                 verified: true,
+                balance: 200,
                 createdAt: new Date()
             },
             {
@@ -31,6 +32,15 @@ const baseData = {
                 phone: "01234567832",
                 verified: true,
                 balance: 0,
+                createdAt: new Date()
+            },
+            {
+                mail: "user2@test.com",
+                password: await bcrypt.hash(process.env.TEST_PASSWORD, 10),
+                role: "customer",
+                phone: "0134567832",
+                verified: true,
+                balance: 200,
                 createdAt: new Date()
             }
         ]);
@@ -89,6 +99,15 @@ const baseData = {
                 number: 2,
                 battery: 100,
                 status: "rented",
+                position: {}
+            },
+            {
+                city: "",
+                currentZone: "",
+                currentStation: "",
+                number: 3,
+                battery: 100,
+                status: "free",
                 position: {}
             }
         ]);

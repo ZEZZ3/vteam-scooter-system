@@ -73,6 +73,22 @@ const rent = {
                 }
             }
             
+            return bike
+        } finally {
+            if (dbBikes) {
+                await dbBikes.client.close();
+            }
+        }
+    },
+
+    validateNotRented: async function (bikeID) {
+        let dbBikes;
+        try {
+
+            dbBikes = await database.getDb("bikes");
+            
+            const bike = await dbBikes.collection.findOne({_id: new ObjectId(bikeID)});
+            
             if (bike.status === "rented") {
                 return {
                     error: {
@@ -153,7 +169,7 @@ const rent = {
         try {
             dbUser = await database.getDb("users");
             const user = await dbUser.collection.findOne({_id: new ObjectId(userID)});
-            console.log(user)
+
             if (!user) {
                 return {
                     error: {
@@ -165,7 +181,7 @@ const rent = {
                 }                
             }
             
-            if (user.balance < helpers.minBalance) {
+            if (!user.balance || user.balance < helpers.minBalance) {
                 return {
                     error: {
                         status: 402,
@@ -199,7 +215,7 @@ const rent = {
                 parking: null,
                 active: true
             });
-            console.log(createRide)
+
             if (!createRide || !createRide.insertedId) {
                 return res.status(500).json({
                     error: {
@@ -236,6 +252,11 @@ const rent = {
             let validateRes;
 
             validateRes = await this.validateBike(bikeID);
+            if (validateRes.error) {
+                return res.status(validateRes.error.status).json({error: validateRes.error});
+            }
+
+            validateRes = await this.validateNotRented(bikeID);
             if (validateRes.error) {
                 return res.status(validateRes.error.status).json({error: validateRes.error});
             }
@@ -303,7 +324,7 @@ const rent = {
             }
 
             // only user who started the ride or an admin can make changes
-            if (!user.role !== "admin" && activeRide.user !== user.id) {
+            if (user.role !== "admin" && activeRide.user.toString() !== user.id.toString()) {
                 return {
                     error: {
                         status: 403,
@@ -342,7 +363,6 @@ const rent = {
                     }
                 }                
             }
-            
             return updateBike;
 
         } finally {
@@ -357,14 +377,13 @@ const rent = {
         return { minutes, price }
     },
 
-    endRide: async function (bikeID, rideID, userID) {
-        let dbRides
-        let dbUsers
+    endRide: async function (bikeID, rideID, userID, bikePos, parkingType) {
+        let dbRides;
+        let dbUsers;
 
         try {
             dbRides = await database.getDb("rides");
             const ride = await dbRides.collection.findOne({ _id: new ObjectId(rideID)});
-            
             if (!ride) {
                 return {
                     error: {
@@ -377,15 +396,14 @@ const rent = {
             }
             
             const stop = new Date();
-            const { duration, price } = this.calculateCost(ride.start, stop);
-            
+            const { minutes, price } = this.calculateCost(ride.start, stop);
             const update = await dbRides.collection.findOneAndUpdate(
                 { _id: new ObjectId(rideID) },
                 {
                     $set: {
                         stop: stop,
                         stopPos: bikePos,
-                        duration: duration,
+                        duration: minutes,
                         price: price,
                         parking: parkingType,
                         active: false
@@ -393,7 +411,6 @@ const rent = {
                 },
                 { returnDocument: "after" }
             );
-
             if (!update) {
                 return {
                     error: {
@@ -411,7 +428,7 @@ const rent = {
                 { $inc: { balance: -price }},
                 { returnDocument: "after" }
             );
-
+           
             if(!user) {
                 return {
                     error: {
@@ -425,12 +442,13 @@ const rent = {
 
             return {
                 ride: update,
-                duration: duration,
+                duration: minutes,
                 price: price,
                 balance: user.balance
             }
 
-        } finally {
+        } 
+        finally {
             await dbRides.client.close();
             await dbUsers.client.close();
         }        
@@ -438,6 +456,7 @@ const rent = {
 
     stopRide: async function (res, req) {
         const bikeID = req.params.bikeID;
+        const parkingType = req.body.parkingType;
         
         if (!bikeID) {
             return res.status(400).json({
@@ -450,29 +469,40 @@ const rent = {
             });
         }
 
+        if (!parkingType) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `POST api/v1/rent/stop/${bikeID}`,
+                    title: "Bad Request",
+                    message: "Parking type is missing"
+                }
+            });
+        }
+
         try {
             let validateRes;
 
             validateRes = await this.validateBike(bikeID);
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
 
             validateRes = await this.validateActiveRide(req.user, bikeID)
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
             const activeRideID = validateRes._id
 
             validateRes = await this.updateBikeAvailable(bikeID)
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
             const bikePos = validateRes.position;
 
-            validateRes = await this.endRide(bikeID, activeRideID, req.user.id, bikePos)
+            validateRes = await this.endRide(bikeID, activeRideID, req.user.id, bikePos, parkingType)
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
 
             return res.status(200).json({
@@ -492,7 +522,8 @@ const rent = {
                     status: 500,
                     path: `POST api/v1/rent/start/${bikeID}`,
                     title: "Database error",
-                    message: e.message
+                    message: e.message,
+                    stack: process.env.NODE_ENV === "test" ? e.stack : undefined
                 }
             });
         } 

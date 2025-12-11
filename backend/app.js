@@ -63,7 +63,8 @@ app.use((err, req, res, next) => {
             {
                 "status": err.status,
                 "title":  err.message,
-                "detail": err.message
+                "detail": err.message,
+                "stack": process.env.NODE_ENV === "test" ? e.stack : undefined
             }
         ]
     });

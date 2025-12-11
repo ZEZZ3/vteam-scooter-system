@@ -482,7 +482,7 @@ const users = {
                     status: 500,
                     path: `DELETE api/v1/users/${requestedID}`,
                     title: "Database error",
-                    message: e.message
+                    message: e.message,
                 }
             });
         } finally {
@@ -572,7 +572,8 @@ const users = {
                     status: 500,
                     path: `GET api/v1/users/verify`,
                     title: "Database error",
-                    message: e.message
+                    message: e.message,
+                    stack: process.env.NODE_ENV === "test" ? e.stack : undefined
                 }
             });
         } finally {

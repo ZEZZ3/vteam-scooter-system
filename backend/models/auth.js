@@ -105,7 +105,8 @@ const auth = {
                         status: 500,
                         source: "POST api/v1/users/register",
                         title: "Database error",
-                        detail: e.message
+                        detail: e.message,
+                        stack: process.env.NODE_ENV === "test" ? e.stack : undefined
                     }
                 });
             } finally {
@@ -170,7 +171,8 @@ const auth = {
                     status: 500,
                     source: "POST api/v1/users/login",
                     title: "Database error",
-                    detail: e.message
+                    detail: e.message,
+                    stack: process.env.NODE_ENV === "test" ? e.stack : undefined
                 }
             });
         } finally {
