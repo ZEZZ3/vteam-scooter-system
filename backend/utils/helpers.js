@@ -41,5 +41,7 @@ module.exports = {
     checkPutData,
     checkPatchData,
     changeToIsValid,
-    minBalance
+    minBalance,
+    startingFee,
+    minuteFee
 }
