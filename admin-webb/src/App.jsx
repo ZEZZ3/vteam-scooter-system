@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthContext";
+import RequireAuth from "./auth/RequireAuth";
 
-function App() {
-  const [count, setCount] = useState(0)
+import AppShell from "./layout/AppShell";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
+import Users from "./pages/Users";
+import Bikes from "./pages/Bikes";
+import Cities from "./pages/Cities"; // om du skapade Cities
 
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
-export default App
+          <Route path="/" element={
+            <RequireAuth>
+              <AppShell><AdminDashboard /></AppShell>
+            </RequireAuth>
+          } />
+
+          <Route path="/users" element={
+            <RequireAuth>
+              <AppShell><Users /></AppShell>
+            </RequireAuth>
+          } />
+
+          <Route path="/bikes" element={
+            <RequireAuth>
+              <AppShell><Bikes /></AppShell>
+            </RequireAuth>
+          } />
+
+          <Route path="/cities" element={
+            <RequireAuth>
+              <AppShell><Cities /></AppShell>
+            </RequireAuth>
+          } />
+
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
