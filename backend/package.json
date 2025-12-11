@@ -4,6 +4,9 @@
   "type": "module",
   "scripts": {
     "test": "jest --detectOpenHandles",
+    "test:users": "jest user_integration.test.js --detectOpenHandles",
+    "test:rent": "jest rent_integration.test.js --detectOpenHandles",
+    "test:watch": "jest --watch --detectOpenHandles",
     "start": "node server.js",
     "production": "NODE_ENV='production' node server.js",
     "dev": "NODE_ENV='test' nodemon server.js",

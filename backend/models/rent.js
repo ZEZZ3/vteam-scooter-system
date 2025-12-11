@@ -2,15 +2,16 @@ const ObjectId = require('mongodb').ObjectId;
 const database = require("../database/database.js");
 const helpers = require("../utils/helpers.js");
 
-const users = {
+const rent = {
 
     /**
      * Show the status of a specific bike.
      */
     getRentStatus: async function (res, req) {
-        const bikeID = req.body.bikeID;
+        const bikeID = req.params.bikeID;
 
         if (!bikeID) {
+
             return res.status(400).json({
                 error: {
                     status: 400,
@@ -25,7 +26,6 @@ const users = {
 
         try {
             db = await database.getDb("bikes");
-
             const bike = await db.collection.findOne({_id: new ObjectId(bikeID)});
 
             if (!bike) {
@@ -39,10 +39,10 @@ const users = {
                 });
             }
 
-            return res.status(200).json({ data: bike.status });
+            return res.status(200).json({ data: {status: bike.status } });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `GET api/v1/rent/${bikeID}`,
                     title: "Database error",
@@ -62,7 +62,6 @@ const users = {
             dbBikes = await database.getDb("bikes");
             
             const bike = await dbBikes.collection.findOne({_id: new ObjectId(bikeID)});
-            
             if (!bike) {
                 return {
                     error: {
@@ -93,13 +92,13 @@ const users = {
         }
     },
 
-    validateRide: async function(user, bikeID) {
+    validateRide: async function(bikeID) {
         let dbRides
 
         try {
             dbRides = await database.getDb("rides");
-            const activeRide = await dbRides.collection.findOne({bike: new ObjectId(bikeID), status: "active"});
-            
+            const activeRide = await dbRides.collection.findOne({bike: new ObjectId(bikeID), active: true});
+
             // trying to rent an active bike
             if (activeRide) {
                 return {
@@ -107,7 +106,7 @@ const users = {
                         status: 409,
                         path: `POST api/v1/rent/start/${bikeID}`,
                         title: "Conflict",
-                        message: `Bike with ID: ${bikeID} is busy and cant be rented.`
+                        message: `Bike with ID: ${bikeID} is already in a ride and cant be rented.`
                     }
                 }               
             }
@@ -154,6 +153,7 @@ const users = {
         try {
             dbUser = await database.getDb("users");
             const user = await dbUser.collection.findOne({_id: new ObjectId(userID)});
+            console.log(user)
             if (!user) {
                 return {
                     error: {
@@ -199,7 +199,7 @@ const users = {
                 parking: null,
                 active: true
             });
-            
+            console.log(createRide)
             if (!createRide || !createRide.insertedId) {
                 return res.status(500).json({
                     error: {
@@ -219,7 +219,7 @@ const users = {
     },
 
     startRide: async function (res, req) {
-        const bikeID = req.body.bikeID;
+        const bikeID = req.params.bikeID;
         
         if (!bikeID) {
             return res.status(400).json({
@@ -237,28 +237,28 @@ const users = {
 
             validateRes = await this.validateBike(bikeID);
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
 
-            validateRes = await this.validateRide(req.user)
+            validateRes = await this.validateRide(bikeID)
+            if (validateRes?.error) {
+                return res.status(validateRes.error.status).json({error: validateRes.error});
+            }
+
+            validateRes = await this.validateUser(req.user.id, bikeID)
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
 
             validateRes = await this.updateBike(bikeID)
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
             const bikePos = validateRes.position;
-
-            validateRes = await this.validateUser(req.user.id, bikeID)
-            if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
-            }
             
             validateRes = await this.createRide(bikeID, req.user.id, bikePos)
             if (validateRes.error) {
-                return res.status(validateRes.error.status).json(validateRes.error);
+                return res.status(validateRes.error.status).json({error: validateRes.error});
             }
 
             return res.status(201).json({
@@ -271,7 +271,7 @@ const users = {
             });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `POST api/v1/rent/start/${bikeID}`,
                     title: "Database error",
@@ -437,7 +437,7 @@ const users = {
     },
 
     stopRide: async function (res, req) {
-        const bikeID = req.body.bikeID;
+        const bikeID = req.params.bikeID;
         
         if (!bikeID) {
             return res.status(400).json({
@@ -488,7 +488,7 @@ const users = {
             });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `POST api/v1/rent/start/${bikeID}`,
                     title: "Database error",

@@ -44,7 +44,7 @@ const users = {
             return res.status(200).json({ data: users });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: "GET api/v1/users",
                     title: "Database error",
@@ -233,7 +233,7 @@ const users = {
             return res.status(200).json({ data: user });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `GET api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -323,7 +323,7 @@ const users = {
         } catch (e) {
             console.log(e.message)
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `PUT api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -411,7 +411,7 @@ const users = {
             return res.status(200).json({ data: response });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `PATCH api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -478,7 +478,7 @@ const users = {
             return res.status(200).json({ data: { message: "User has been deleted" }});
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `DELETE api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -568,7 +568,7 @@ const users = {
             return res.status(200).json({ data: { message: "User has been verified" }});
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `GET api/v1/users/verify`,
                     title: "Database error",

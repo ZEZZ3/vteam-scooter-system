@@ -23,6 +23,15 @@ const baseData = {
                 phone: "012345678",
                 verified: true,
                 createdAt: new Date()
+            },
+            {
+                mail: "user1@test.com",
+                password: await bcrypt.hash(process.env.TEST_PASSWORD, 10),
+                role: "customer",
+                phone: "01234567832",
+                verified: true,
+                balance: 0,
+                createdAt: new Date()
             }
         ]);
         await client.close();
@@ -30,8 +39,8 @@ const baseData = {
 
     baseRideData: async function baseRideData() {
         const { collection, client } = await database.getDb("rides");
-        
-        await collection.insertOne(
+
+        await collection.insertMany([
             {
                 user: "",
                 bike: "",
@@ -43,15 +52,27 @@ const baseData = {
                 price: 0.0,
                 parking: "station",
                 active: false,
+            },
+            {
+                user: "",
+                bike: "",
+                start: Date.now(),
+                stop: Date.now() + 1000*60*1,
+                startPos: {},
+                stopPos: {},
+                duration: 0.0,
+                price: 0.0,
+                parking: "station",
+                active: true,
             }
-        );
+        ]);
         await client.close();
     },
 
     baseBikeData: async function baseBikeData() {
         const { collection, client } = await database.getDb("bikes");
         
-        await collection.insertOne(
+        await collection.insertMany([
             {
                 city: "",
                 currentZone: "",
@@ -60,8 +81,17 @@ const baseData = {
                 battery: 100,
                 status: "free",
                 position: {}
+            },
+            {
+                city: "",
+                currentZone: "",
+                currentStation: "",
+                number: 2,
+                battery: 100,
+                status: "rented",
+                position: {}
             }
-        );
+        ]);
         await client.close();
     },
 
