@@ -111,7 +111,7 @@ describe('Users', () => {
                 .expect(200);
 
             expect(response.body).toEqual(expect.any(Object));
-            expect(response.body.data.length).toEqual(2);
+            expect(response.body.data.length).toEqual(4);
         });
 
         test('403 FORBIDDEN: CUTOMER', async () => {
