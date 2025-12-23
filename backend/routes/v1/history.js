@@ -16,11 +16,11 @@ router.get('/history', (req, res) => {
 // POST api/v1/history/:userID/rides
 // Add ride history
 // Limited to admins and user with matching id
-router.post('/history/:userID/rides', (req, res) => {
+/* router.post('/history/:userID/rides', (req, res) => {
     res.status(200).json({
         status: "Not implemented"
     });
-});
+}); */
 
 // GET api/v1/history/:userID/rides/:rideID
 // Get specific ride for a user
@@ -52,11 +52,11 @@ router.delete('/history/:userID/rides/:rideID', (req, res) => {
 // POST api/v1/history/:userID/payments
 // Add payment to payment history for a user
 // Limited to admins and user with matching id
-router.post('/history/:userID/payments', (req, res) => {
+/* router.post('/history/:userID/payments', (req, res) => {
     res.status(200).json({
         status: "Not implemented"
     });
-});
+}); */
 
 // GET api/v1/history/:userID/payments/:rideID
 // Get specific users payment for specific ride
