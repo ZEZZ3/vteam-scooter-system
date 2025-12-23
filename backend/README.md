@@ -7,12 +7,10 @@
 | /v1/users/register                      |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/{id}                          |  Yes | -    | Yes |  Yes  |  Yes   |   **Yes**  |
 | /v1/users/verify?token=...              |  Yes | -    | -   |  -    |  -     |   **Yes**  |
-| /v1/rent/{bikeid}                       |  Yes | -    | -   |  -    |  -     |   Yes  |
-| /v1/rent/start/{bikeid}                 |  -   | Yes  | -   |  -    |  -     |   Yes  |
-| /v1/rent/stop/{bikeid}                  |  -   | Yes  | -   |  -    |  -     |   Yes  |
-| /v1/payment                             |  -   | -    | -   |  -    |  -     |   -    |
-| /v1/payment/{userid}/{rideid}           |  No  | No   | -   |  -    |  No    |   No   |
-| /v1/payment/{userid}/fill               |  No  | -    | -   |  -    |  -     |   No   |
+| /v1/rent/{bikeid}                       |  Yes | -    | -   |  -    |  -     |   **Yes**  |
+| /v1/rent/start/{bikeid}                 |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
+| /v1/rent/stop/{bikeid}                  |  -   | Yes  | -   |  -    |  -     |   **Yes**  |
+| /v1/payment/{userid}/fill               |  -   | Yes  | -   |  -    |  -     |   **Yes**   |
 | /v1/history                             |  No  | -    | -   |  -    |  -     |   No   |
 | /v1/history/{userid}                    |  No  | -    | -   |  -    |  -     |   No   |
 | /v1/history/rides/{userid}              |  No  | No   | -   |  -    |  -     |   No   |
