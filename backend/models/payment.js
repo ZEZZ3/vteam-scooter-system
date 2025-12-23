@@ -80,7 +80,7 @@ const payment = {
                     userID: userID
                 }
             });
-            //console.log(payment)
+
             if (payment.status ===  "succeeded") {
 
                 let update = await this.increaseUserBalance(userID, amount);
@@ -119,6 +119,19 @@ const payment = {
                 });
             }
         } catch (e) {
+            if (e.message === "Your card was declined." ||
+                e.message === "Your card has insufficient funds."
+            ) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: "POST api/v1/payment/:userID/fill/",
+                        title: "Declined",
+                        message: e.message
+                    }
+                });                   
+            }
+            
             return res.status(500).json({
                 error: {
                     status: 500,
@@ -203,82 +216,6 @@ const payment = {
             await db.client.close();
         }        
     },
-
-    /**
-     * Get the payment of user with some ride ID
-     */
-/*     getRidePayment: async function (res, req) {
-
-        const userID = req.params.userID;
-        const rideID = req.body.rideID;
-
-        if (req.user.id !== userID && req.user.role !== "admin") {
-            return res.status(403).json({
-                error: {
-                    status: 403,
-                    path: "GET api/v1/payment/:userID/:rideID/",
-                    title: "Forbidden",
-                    message: "Cannot access resource"
-                }
-            });
-        }
-
-        if (!userID) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    path: `GET api/v1/payment/:userID/:rideID/`,
-                    title: "Bad Request",
-                    message: "User ID is missing"
-                }
-            });         
-        }
-
-        if (!rideID) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    path: `GET api/v1/payment/:userID/:rideID/`,
-                    title: "Bad Request",
-                    message: "Ride ID is missing"
-                }
-            });
-        }
-
-        let db;
-
-        try {
-            db = await database.getDb("payments");
-
-            const payment = await db.collection.findOne({
-                userID: new ObjectId(userID),
-                rideID: new ObjectId(rideID)
-            });
-
-            if (!payment) {
-                return {
-                    error: {
-                        status: 404,
-                        path: `GET api/v1/payment/:userID/:rideID/`,
-                        title: "Not found",
-                        message: "Could not find matching user and ride."
-                    }
-                }
-            }
-            return res.status(200).json({ data: payment });
-        } catch (e) {
-            return {
-                error: {
-                    status: 500,
-                    path: `GET api/v1/payment/:userID/:rideID/`,
-                    title: "Database error",
-                    message: e.message
-                }
-            }
-        } finally {
-            await db.client.close();
-        }        
-    }, */
 };
 
 module.exports = payment;

@@ -439,7 +439,19 @@ const rent = {
                     }
                 }                   
             }
-
+ 
+            dbPayments = await database.getDb("payments");
+            await dbPayments.collection.insertOne(
+                {
+                    user: new ObjectId(userID),
+                    ride: new ObjectId(rideID),
+                    price: price,
+                    type: "ride",
+                    status: "finished",
+                    createdAt: Date.now()
+                }
+            );
+           
             return {
                 ride: update,
                 duration: minutes,
