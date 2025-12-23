@@ -266,11 +266,18 @@ describe('Rent', () => {
                 .send({parkingType: "free"})
                 .expect(200);
 
-            const db = await database.getDb("rides")
+            let db = await database.getDb("rides")
             const ride = await db.collection.findOne(
                 { bike: bike._id }
             );
+
+            db = await database.getDb("payments")
+            const payment = await db.collection.findOne(
+                { ride: ride._id }
+            );
+
             await db.client.close();
+
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.data.message).toEqual("Ride has ended");
             expect(response.body.data.bikeID).toEqual(bike._id.toString());
@@ -279,6 +286,12 @@ describe('Rent', () => {
             expect(response.body.data.duration).toEqual(1);
             expect(response.body.data.price).toBeDefined();
             expect(response.body.data.balance).toBeLessThan(200);
+
+            expect(payment.user.toString()).toEqual(customerID);
+            expect(payment.ride.toString()).toEqual(ride._id.toString());
+            expect(payment.price).toBeGreaterThan(0);
+            expect(payment.type).toEqual("ride");
+            expect(payment.status).toEqual("finished");
         });     
     });
 });
