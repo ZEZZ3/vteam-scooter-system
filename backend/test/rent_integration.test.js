@@ -52,8 +52,6 @@ beforeEach(async () => {
     bike = await getBike();
 });
 
-// stopRide
-// post api/v1/rent/stop/:id
 describe('Rent', () => {
     describe('GET api/v1/rent/:bikeid', () => {
 
