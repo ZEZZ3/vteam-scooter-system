@@ -30,7 +30,7 @@ const users = {
 
             const users = await db.collection.find({}).toArray();
 
-            if (!users || users.lenght === 0) {
+            /*if (!users || users.lenght === 0) {
                 return res.status(404).json({
                     error: {
                         status: 404,
@@ -39,6 +39,10 @@ const users = {
                         message: "No data found."
                     }
                 });
+            }
+            */
+            if (!users || users.length === 0) {
+                return res.status(200).json({ data: [] });
             }
 
             return res.status(200).json({ data: users });
@@ -300,6 +304,8 @@ const users = {
                 newData.password = await bcrypt.hash(req.body.password, 10);
             }
 
+            newData.updatedAt = new Date();
+
             const response = await db.collection.findOneAndUpdate(
                 {_id: new ObjectId(requestedID) },
                 { $set: newData },
@@ -388,6 +394,8 @@ const users = {
                     }
                 });
             }
+
+            newData.updatedAt = new Date();
 
             const response = await db.collection.findOneAndUpdate(
                 {_id: new ObjectId(requestedID) },
@@ -548,6 +556,8 @@ const users = {
                 tokenExpires: null,
                 verificationToken: null
             }
+
+            newData.updatedAt = new Date();
 
             const update = await db.collection.findOneAndUpdate(
                 { _id: new ObjectId(response._id) },

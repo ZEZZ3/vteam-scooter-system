@@ -84,13 +84,14 @@ const baseData = {
         
         await collection.insertMany([
             {
-                city: "",
+                city: "Stockholm",
                 currentZone: "",
                 currentStation: "",
                 number: 1,
                 battery: 100,
                 status: "free",
-                position: {}
+                position: {},
+                createdAt: new Date()
             },
             {
                 city: "",
@@ -99,16 +100,18 @@ const baseData = {
                 number: 2,
                 battery: 100,
                 status: "rented",
-                position: {}
+                position: {},
+                createdAt: new Date()
             },
             {
-                city: "",
+                city: "Malmö",
                 currentZone: "",
                 currentStation: "",
                 number: 3,
                 battery: 100,
                 status: "free",
-                position: {}
+                position: {},
+                createdAt: new Date()
             }
         ]);
         await client.close();
