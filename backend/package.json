@@ -7,6 +7,7 @@
     "test:users": "jest users_integration.test.js --detectOpenHandles",
     "test:rent": "jest rent_integration.test.js --detectOpenHandles",
     "test:payment": "jest payment_integration.test.js --detectOpenHandles",
+    "test:bikes": "jest bikes_integration.test.js --detectOpenHandles",
     "test:watch": "jest --watch --detectOpenHandles",
     "start": "node server.js",
     "production": "NODE_ENV='production' node server.js",

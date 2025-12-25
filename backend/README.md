@@ -17,7 +17,7 @@
 | /v1/history/rides/{userid}/{rideid}     |  No  | -    | No  |  No   |  No    |   No   |
 | /v1/history/payments/{userid}           |  No  | No   | -   |  -    |  -     |   No   |
 | /v1/history/payments/{userid}/{rideid}  |  No  | -    | No  |  No   |  No    |   No   |
-| /v1/bikes                               |  No  | No   | -   |  -    |  -     |   No   |
-| /v1/bikes/{bikeid}                      |  No  | -    | No  |  No   |  No    |   No   |
+| /v1/bikes                               |  Yes  | Yes   | -   |  -    |  -     |   **Yes**   |
+| /v1/bikes/{bikeid}                      |  Yes  | -    | -  |  Yes   |  Yes    |   **Yes**   |
 | /v1/city                                |  No  | No   | -   |  -    |  -     |   No   |
 | /v1/city/{cityid}                       |  No  | -    | No  |  No   |  No    |   No   |

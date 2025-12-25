@@ -261,7 +261,7 @@ describe('Users', () => {
             expect(response.body.error.title).toEqual("Not a valid role");
         });
 
-        test('403 FORBIDDEN', async () => {
+        test('403 FORBIDDEN: CUSTOMER ADD USER', async () => {
 
             const userInfo = {
                 mail: "test1@test.com",
