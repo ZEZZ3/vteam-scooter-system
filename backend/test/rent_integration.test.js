@@ -3,43 +3,17 @@ process.env.NODE_ENV = 'test';
 const ObjectId = require('mongodb').ObjectId;
 const request = require('supertest');
 const server = require('./../app.js');
-const jwt = require("jsonwebtoken");
+
 const database = require("../database/database")
+const clearDatabase = require("./clearDatabase");
+const baseData = require("./baseData");
+const testHelpers = require("./testHelpers.js")
 
 let customerID = "";
 let customerToken = "";
-let adminID = "";
 let adminToken = "";
 let bike = {};
 
-const clearDatabase = require("./clearDatabase");
-const baseData = require("./baseData");
-
-async function loginHelper(mail, password, admin) {
-    const response = await request(server)
-        .post('/api/v1/users/login')
-        .send({ mail: mail, password: password});
-
-    if (response.body) {
-        if (admin) {
-            adminToken = response.body.data.token;
-            const decode = jwt.verify(adminToken, process.env.JWT_SECRET);
-            adminID = decode.id;
-        } else {
-            customerToken = response.body.data.token;
-            const decode = jwt.verify(customerToken, process.env.JWT_SECRET);
-            customerID = decode.id;
-        }
-    }
-    return response;
-}
-
-async function getBike(num = 1) {
-    const db = await database.getDb("bikes")
-    const bike = await db.collection.findOne({ number: num});
-    await db.client.close();
-    return bike; 
-}
 
 beforeEach(async () => {
     await clearDatabase();
@@ -47,9 +21,14 @@ beforeEach(async () => {
     await baseData.baseBikeData();
     await baseData.baseRideData();
 
-    const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
-    const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
-    bike = await getBike();
+    const admin = await testHelpers.loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+    const customer = await testHelpers.loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+    
+    adminToken = admin.token;
+    customerToken = customer.token;
+    customerID = customer.id;
+
+    bike = await testHelpers.getBike();
 });
 
 describe('Rent', () => {
@@ -83,7 +62,7 @@ describe('Rent', () => {
     describe('POST api/v1/rent/start/:bikeid', () => {
 
         test('201 CREATED: BIKE IS RENTED', async () => {
-            bike = await getBike(1);
+            bike = await testHelpers.getBike(1);
 
             const response = await request(server)
                 .post(`/api/v1/rent/start/${bike._id}`)
@@ -109,12 +88,12 @@ describe('Rent', () => {
         });
 
         test('402 INSUFFICIENT BALANCE: USER HAS TOO LOW BALANCE', async () => {
-            bike = await getBike(1);
-            const _ = await loginHelper("user1@test.com", process.env.TEST_PASSWORD, false)
+            bike = await testHelpers.getBike(1);
+            const customer = await testHelpers.loginHelper("user1@test.com", process.env.TEST_PASSWORD, false)
 
             const response = await request(server)
                 .post(`/api/v1/rent/start/${bike._id}`)
-                .set({ "x-access-token": `${customerToken}` })
+                .set({ "x-access-token": `${customer.token}` })
                 .send()
                 .expect(402);
 
@@ -138,7 +117,7 @@ describe('Rent', () => {
         });
 
         test('409 CONFLICT: BIKE IS BUSY', async () => {
-            bike = await getBike(2);
+            bike = await testHelpers.getBike(2);
 
             const response = await request(server)
                 .post(`/api/v1/rent/start/${bike._id}`)
@@ -152,7 +131,7 @@ describe('Rent', () => {
         });
 
         test('409 CONFLICT: BIKE IS ACTIVE', async () => {
-            bike = await getBike(1);
+            bike = await testHelpers.getBike();
 
             const db = await database.getDb("rides")
             const ride = await db.collection.findOneAndUpdate(
@@ -232,10 +211,11 @@ describe('Rent', () => {
                 .expect(201);
             
             // rent bike 2
-            const _ = await loginHelper("user2@test.com", process.env.TEST_PASSWORD, false)
-            const bike2UserToken = customerToken
-            bike2 = await getBike(3);
+            const customer = await testHelpers.loginHelper("user2@test.com", process.env.TEST_PASSWORD, false)
+            const bike2UserToken = customer.token
+            bike2 = await testHelpers.getBike(3);
             bike2ID = bike2._id;
+            
             const rent2 = await request(server)
                 .post(`/api/v1/rent/start/${bike2ID}`)
                 .set({ "x-access-token": `${bike2UserToken}` })
@@ -266,17 +246,18 @@ describe('Rent', () => {
                 .send({parkingType: "free"})
                 .expect(200);
 
-            let db = await database.getDb("rides")
-            const ride = await db.collection.findOne(
+            let dbRides = await database.getDb("rides")
+            const ride = await dbRides.collection.findOne(
                 { bike: bike._id }
             );
 
-            db = await database.getDb("payments")
-            const payment = await db.collection.findOne(
+            dbPayments = await database.getDb("payments")
+            const payment = await dbPayments.collection.findOne(
                 { ride: ride._id }
             );
 
-            await db.client.close();
+            await dbRides.client.close();
+            await dbPayments.client.close();
 
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.data.message).toEqual("Ride has ended");

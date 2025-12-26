@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "0.1.0",
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "jest --detectOpenHandles --forceExit",
     "test:index": "jest index_integration.test.js --detectOpenHandles",
     "test:users": "jest users_integration.test.js --detectOpenHandles",
     "test:rent": "jest rent_integration.test.js --detectOpenHandles",

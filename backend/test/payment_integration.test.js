@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const server = require('./../app.js');
 const jwt = require("jsonwebtoken");
+const testHelpers = require("./testHelpers");
 
 let customerID = "";
 let customerToken = "";
@@ -19,33 +20,19 @@ const STRIPE_PM = {
 const clearDatabase = require("./clearDatabase");
 const baseData = require("./baseData");
 
-async function loginHelper(mail, password, admin) {
-    const response = await request(server)
-        .post('/api/v1/users/login')
-        .send({ mail: mail, password: password});
-
-    if (response.body) {
-        if (admin) {
-            adminToken = response.body.data.token;
-            const decode = jwt.verify(adminToken, process.env.JWT_SECRET);
-            adminID = decode.id;
-        } else {
-            customerToken = response.body.data.token;
-            const decode = jwt.verify(customerToken, process.env.JWT_SECRET);
-            customerID = decode.id;
-        }
-    }
-    return response;
-}
-
 beforeEach(async () => {
     await clearDatabase();
     await baseData.baseUserData();
     await baseData.baseBikeData();
     await baseData.baseRideData();
 
-    const _ = await loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
-    const __ = await loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+    const admin = await testHelpers.loginHelper("admin@test.com", process.env.TEST_PASSWORD, true)
+    const customer = await testHelpers.loginHelper("user@test.com", process.env.TEST_PASSWORD, false)
+    
+    adminToken = admin.token;
+    adminID = admin.id;
+    customerToken = customer.token;
+    customerID = customer.id;
 });
 
 describe('Payment', () => {
@@ -140,7 +127,6 @@ describe('Payment', () => {
                 .set({ "x-access-token": `${customerToken}` })
                 .send({amount: 200, payMethodID: STRIPE_PM.decline})
                 .expect(400);
-            console.log(response.body.error.message);
             
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.error.title).toEqual("Declined");
@@ -161,13 +147,14 @@ describe('Payment', () => {
 
         test('403 FORBIDDEN: FILL OTHER BALANCE', async () => {
             const customerID2 = customerID;
-            const _ = await loginHelper("user1@test.com", process.env.TEST_PASSWORD, false)
+            const customer = await testHelpers.loginHelper("user1@test.com", process.env.TEST_PASSWORD, false)
             
             const response = await request(server)
                 .post(`/api/v1/payment/${customerID2}/fill`)
-                .set({ "x-access-token": `${customerToken}` })
+                .set({ "x-access-token": `${customer.token}` })
                 .send({amount: 200, payMethodID: STRIPE_PM.success})
                 .expect(403);
+
             expect(response.body).toEqual(expect.any(Object));
             expect(response.body.error.title).toEqual("Forbidden");
             expect(response.body.error.message).toEqual("Cannot fill balance of other user");

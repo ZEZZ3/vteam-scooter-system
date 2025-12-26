@@ -50,7 +50,9 @@ const rent = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -75,7 +77,7 @@ const rent = {
             
             return bike
         } finally {
-            if (dbBikes) {
+            if (dbBikes && dbBikes.client) {
                 await dbBikes.client.close();
             }
         }
@@ -102,7 +104,7 @@ const rent = {
             
             return bike
         } finally {
-            if (dbBikes) {
+            if (dbBikes && dbBikes.client) {
                 await dbBikes.client.close();
             }
         }
@@ -129,7 +131,7 @@ const rent = {
             
             return activeRide
         } finally {
-            if (dbRides) {
+            if (dbRides && dbRides.client) {
                 await dbRides.client.close();
             }
         }
@@ -159,7 +161,9 @@ const rent = {
             
             return updateBike
         } finally {
-            await dbBikes.client.close();
+            if (dbBikes && dbBikes.client) {
+                await dbBikes.client.close();
+            }
         }
     },
         
@@ -194,7 +198,9 @@ const rent = {
             
             return user
         } finally {
-            await dbUser.client.close();
+            if (dbUser && dbUser.client) {
+                await dbUser.client.close();
+            }
         }
     },
 
@@ -230,7 +236,9 @@ const rent = {
             return createRide.insertedId;
 
         } finally {
-            await dbRides.client.close();
+            if (dbRides && dbRides.client) {
+                await dbRides.client.close();
+            }  
         }
     },
 
@@ -338,7 +346,10 @@ const rent = {
             return activeRide;
 
         } finally {
-            await dbRides.client.close();
+            if (dbRides && dbRides.client) {
+                await dbRides.client.close();
+
+            }
         }        
     },
 
@@ -366,7 +377,9 @@ const rent = {
             return updateBike;
 
         } finally {
-            await dbBikes.client.close();
+            if (dbBikes && dbBikes.client) {
+                await dbBikes.client.close();
+            }
         }        
     },
 
@@ -380,6 +393,7 @@ const rent = {
     endRide: async function (bikeID, rideID, userID, bikePos, parkingType) {
         let dbRides;
         let dbUsers;
+        let dbPayments;
 
         try {
             dbRides = await database.getDb("rides");
@@ -448,7 +462,7 @@ const rent = {
                     price: price,
                     type: "ride",
                     status: "finished",
-                    createdAt: Date.now()
+                    createdAt: new Date()
                 }
             );
            
@@ -461,8 +475,15 @@ const rent = {
 
         } 
         finally {
-            await dbRides.client.close();
-            await dbUsers.client.close();
+            if (dbRides && dbRides.client) {
+                await dbRides.client.close();
+            }
+            if (dbUsers && dbUsers.client) {
+                await dbUsers.client.close();
+            }
+            if (dbPayments && dbPayments.client) {
+                await dbPayments.client.close();
+            }
         }        
     },
 

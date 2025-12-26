@@ -110,7 +110,9 @@ const auth = {
                     }
                 });
             } finally {
-                await db.client.close();
+                if (db && db.client) {
+                    await db.client.close();
+                }
             }
         });
     },
@@ -176,7 +178,9 @@ const auth = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
