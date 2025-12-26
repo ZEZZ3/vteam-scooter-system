@@ -5,14 +5,13 @@ const request = require('supertest');
 const server = require('./../app.js');
 const jwt = require("jsonwebtoken");
 const database = require("../database/database")
+const clearDatabase = require("./clearDatabase");
+const baseData = require("./baseData");
 
 let customerID = "";
 let customerToken = "";
 let adminID = "";
 let adminToken = "";
-
-const clearDatabase = require("./clearDatabase");
-const baseData = require("./baseData");
 
 beforeEach(async () => {
     await clearDatabase();
@@ -37,7 +36,6 @@ async function loginHelper(mail, password, admin) {
         }
     }
     return response;
-
 }
 
 describe('Users', () => {

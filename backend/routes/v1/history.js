@@ -8,20 +8,11 @@ const history = require("../../models/history.js");
 // Get all combined history
 // or filter on specifics.
 // use ?userID=, ?type=payments or ?type=rides to filter
-router.get('/history', (req, res) => {
-    res.status(200).json({
-        status: "Not implemented"
-    });
-});
+router.get('/',
+    (req, res, next) => auth.checkToken(req, res, next),
+    (req, res) => bikes.getHistory(res, req)
+);
 
-// POST api/v1/history/:userID/rides
-// Add ride history
-// Limited to admins and user with matching id
-/* router.post('/history/:userID/rides', (req, res) => {
-    res.status(200).json({
-        status: "Not implemented"
-    });
-}); */
 
 // GET api/v1/history/:userID/rides/:rideID
 // Get specific ride for a user

@@ -22,10 +22,14 @@ async function loginHelper(mail, password, admin) {
 }
 
 async function getBike(num = 1) {
-    const db = await database.getDb("bikes")
-    const bike = await db.collection.findOne({ number: num});
-    await db.client.close();
-    return bike; 
+    let db = await database.getDb("bikes"); 
+    try {
+        return await db.collection.findOne({ number: num});
+    } finally {
+        if (db && db.client) {
+            await db.client.close();
+        }
+    }
 }
 
 module.exports = {

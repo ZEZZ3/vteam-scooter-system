@@ -56,7 +56,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -181,7 +183,9 @@ const users = {
                     }
                 });
             } finally {
-                await db.client.close();
+                if (db && db.client) {
+                    await db.client.close();
+                }
             }
         });
     },
@@ -245,7 +249,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -337,7 +343,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -427,7 +435,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -494,7 +504,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -587,7 +599,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     }
 };

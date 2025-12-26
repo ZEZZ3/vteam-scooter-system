@@ -47,7 +47,9 @@ const bikes = {
                 }
             })
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }        
     },
 
@@ -127,7 +129,9 @@ const bikes = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }        
     },
 
@@ -175,7 +179,9 @@ const bikes = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }        
     },
 
@@ -262,7 +268,9 @@ const bikes = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }        
     },
 
@@ -324,7 +332,9 @@ const bikes = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }        
     },
 
