@@ -94,7 +94,9 @@ const history = {
             })
         } finally {
             for(const db of connections) {
-                await db.client.close()
+                if (db && db.client) {
+                    await db.client.close()
+                }
             }
         }        
     },

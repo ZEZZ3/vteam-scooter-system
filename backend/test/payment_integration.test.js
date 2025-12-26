@@ -2,7 +2,6 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 const server = require('./../app.js');
-const jwt = require("jsonwebtoken");
 const testHelpers = require("./testHelpers");
 
 let customerID = "";
