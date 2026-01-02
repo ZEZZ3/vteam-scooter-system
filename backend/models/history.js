@@ -1,6 +1,5 @@
 const ObjectId = require('mongodb').ObjectId;
 const database = require("../database/database.js");
-const helpers = require("../utils/helpers.js");
 
 const history = {
     getAllHistory: async function () {
@@ -30,6 +29,20 @@ const history = {
         const userID = req.query.userID;
         const type = req.query.type;
 
+        if (type) {
+            if (type !== "rides" && type !== "payments") {
+
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: `GET api/v1/history?userID=${userID}&type=${type}`,
+                        title: "Bad request",
+                        message: `Invalid type: ${type}`
+                    }
+                });     
+            }
+        }
+
         let query = {};
         let result = {};
         let connections = [];
@@ -54,6 +67,18 @@ const history = {
                     });                    
                 }
 
+
+                if (userID && !ObjectId.isValid(userID)) {
+                    return res.status(400).json({
+                        error: {
+                            status: 400,
+                            path: `GET api/v1/history?userID=${userID}`,
+                            title: "Bad request",
+                            message: `Invalid ID: ${userID}`
+                        }
+                    });            
+                }
+
                 if (userID !== req.user.id) {
                     //  obscurity: 404 instead of 403
                     return res.status(404).json({
@@ -68,7 +93,7 @@ const history = {
             }
 
             // admin can call without userID
-            query = userID ? { _id: new ObjectId(userID) } : {}
+            query = userID ? { user: new ObjectId(userID) } : {}
 
             if(type === "rides" || !type) {
                 const db = await database.getDb("rides");
@@ -87,9 +112,10 @@ const history = {
             return res.status(500).json({
                 error: {
                     status: 500,
-                    path: "GET api/v1/bikes/",
+                    path: "GET api/v1/history",
                     title: "Database error",
-                    message: e.message
+                    message: e.message,
+                    stack: e.stack
                 }
             })
         } finally {
@@ -101,6 +127,309 @@ const history = {
         }        
     },
 
+    /**
+     * Get specific ride
+     */
+    getSpecificRide: async function (res, req) {
+        const userID = req.params.userID;
+        const rideID = req.params.rideID;
+
+        if (!ObjectId.isValid(userID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `GET api/v1/history/${userID}/rides/${rideID}`,
+                    title: "Bad request",
+                    message: `Invalid user ID: ${userID}`
+                }
+            });            
+        }
+
+        if (!ObjectId.isValid(rideID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `GET api/v1/history/${userID}/rides/${rideID}`,
+                    title: "Bad request",
+                    message: `Invalid ride ID: ${rideID}`
+                }
+            });            
+        }
+
+        if (req.user.role !== "admin") {
+            if (req.user.id !== userID) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `GET api/v1/history/${userID}/rides/${rideID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this data."
+                    }
+                });
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("rides");
+            const ride = await db.collection.findOne({_id: new ObjectId(rideID)});
+
+            if (!ride) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `GET api/v1/history/${userID}/rides/${rideID}`,
+                        title: "Not found",
+                        message: `Ride with id '${rideID}' not found.`
+                    }
+                });
+            }
+
+            return res.status(200).json({ data: ride });
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: `GET api/v1/history/${userID}/rides/${rideID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }    
+    },
+
+    /**
+     * Delete specific ride
+     */
+    deleteSpecificRide: async function (res, req) {
+        const userID = req.params.userID;
+        const rideID = req.params.rideID;
+
+        if (!ObjectId.isValid(userID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/history/${userID}/rides/${rideID}`,
+                    title: "Bad request",
+                    message: `Invalid user ID: ${userID}`
+                }
+            });            
+        }
+
+        if (!ObjectId.isValid(rideID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/history/${userID}/rides/${rideID}`,
+                    title: "Bad request",
+                    message: `Invalid ride ID: ${rideID}`
+                }
+            });            
+        }
+
+        if (req.user.role !== "admin") {
+            if (req.user.id !== userID) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `DELETE api/v1/history/${userID}/rides/${rideID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this data."
+                    }
+                });
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("rides");
+            const ride = await db.collection.deleteOne({_id: new ObjectId(rideID)});
+
+            if (ride.deletedCount === 0) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `DELETE api/v1/history/${userID}/rides/${rideID}`,
+                        title: "Not found",
+                        message: `Ride with id '${rideID}' not found.`
+                    }
+                });
+            }
+
+            return res.status(200).json({ data: {message: "Ride has been deleted"} });
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: `DELETE api/v1/history/${userID}/rides/${rideID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }    
+    },
+
+    /**
+     * Get specific payment
+     */
+    getSpecificPayment: async function (res, req) {
+        const userID = req.params.userID;
+        const paymentID = req.params.paymentID;
+
+        if (!ObjectId.isValid(userID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `GET api/v1/history/${userID}/payments/${paymentID}`,
+                    title: "Bad request",
+                    message: `Invalid user ID: ${userID}`
+                }
+            });            
+        }
+
+        if (!ObjectId.isValid(paymentID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `GET api/v1/history/${userID}/payments/${paymentID}`,
+                    title: "Bad request",
+                    message: `Invalid payment ID: ${paymentID}`
+                }
+            });            
+        }
+
+        if (req.user.role !== "admin") {
+            if (req.user.id !== userID) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `GET api/v1/history/${userID}/payments/${paymentID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this data."
+                    }
+                });
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("payments");
+            const payment = await db.collection.findOne({_id: new ObjectId(paymentID)});
+
+            if (!payment) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `GET api/v1/history/${userID}/payments/${paymentID}`,
+                        title: "Not found",
+                        message: `Payment with id '${paymentID}' not found.`
+                    }
+                });
+            }
+
+            return res.status(200).json({ data: payment });
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: `GET api/v1/history/${userID}/payments/${paymentID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }    
+    },
+
+    /**
+     * Delete specific payment
+     */
+    deleteSpecificPayment: async function (res, req) {
+        const userID = req.params.userID;
+        const paymentID = req.params.paymentID;
+
+        if (!ObjectId.isValid(userID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/history/${userID}/payments/${paymentID}`,
+                    title: "Bad request",
+                    message: `Invalid user ID: ${userID}`
+                }
+            });            
+        }
+
+        if (!ObjectId.isValid(paymentID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/history/${userID}/payments/${paymentID}`,
+                    title: "Bad request",
+                    message: `Invalid payment ID: ${paymentID}`
+                }
+            });            
+        }
+
+        if (req.user.role !== "admin") {
+            if (req.user.id !== userID) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        path: `DELETE api/v1/history/${userID}/payments/${paymentID}`,
+                        title: "Forbidden",
+                        message: "You dont have access to this data."
+                    }
+                });
+            }
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("payments");
+            const payment = await db.collection.deleteOne({_id: new ObjectId(paymentID)});
+
+            if (payment.deletedCount === 0) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `DELETE api/v1/history/${userID}/payments/${paymentID}`,
+                        title: "Not found",
+                        message: `Payment with id '${paymentID}' not found.`
+                    }
+                });
+            }
+
+            return res.status(200).json({ data: {message: "Payment has been deleted"} });
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: `DELETE api/v1/history/${userID}/payments/${rideID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }    
+    },
 };
 
 module.exports = history;
