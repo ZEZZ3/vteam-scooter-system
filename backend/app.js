@@ -14,7 +14,7 @@ const rent = require("./routes/v1/rent.js");
 const bikes = require("./routes/v1/bikes.js");
 const payment = require("./routes/v1/payment.js");
 const history = require("./routes/v1/history.js");
-const city = require("./routes/v1/users.js");
+const city = require("./routes/v1/city.js");
 
 
 const app = express();
@@ -35,7 +35,7 @@ app.use('/api/v1/rent', rent);
 app.use('/api/v1/bikes', bikes);
 app.use('/api/v1/payment', payment);
 app.use('/api/v1/history', history);
-app.use('api/v1/city', city);
+app.use('/api/v1/city', city);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {

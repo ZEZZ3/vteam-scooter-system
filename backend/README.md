@@ -11,7 +11,7 @@
 | /v1/rent/start/{bikeid}                   |  -    | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/rent/stop/{bikeid}                    |  -    | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/payment/{userid}/fill                 |  -    | Yes  | -   |  -    |  -     |   **Yes**  |
-| /v1/history                               |  Yes  | -    | -   |  -    |  -     |   **Yes**  |
+| /v1/history?{userID}&{type}               |  Yes  | -    | -   |  -    |  -     |   **Yes**  |
 | /v1/history/{userid}/payments/{paymentid} |  Yes  | -    | -   |  -    |  Yes   |   **Yes**  |
 | /v1/history/{userid}/rides/{rideid}       |  Yes  | -    | -   |  -    |  Yes   |   **Yes**  |
 | /v1/bikes                                 |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
