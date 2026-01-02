@@ -85,12 +85,40 @@ const baseData = {
         await dbUser.client.close();
     },
 
-    baseBikeData: async function baseBikeData() {
-        const { collection, client } = await database.getDb("bikes");
+    baseCityData: async function baseCityData() {
+        const { collection, client } = await database.getDb("cities");
         
         await collection.insertMany([
             {
+                name: "Stockholm",
+                zones: [],
+                stations: [],
+            }, 
+            {
+                name: "Malmö",
+                zones: [],
+                stations: [],
+            },
+            {
+                name: "Linköping",
+                zones: [],
+                stations: [],
+            }
+        ]);
+        await client.close();
+    },
+
+    baseBikeData: async function baseBikeData() {
+        const { collection, client } = await database.getDb("bikes");
+        const dbCities = await database.getDb("cities");
+        const city1 = await dbCities.collection.findOne({name: "Stockholm" });
+        const city2 = await dbCities.collection.findOne({name: "Malmö" });
+        const city3 = await dbCities.collection.findOne({name: "Linköping" });
+
+        await collection.insertMany([
+            {
                 city: "Stockholm",
+                cityID: city1._id,
                 currentZone: "",
                 currentStation: "",
                 number: 1,
@@ -100,7 +128,8 @@ const baseData = {
                 createdAt: new Date()
             },
             {
-                city: "",
+                city: "Linköping",
+                cityID: city3._id,
                 currentZone: "",
                 currentStation: "",
                 number: 2,
@@ -111,6 +140,7 @@ const baseData = {
             },
             {
                 city: "Malmö",
+                cityID: city2._id,
                 currentZone: "",
                 currentStation: "",
                 number: 3,
@@ -121,26 +151,15 @@ const baseData = {
             }
         ]);
         await client.close();
-    },
-
-    baseCityData: async function baseCityData() {
-        const { collection, client } = await database.getDb("cities");
-        
-        await collection.insertOne(
-            {
-                name: "",
-                zones: [],
-                stations: [],
-            }
-        );
-        await client.close();
-    },
+        await dbCities.client.close();
+    },    
 
     baseZoneData: async function baseZoneData() {
         const { collection, client } = await database.getDb("zones");
         
         await collection.insertOne(
             {
+                cityID: "",
                 name: "",
                 zones: [],
                 area: {},
@@ -154,6 +173,7 @@ const baseData = {
         
         await collection.insertOne(
             {
+                cityID: "",
                 name: "",
                 zones: [],
                 position: {},
