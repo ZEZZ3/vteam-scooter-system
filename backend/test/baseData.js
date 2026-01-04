@@ -239,72 +239,93 @@ const baseData = {
         const zone2 = await dbZones.collection.findOne({name: "Djurgården" });
         const zoneID2 = zone2._id
 
-        await collection.insertMany([
+        //await collection.insertMany([
+
+        const stations = [
             {
                 cityID: cityID,
                 name: "Karlaplan",
-                zone: zoneID1,
-                position: { lat: 59.337527, long: 18.090962 }
+                zoneID: zoneID1,
+                position: { lat: 59.337527, long: 18.090962 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Humlegården",
-                zone: zoneID1,
-                position: { lat: 59.340783, long: 18.074177 }
+                zoneID: zoneID1,
+                position: { lat: 59.340783, long: 18.074177 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Strandvägen",
-                zone: zoneID1,
-                position: { lat: 59.331876, long: 18.086445 }
+                zoneID: zoneID1,
+                position: { lat: 59.331876, long: 18.086445 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Artillerigatan",
-                zone: zoneID1,
-                position: { lat: 59.333749, long: 18.080810 }
+                zoneID: zoneID1,
+                position: { lat: 59.333749, long: 18.080810 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Djurgårdsbron",
-                zone: zoneID2,
-                position: { lat: 59.330593, long: 18.093916 }
+                zoneID: zoneID2,
+                position: { lat: 59.330593, long: 18.093916 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Skansen",
-                zone: zoneID2,
-                position: { lat:  59.324092, long: 18.101789 }
+                zoneID: zoneID2,
+                position: { lat:  59.324092, long: 18.101789 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Blockhusudden",
-                zone: zoneID2,
-                position: { lat:  59.322833, long: 18.146629 }
+                zoneID: zoneID2,
+                position: { lat:  59.322833, long: 18.146629 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Djurgårdsbrunnsbron",
-                zone: zoneID2,
-                position: { lat:  59.329278, long: 18.131882 }
+                zoneID: zoneID2,
+                position: { lat:  59.329278, long: 18.131882 },
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Folke Bernadottes bro",
-                zone: zoneID2,
-                position: { lat:  59.329850, long: 18.119150}
+                zoneID: zoneID2,
+                position: { lat:  59.329850, long: 18.119150},
+                createdAt: new Date()
             },
             {
                 cityID: cityID,
                 name: "Kärleksudden",
-                zone: zoneID2,
-                position: { lat:  59.329471, long: 18.105414}
+                zoneID: zoneID2,
+                position: { lat:  59.329471, long: 18.105414},
+                createdAt: new Date()
             },
-        ]);
+        ];
+        
+        const insert = await collection.insertMany(stations);
+        const stationIDs = Object.values(insert.insertedIds);
+
+        await dbCities.collection.findOneAndUpdate(
+            { _id: city1._id },
+            { $push: { stations: { $each: stationIDs }}}
+        );
 
         await client.close();
-        await dbCities.client.close();
+        await dbCities.client.close();        
         await dbZones.client.close();
+
     },
 
     basePaymentData: async function basePaymentData() {

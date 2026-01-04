@@ -39,7 +39,7 @@ describe('Zone', () => {
             expect(response.body.data.length).toEqual(2);
         });
 
-        test('200 SUCCESS: ADMIN GET ALL ZONES OF CITY', async () => {
+        test('200 SUCCESS: ADMIN GET ALL ZONES', async () => {
 
             const response = await request(server)
                 .get(`/api/v1/zone`)
