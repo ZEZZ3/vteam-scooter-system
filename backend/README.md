@@ -21,5 +21,5 @@
 | /v1/city/{cityid}/zones                   |  Yes  | No   | -   |  -    |  -     |   **Yes**  |
 | /v1/zone                                  |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/zone/{zoneid}                         |  Yes  | -    | -   |  Yes  |  Yes   |   **Yes**  |
-| /v1/station                               |  No   | No   | -   |  -    |  -     |   **No**   |
-| /v1/station/{stationid}                   |  No   | -    | -   |  No   |  No    |   **No**   |
+| /v1/station                               |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
+| /v1/station/{stationid}                   |  Yes  | -    | -   |  Yes  |  Yes   |   **Yes**  |

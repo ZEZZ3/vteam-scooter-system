@@ -15,7 +15,7 @@ const station = require("../../models/station.js");
 // Get stations in a city
 router.get('/',
     (req, res, next) => auth.checkToken(req, res, next),
-    (req, res) => station.getStations(res, req)
+    (req, res) => station.getAllStations(res, req)
 );
 
 // POST api/v1/stations
