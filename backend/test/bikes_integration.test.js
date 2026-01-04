@@ -13,6 +13,7 @@ let adminToken = "";
 beforeEach(async () => {
     await clearDatabase();
     await baseData.baseUserData();
+    await baseData.baseCityData();
     await baseData.baseBikeData();
     await baseData.baseRideData();
 
@@ -185,8 +186,9 @@ describe('Bikes', () => {
         });
 
         test('201 CREATED: ADD BIKE', async () => {
+
             const newData = {
-                city: "Luleå",
+                city: "Malmö",
                 currentZone: {},
                 currentStation: {},
                 position: {}
@@ -207,7 +209,7 @@ describe('Bikes', () => {
             );
             db.client.close();
             expect(bike).toEqual(expect.any(Object));
-            expect(bike.city).toEqual("Luleå");
+            expect(bike.city).toEqual("Malmö");
         });
     });
 
