@@ -10,6 +10,8 @@
     "test:bikes": "jest bikes_integration.test.js --detectOpenHandles",
     "test:history": "jest history_integration.test.js --detectOpenHandles",
     "test:city": "jest city_integration.test.js --detectOpenHandles",
+    "test:zone": "jest zone_integration.test.js --detectOpenHandles",
+    "test:station": "jest station_integration.test.js --detectOpenHandles",
     "test:watch": "jest --watch --detectOpenHandles",
     "start": "node server.js",
     "production": "NODE_ENV='production' node server.js",
