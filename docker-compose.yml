@@ -1,17 +1,4 @@
 services:
-  backend:
-    build: ./backend
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      MONGO_URI: mongodb://mongo:27017/scooterdb
-      STRIPE_KEY: ${STRIPE_KEY:-test_dummy}
-      API_BASE: http://backend:3000
-    depends_on:
-      - mongo
-    restart: unless-stopped
-
   mongo:
     image: mongo:6
     container_name: mongo
@@ -20,6 +7,24 @@ services:
       - mongo-data:/data/db
     ports:
       - "27017:27017"
+  
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongo:27017/scooterdb
+      STRIPE_KEY: test_dummy
+      API_BASE: http://backend:3000
+
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    command: > 
+      sh -c "node server.js"
 
   admin-webb:
     build: ./admin-webb

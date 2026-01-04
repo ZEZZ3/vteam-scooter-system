@@ -3,6 +3,7 @@ const database = require("../database/database.js");
 const bcrypt = require('bcryptjs');
 const validator = require("validator");
 const helpers = require("../utils/helpers.js");
+const { verify } = require('jsonwebtoken');
 
 const users = {
 
@@ -29,7 +30,7 @@ const users = {
 
             const users = await db.collection.find({}).toArray();
 
-            if (!users || users.lenght === 0) {
+            /*if (!users || users.lenght === 0) {
                 return res.status(404).json({
                     error: {
                         status: 404,
@@ -39,11 +40,15 @@ const users = {
                     }
                 });
             }
+            */
+            if (!users || users.length === 0) {
+                return res.status(200).json({ data: [] });
+            }
 
             return res.status(200).json({ data: users });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: "GET api/v1/users",
                     title: "Database error",
@@ -51,7 +56,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -176,7 +183,9 @@ const users = {
                     }
                 });
             } finally {
-                await db.client.close();
+                if (db && db.client) {
+                    await db.client.close();
+                }
             }
         });
     },
@@ -232,7 +241,7 @@ const users = {
             return res.status(200).json({ data: user });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `GET api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -240,7 +249,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -281,22 +292,25 @@ const users = {
             db = await database.getDb("users");
             
             const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone"]
-            const newData = helpers.checkUpdateData(req.body, fields);
-
-            if (req.body.password) {
-                newData.password = await bcrypt.hash(req.body.password, 10);
-            }
-
-            if (Object.keys(newData).length === 0) {
+            let newData = {}
+            try {
+                newData = helpers.checkPutData(req.body, fields);
+            } catch (e) {
                 return res.status(400).json({
                     error: {
                         status: 400,
                         path: `PUT api/v1/users/${requestedID}`,
                         title: "Bad request",
-                        message: "No data to update"
+                        message: e.message
                     }
                 });
             }
+
+            if (req.body.password) {
+                newData.password = await bcrypt.hash(req.body.password, 10);
+            }
+
+            newData.updatedAt = new Date();
 
             const response = await db.collection.findOneAndUpdate(
                 {_id: new ObjectId(requestedID) },
@@ -321,7 +335,7 @@ const users = {
         } catch (e) {
             console.log(e.message)
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `PUT api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -329,7 +343,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -370,7 +386,7 @@ const users = {
             db = await database.getDb("users");
 
             const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone", "password"]
-            const newData = helpers.checkUpdateData(req.body, fields);
+            const newData = helpers.checkPatchData(req.body, fields);
             
             if (newData.password) {
                 newData.password = await bcrypt.hash(newData.password, 10);
@@ -386,6 +402,8 @@ const users = {
                     }
                 });
             }
+
+            newData.updatedAt = new Date();
 
             const response = await db.collection.findOneAndUpdate(
                 {_id: new ObjectId(requestedID) },
@@ -409,7 +427,7 @@ const users = {
             return res.status(200).json({ data: response });
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
                     path: `PATCH api/v1/users/${requestedID}`,
                     title: "Database error",
@@ -417,7 +435,9 @@ const users = {
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
@@ -429,12 +449,23 @@ const users = {
     deleteUser: async function (res, req) {
         const requestedID = req.params.id;
 
+        if (!ObjectId.isValid(requestedID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/users/${requestedID}`,
+                    title: "Bad request",
+                    message: `Invalid ID: ${requestedID}`
+                }
+            });            
+        }
+
         if (req.user.role !== "admin") {
             if (req.user.id !== requestedID) {
                 return res.status(403).json({
                     error: {
                         status: 403,
-                        path: `GET api/v1/users/${requestedID}`,
+                        path: `DELETE api/v1/users/${requestedID}`,
                         title: "Forbidden",
                         message: "You dont have access to this functionality."
                     }
@@ -447,7 +478,6 @@ const users = {
         try {
             db = await database.getDb("users");
 
-
             const response = await db.collection.deleteOne(
                 { _id: new ObjectId(requestedID) }
             );
@@ -456,7 +486,7 @@ const users = {
                 return res.status(404).json({
                     error: {
                         status: 404,
-                        path: `PUT api/v1/users/${requestedID}`,
+                        path: `DELETE api/v1/users/${requestedID}`,
                         title: "Not found",
                         message: `User with id '${requestedID}' not found.`
                     }
@@ -466,17 +496,113 @@ const users = {
             return res.status(200).json({ data: { message: "User has been deleted" }});
         } catch (e) {
             return res.status(500).json({
-                errors: {
+                error: {
                     status: 500,
-                    path: `GET api/v1/users/${requestedID}`,
+                    path: `DELETE api/v1/users/${requestedID}`,
                     title: "Database error",
-                    message: e.message
+                    message: e.message,
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }
+    },
+
+    verifyUser: async function (res, req) {
+        const token = req.query.token;
+        
+        if (!token) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `GET api/v1/users/verify`,
+                    title: "Bad request",
+                    message: `Token is required`
+                }
+            });            
         }
 
+        let db;
+
+        try {
+            db = await database.getDb("users");
+
+            const response = await db.collection.findOne(
+                { verificationToken: token }
+            );
+
+            if (!response) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `GET api/v1/users/verify`,
+                        title: "Not found",
+                        message: "Token not found"
+                    }
+                });
+            }
+
+            if (Date.now() > response.tokenExpires) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        path: `GET api/v1/users/verify`,
+                        title: "Token has expired",
+                        message: "Verification token has expired. A token is only valid for 30 minutes."
+                    }
+                });
+            }
+
+            // prob not gonna run because verification token is set to null when verified
+            if (response.verified) {
+                return res.status(200).json({
+                    data: { message: "Already verified" }
+                });                
+            }
+
+            const newData = {
+                verified: true,
+                tokenValidity: null,
+                tokenExpires: null,
+                verificationToken: null
+            }
+
+            newData.updatedAt = new Date();
+
+            const update = await db.collection.findOneAndUpdate(
+                { _id: new ObjectId(response._id) },
+                { $set: newData }
+            );
+
+            if (!update) {
+                return res.status(500).json({
+                    error: {
+                        status: 500,
+                        path: `GET api/v1/users/verify`,
+                        title: "Could not verify user",
+                        message: "There was a problem verifying the user."
+                    }
+                });                
+            }
+
+            return res.status(200).json({ data: { message: "User has been verified" }});
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: `GET api/v1/users/verify`,
+                    title: "Database error",
+                    message: e.message,
+                    stack: process.env.NODE_ENV === "test" ? e.stack : undefined
+                }
+            });
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }
     }
 };
 
