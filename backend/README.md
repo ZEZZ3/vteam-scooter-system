@@ -16,5 +16,10 @@
 | /v1/history/{userid}/rides/{rideid}       |  Yes  | -    | -   |  -    |  Yes   |   **Yes**  |
 | /v1/bikes                                 |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/bikes/{bikeid}                        |  Yes  | -    | -   |  Yes  |  Yes   |   **Yes**  |
-| /v1/city                                  |  No   | No   | -   |  -    |  -     |   No   |
-| /v1/city/{cityid}                         |  No   | -    | -   |  No   |  No    |   No   |
+| /v1/city                                  |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
+| /v1/city/{cityid}                         |  Yes  | -    | -   |  -    |  Yes   |   **Yes**  |
+| /v1/city/{cityid}/zones                   |  Yes  | No   | -   |  -    |  -     |   **Yes**  |
+| /v1/zone                                  |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
+| /v1/zone/{zoneid}                         |  Yes  | -    | -   |  Yes  |  Yes   |   **Yes**  |
+| /v1/station                               |  No   | No   | -   |  -    |  -     |   **No**   |
+| /v1/station/{stationid}                   |  No   | -    | -   |  No   |  No    |   **No**   |

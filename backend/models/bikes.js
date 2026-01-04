@@ -92,19 +92,36 @@ const bikes = {
             });
         }
 
-        let db;
+        let dbBikes;
+        let dbCity;
 
         try {
-            db = await database.getDb("bikes");
+            dbBikes = await database.getDb("bikes");
+            dbCity = await database.getDb("cities");
 
-            const lastBike = await db.collection.findOne(
+            const lastBike = await dbBikes.collection.findOne(
                 {},
                 {sort: {number: -1}, projection: {number: 1}}
             )
             const nextBikeNumber = (lastBike?.number || 0) + 1;
 
+            const cityFetch = await dbCity.collection.findOne({name: city})
+            if (!cityFetch) {
+                return res.status(400).json({
+                    error: {
+                        status: 404,
+                        path: "POST api/v1/bikes/",
+                        title: "Not found",
+                        message: `City with name '${city}' could not be found`
+                    }
+                });                
+            }
+
+            const cityID = cityFetch._id;
+
             await db.collection.insertOne({
                 city,
+                cityID,
                 currentZone,
                 currentStation,
                 battery,
@@ -129,8 +146,11 @@ const bikes = {
                 }
             });
         } finally {
-            if (db && db.client) {
-                await db.client.close();
+            if (dbBikes && dbBikes.client) {
+                await dbBikes.client.close();
+            }
+            if (dbCity && dbCity.client) {
+                await dbCity.client.close();
             }
         }        
     },
