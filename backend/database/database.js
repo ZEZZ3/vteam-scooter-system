@@ -6,7 +6,7 @@ const database = {
     getDb: async function getDb(collectionName = "users") {
 
         //let dsn = `mongodb+srv://${process.env.ATLAS_USERNAME}:${process.env.ATLAS_PASSWORD}@cluster0.ilwcret.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-        let dsn = "mongodb://127.0.0.1:27017/dev";
+        let dsn = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/dev";
 
         if (process.env.NODE_ENV === "test") {
             dsn = "mongodb://127.0.0.1:27017/test";
@@ -17,7 +17,9 @@ const database = {
         const db = await client.db();
         const collection = await db.collection(collectionName);
 
-        await collection.createIndex({mail: 1}, {unique: true});
+        if (collectionName === "users") {
+            await collection.createIndex({mail: 1}, {unique: true});
+        }
 
         return {
             db: db,

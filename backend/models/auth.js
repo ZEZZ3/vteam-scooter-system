@@ -105,11 +105,14 @@ const auth = {
                         status: 500,
                         source: "POST api/v1/users/register",
                         title: "Database error",
-                        detail: e.message
+                        detail: e.message,
+                        stack: process.env.NODE_ENV === "test" ? e.stack : undefined
                     }
                 });
             } finally {
-                await db.client.close();
+                if (db && db.client) {
+                    await db.client.close();
+                }
             }
         });
     },
@@ -135,13 +138,8 @@ const auth = {
             db = await database.getDb("users");
 
             const user = await db.collection.findOne({ mail });
-            if (user) {
-                return auth.comparePasswords(
-                    res,
-                    password,
-                    user,
-                );
-            } else {
+            
+            if (!user) {
                 return res.status(401).json({
                     error: {
                         status: 401,
@@ -151,17 +149,38 @@ const auth = {
                     }
                 });
             }
+
+            if (!user.verified) {
+                return res.status(403).json({
+                    error: {
+                        status: 403,
+                        source: "POST api/v1/users/login",
+                        title: "User not verified",
+                        detail: "User is not verified, please verify before logging in"
+                    }
+                });
+            }            
+            
+            return auth.comparePasswords(
+                res,
+                password,
+                user,
+            );
+
         } catch (e) {
             return res.status(500).json({
                 error: {
                     status: 500,
                     source: "POST api/v1/users/login",
                     title: "Database error",
-                    detail: e.message
+                    detail: e.message,
+                    stack: process.env.NODE_ENV === "test" ? e.stack : undefined
                 }
             });
         } finally {
-            await db.client.close();
+            if (db && db.client) {
+                await db.client.close();
+            }
         }
     },
 
