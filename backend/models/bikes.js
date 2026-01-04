@@ -119,7 +119,7 @@ const bikes = {
 
             const cityID = cityFetch._id;
 
-            await db.collection.insertOne({
+            await dbBikes.collection.insertOne({
                 city,
                 cityID,
                 currentZone,

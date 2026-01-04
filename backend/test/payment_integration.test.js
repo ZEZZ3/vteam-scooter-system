@@ -22,6 +22,7 @@ const baseData = require("./baseData");
 beforeEach(async () => {
     await clearDatabase();
     await baseData.baseUserData();
+    await baseData.baseCityData();
     await baseData.baseBikeData();
     await baseData.baseRideData();
 

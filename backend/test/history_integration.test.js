@@ -16,6 +16,7 @@ let adminID = "";
 beforeEach(async () => {
     await clearDatabase();
     await baseData.baseUserData();
+    await baseData.baseCityData();
     await baseData.baseBikeData();
     await baseData.baseRideData();
     await baseData.basePaymentData();
