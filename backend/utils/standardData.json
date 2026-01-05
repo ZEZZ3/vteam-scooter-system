@@ -345,7 +345,7 @@
                 "user": "",
                 "bike": "",
                 "start": "",
-                "stop": Date.now() + 1000*60*1,
+                "stop": "",
                 "startPos": {},
                 "stopPos": {},
                 "duration": 0.0,
