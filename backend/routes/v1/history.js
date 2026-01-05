@@ -4,6 +4,15 @@ var router = express.Router();
 const auth = require("../../models/auth.js");
 const history = require("../../models/history.js");
 
+/***************************************************************************************************
+| Uri                                       |  GET  | POST | PUT | PATCH | DELETE |
+|-------------------------------------------|:-----:|:----:|:---:|:-----:|:------:|
+| /v1/history?{userID}&{type}               |  Yes  | -    | -   |  -    |  -     |
+| /v1/history/{userid}/payments/{paymentid} |  Yes  | -    | -   |  -    |  Yes   |
+| /v1/history/{userid}/rides/{rideid}       |  Yes  | -    | -   |  -    |  Yes   |
+ ***************************************************************************************************/
+
+
 // GET api/v1/history
 // Get all combined history
 // or filter on specifics.

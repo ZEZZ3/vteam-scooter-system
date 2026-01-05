@@ -1,0 +1,368 @@
+{
+    "users": [
+        {
+            "mail": "admin@test.com",
+            "role": "admin",
+            "phone": "123456789",
+            "balance": 20000,
+            "verified": true
+        },
+        {
+            "mail": "user@test.com",
+            "role": "customer",
+            "phone": "012345678",
+            "verified": true,
+            "balance": 200
+        },
+        {
+            "mail": "user1@test.com",
+            "role": "customer",
+            "phone": "01234567832",
+            "verified": true,
+            "balance": 0
+        },
+        {
+            "mail": "user2@test.com",
+            "role": "customer",
+            "phone": "0134567832",
+            "verified": true,
+            "balance": 200
+        }
+    ],
+    "cities": [
+        {
+            "name": "Stockholm",
+            "zones": [],
+            "stations": []
+        }, 
+        {
+            "name": "Malmö",
+            "zones": [],
+            "stations": []
+        },
+        {
+            "name": "Linköping",
+            "zones": [],
+            "stations": []
+        }
+    ],
+    "bikes": [
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Östermalm",
+            "currentZone": "",
+            "currentStationName": "Karlaplan",
+            "currentStation": "",
+            "number": 1,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Östermalm",
+            "currentZone": "",
+            "currentStationName": "Humlegården",
+            "currentStation": "",
+            "number": 2,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Östermalm",
+            "currentZone": "",
+            "currentStationName": "Strandvägen",
+            "currentStation": "",
+            "number": 3,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Östermalm",
+            "currentZone": "",
+            "currentStationName": "Artillerigatan",
+            "currentStation": "",
+            "number": 4,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Djurgården",
+            "currentZone": "",
+            "currentStationName": "Djurgårdsbron",
+            "currentStation": "",
+            "number": 5,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Djurgården",
+            "currentZone": "",
+            "currentStationName": "Skansen",
+            "currentStation": "",
+            "number": 6,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Djurgården",
+            "currentZone": "",
+            "currentStationName": "Blockhusudden",
+            "currentStation": "",
+            "number": 7,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {   
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Djurgården",
+            "currentZone": "",
+            "currentStationName": "Djurgårdsbrunnsbron",
+            "currentStation": "",
+            "number": 8,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Djurgården",
+            "currentZone": "",
+            "currentStationName": "Folke Bernadottes bro",
+            "currentStation": "",
+            "number": 9,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZoneName": "Djurgården",
+            "currentZone": "",
+            "currentStationName": "Kärleksudden",
+            "currentStation": "",
+            "number": 10,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Linköping",
+            "cityID": "",
+            "currentZone": "",
+            "currentStation": "",
+            "number": 11,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        },
+        {
+            "city": "Malmö",
+            "cityID": "",
+            "currentZone": "",
+            "currentStation": "",
+            "number": 12,
+            "battery": 100,
+            "status": "free",
+            "position": {},
+            "createdAt": ""
+        }        
+    ],
+    "zones": [
+        {
+            "cityID": "Stockholm",
+            "name": "Östermalm",
+            "area": {
+                "coordinates": [
+                    {"lat": 59.340628, "long": 18.092183},
+                    {"lat": 59.338007, "long": 18.103317},
+                    {"lat": 59.331617, "long": 18.095166},
+                    {"lat": 59.333029, "long": 18.075872},
+                    {"lat": 59.338106, "long": 18.069670},
+                    {"lat": 59.345204, "long": 18.073584},
+                    {"lat": 59.340628, "long": 18.092183}
+                ]
+            },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Djurgården",
+            "area": {
+                "coordinates": [
+                    {"lat": 59.330929, "long": 18.093944 },
+                    {"lat": 59.329090, "long": 18.099696},
+                    {"lat": 59.329623, "long": 18.105292},
+                    {"lat": 59.330130,"long": 18.112934},
+                    {"lat": 59.330316, "long": 18.127119},
+                    {"lat": 59.326273,"long": 18.148348},
+                    {"lat": 59.323794,"long": 18.148982},
+                    {"lat": 59.322732,"long": 18.155186},
+                    {"lat": 59.321212,"long": 18.153796},
+                    {"lat": 59.321479, "long": 18.146551},
+                    {"lat": 59.322657,"long": 18.145336},
+                    {"lat": 59.321722,"long": 18.143067},
+                    {"lat": 59.322350, "long": 18.140068},
+                    {"lat": 59.323080, "long": 18.131375},
+                    {"lat": 59.321557,"long": 18.123666},
+                    {"lat": 59.320246,"long": 18.123153},
+                    {"lat": 59.319783,"long": 18.112643},
+                    {"lat": 59.321038,"long": 18.114047},
+                    {"lat": 59.321896,"long": 18.113100},
+                    {"lat": 59.322802,"long": 18.112694},
+                    {"lat": 59.322592,"long": 18.109801},
+                    {"lat": 59.323467,"long": 18.103330},
+                    {"lat": 59.325794,"long": 18.096673},
+                    {"lat": 59.327267,"long": 18.092009},
+                    {"lat": 59.328754,"long": 18.089856},
+                    {"lat": 59.330339,"long": 18.089316},
+                    {"lat": 59.329623,"long": 18.105292}
+                ]
+            },
+            "createdAt": ""
+        }
+    ],
+    "stations": [
+        {
+            "cityID": "Stockholm",
+            "name": "Karlaplan",
+            "zoneID": "Östermalm",
+            "position": { "lat": 59.337527, "long": 18.090962 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Humlegården",
+            "zoneID": "Östermalm",
+            "position": { "lat": 59.340783, "long": 18.074177 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Strandvägen",
+            "zoneID": "Östermalm",
+            "position": { "lat": 59.331876, "long": 18.086445 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Artillerigatan",
+            "zoneID": "Östermalm",
+            "position": { "lat": 59.333749, "long": 18.080810 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Djurgårdsbron",
+            "zoneID": "Djurgården",
+            "position": { "lat": 59.330593, "long": 18.093916 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Skansen",
+            "zoneID": "Djurgården",
+            "position": { "lat":  59.324092, "long": 18.101789 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Blockhusudden",
+            "zoneID": "Djurgården",
+            "position": { "lat":  59.322833, "long": 18.146629 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Djurgårdsbrunnsbron",
+            "zoneID": "Djurgården",
+            "position": { "lat":  59.329278, "long": 18.131882 },
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Folke Bernadottes bro",
+            "zoneID": "Djurgården",
+            "position": { "lat":  59.329850, "long": 18.119150},
+            "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Kärleksudden",
+            "zoneID": "Djurgården",
+            "position": { "lat":  59.329471, "long": 18.105414},
+            "createdAt": ""
+        }
+    ],
+    "payments": [
+        {
+            "user": "admin@test.com",
+            "price": 100,
+            "type": "ride",
+            "status": "success"
+        },
+        {
+            "user": "user@test.com",
+            "price": 200,
+            "type": "fill",
+            "status": "success"
+        }
+    ],
+    "rides": [
+            {
+                "user": "",
+                "bike": "",
+                "start": "",
+                "stop": Date.now() + 1000*60*1,
+                "startPos": {},
+                "stopPos": {},
+                "duration": 0.0,
+                "price": 0.0,
+                "parking": "station",
+                "active": false
+            }
+    ],
+    "simulations": [
+        {
+            "numberOfBikes": 0,
+            "bikes": [],
+            "start": "",
+            "end": "",
+            "status": ""
+        }
+    ]
+
+
+}
