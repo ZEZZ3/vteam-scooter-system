@@ -4,7 +4,7 @@ const API = process.env.API_BASE || "http://backend:3000";
 
 async function poke() {
   try {
-    const { data } = await axios.get(`${API}/api/health`);
+    const { data } = await axios.get(`${API}/api/v1/index`);
     console.log("Simulation ping:", data);
   } catch (err) {
     console.log("Simulation ping failed (expected if backend not ready yet)");

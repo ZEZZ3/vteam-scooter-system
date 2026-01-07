@@ -3,6 +3,20 @@
 const minBalance = 100.0;
 const startingFee = 12.0;
 const minuteFee = 3.0;
+const LOG_DELAY = 10000;
+const BIKES_PER_STATION = 15;
+
+function getTimeString() {
+    const now = new Date();
+    const seconds = now.getSeconds().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const hours = now.getHours().toString().padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`
+}
+
+function print(source, text) {
+    console.log(`${getTimeString()} [${source}] ${text}`);
+}
 
 function checkPutData(body, required) {
     const newData = {}
@@ -41,7 +55,11 @@ module.exports = {
     checkPutData,
     checkPatchData,
     changeToIsValid,
+    getTimeString,
+    print,
     minBalance,
     startingFee,
-    minuteFee
+    minuteFee,
+    LOG_DELAY,
+    BIKES_PER_STATION
 }

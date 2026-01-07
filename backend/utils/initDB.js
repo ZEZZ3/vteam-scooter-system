@@ -3,20 +3,20 @@
 const database = require('../database/database');
 const bcrypt = require('bcryptjs');
 const standardData = require("./standardData.json");
+const helpers = require("./helpers");
 
 async function createUsers() {
 
-    console.log("Adding users to DB")
+    helpers.print("Database", "Adding users.")
 
     let db = await database.getDb("users");
-
     const minLength = standardData.users.length;
     const currentLength = await db.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Users already in DB. Skipping.");
+        helpers.print("Database", "Users already exist. Skipping.")
         return;
     }
-
+    
     await db.collection.deleteMany({});
 
     for (const user of standardData.users) {
@@ -35,20 +35,18 @@ async function createUsers() {
     }
 
     db.client.close()
-
-    console.log("Users added to DB")
+    helpers.print("Database", "Users added.")
 }
 
 async function createCities() {
 
-    console.log("Adding cities to DB")
-
+    helpers.print("Database", "Adding cities.")
     let db = await database.getDb("cities");
 
     const minLength = standardData.cities.length;
     const currentLength = await db.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Cities already in DB. Skipping.");
+        helpers.print("Database", "Cities already exist. Skipping.")
         return;
     }
 
@@ -65,20 +63,19 @@ async function createCities() {
         );
     }
     db.client.close()
-    console.log("Cities added to DB")
+    helpers.print("Database", "Cities added.")
 }
 
 async function createZones() {
     
-    console.log("Adding zones to DB")
-
+    helpers.print("Database", "Adding zones.")
     let dbZones = await database.getDb("zones");
     let dbCities = await database.getDb("cities");
 
     const minLength = standardData.zones.length;
     const currentLength = await dbZones.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Zones already in DB. Skipping.");
+        helpers.print("Database", "Zones already in exist. Skipping.")
         return;
     }
 
@@ -101,9 +98,8 @@ async function createZones() {
             { upsert: true }
         );
     }
-    
-    console.log("Zones added to DB")
-    console.log("Adding zones references to 'city' collection")
+    helpers.print("Database", "Zones added.")    
+    helpers.print("Database", "Adding zones references to 'city' collection.")    
 
     const zones = await dbZones.collection.find().toArray();
     for (const city of cities) {
@@ -124,15 +120,13 @@ async function createZones() {
 
     dbCities.client.close()
     dbZones.client.close()
-
-    console.log("Zones references added to 'city' collection");
+    helpers.print("Database", "Zones references added to 'city' collection.")    
 
 }
 
 async function createStations() {
     
-    console.log("Adding stations to DB")
-
+    helpers.print("Database", "Adding stations.")   
     let dbStations = await database.getDb("stations");
     let dbCities = await database.getDb("cities");
     let dbZones = await database.getDb("zones");
@@ -140,7 +134,7 @@ async function createStations() {
     const minLength = standardData.stations.length;
     const currentLength = await dbStations.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Stations already in DB. Skipping.");
+        helpers.print("Database", "Stations already exist. Skipping.")   
         return;
     }
 
@@ -166,9 +160,9 @@ async function createStations() {
             { upsert: true }
         );
     }
-    
-    console.log("Stations added to DB")
-    console.log("Adding station references to 'city' collection")
+
+    helpers.print("Database", "Stations added.")  
+    helpers.print("Database", "Adding station references to 'city' collection.")  
 
     const stations = await dbStations.collection.find().toArray();
     for (const city of cities) {
@@ -190,25 +184,25 @@ async function createStations() {
     dbCities.client.close()
     dbZones.client.close()
     dbStations.client.close()
-
-    console.log("Station references added to 'city' collection");
+    
+    helpers.print("Database", "Station references added to 'city' collection.")  
 }
 
 async function createBikes() {
-    console.log("Adding bikes to DB")
+    helpers.print("Database", "Adding bikes.")
     
     let dbBikes = await database.getDb("bikes");
     let dbCities = await database.getDb("cities");
     let dbZones = await database.getDb("zones");
     let dbStations = await database.getDb("stations");
 
-    const minLength = standardData.bikes.length;
+/*     const minLength = standardData.bikes.length;
     const currentLength = await dbBikes.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Bikes already in DB. Skipping.");
+        console.log("[Database] Bikes already exist. Skipping.");
         return;
     }
-
+    */
     await dbBikes.collection.deleteMany({});
 
     const cities = await dbCities.collection.find().toArray();
@@ -219,12 +213,15 @@ async function createBikes() {
     const cityMap = new Map(cities.map(city => [city.name, city._id]))
     const zoneMap = new Map(zones.map(zone => [zone.name, zone._id]))
     const stationMap = new Map(stations.map(station => [station.name, station]))
+    
+    let currentNum = 1;
+    const bikes = [];
 
     for (const bike of standardData.bikes) {
-        
+
         const cityID = cityMap.get(bike.city);
         if (!cityID) {
-            console.warn(`Unknown city: ${bike.city}. Skipping bike nr: ${bike.number}.`)
+            helpers.print("Database", `Unknown city: ${bike.city}. Skipping bike nr: ${bike.number}.`)  
             continue;
         }
 
@@ -232,41 +229,44 @@ async function createBikes() {
         const stationID = bike.currentStationName ? stationMap.get(bike.currentStationName)._id: null;
         const stationPos = bike.currentStationName ? stationMap.get(bike.currentStationName).position: null;
         
-        await dbBikes.collection.updateOne(
-            { number: bike.number },
-            {
-                $setOnInsert: {
-                     ...bike, 
-                     cityID: cityID,
-                     zoneID: zoneID,
-                     stationID: stationID,
-                     position: stationPos,
-                     createdAt: new Date() 
-                }
-            },
-            { upsert: true }
-        );
+
+        for (let index = 0; index < helpers.BIKES_PER_STATION; index++) {
+            bikes.push({
+                city: bike.city,
+                cityID: cityID,
+                currentZoneName: bike.currentZoneName,
+                currentZone: zoneID,
+                currentStationName: bike.currentStationName,
+                currentStation: stationID,
+                number: currentNum,
+                battery: 100,
+                status: "free",
+                position: stationPos,
+                createdAt: new Date()
+            })
+            currentNum++;  
+        }
     }
+        
+    await dbBikes.collection.insertMany(bikes)
 
     dbBikes.client.close()
     dbCities.client.close()
     dbZones.client.close()
     dbStations.client.close()
-    
-    console.log("Bikes added to DB")
+    helpers.print("Database", "Bikes added.")
 }
 
 async function createPayments() {
 
-    console.log("Adding dummy payments to DB")
-
+    helpers.print("Database", "Adding dummy payments.")
     let dbPayments = await database.getDb("payments");
     let dbUsers = await database.getDb("users");
     
     const minLength = standardData.payments.length;
     const currentLength = await dbPayments.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Payments already in DB. Skipping.");
+        helpers.print("Database", "Payments already exist. Skipping.")
         return;
     }
 
@@ -290,14 +290,12 @@ async function createPayments() {
 
     dbPayments.client.close();
     dbUsers.client.close();
-    
-    console.log("Dummy payments added to DB")
+    helpers.print("Database", "Dummy payments added.")    
 }
 
 async function createRides() {
 
-    console.log("Adding dummy rides to DB")
-
+    helpers.print("Database", "Adding dummy rides.")    
     let dbRides = await database.getDb("rides");
     let dbBikes = await database.getDb("bikes");
     let dbUsers = await database.getDb("users");
@@ -305,7 +303,7 @@ async function createRides() {
     const minLength = standardData.rides.length;
     const currentLength = await dbRides.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("Rides already in DB. Skipping.");
+        helpers.print("Database", "Rides already exist. Skipping.")    
         return;
     }
 
@@ -344,13 +342,12 @@ async function createRides() {
     dbRides.client.close()
     dbBikes.client.close()
     dbUsers.client.close()
-
-    console.log("Dummy rides added to DB")
+    helpers.print("Database", "Dummy rides added.")
 }
 
 async function initDB() {
     try {
-        console.log("Preparing DB")
+        helpers.print("Database", "Preparing.")
         await createUsers();
         await createCities();
         await createZones();
@@ -358,10 +355,10 @@ async function initDB() {
         await createBikes();
         await createPayments();
         await createRides();
-        console.log("DB ready")
+        helpers.print("Database", "ready.")
     } catch (e) {
         return new Error(e);
     }
 };
 
-module.exports = {initDB}
+module.exports = initDB

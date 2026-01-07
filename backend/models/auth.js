@@ -9,6 +9,72 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const auth = {
 
+    checkServiceToken: function(req, res, next) {
+        let token = req.headers['x-access-token'];
+        if (!token) {
+            return res.status(401).json({
+                error: {
+                    status: 401,
+                    source: req.path,
+                    title: "No token",
+                    detail: "No token provided in request headers"
+                }
+            });
+        }
+        //console.log(token)
+        try {
+            const payload = jwt.verify(token, process.env.SERVICE_JWT_SECRET);
+            if(payload.type !== "service") {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        source: req.path,
+                        title: "Invalid token type",
+                        detail: "Invalid token type provided in request headers"
+                    }
+                });                
+            }
+            
+            return next();
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    source: req.path,
+                    title: "Validation failed",
+                    detail: "Invalid or expired token?"
+                }
+            });   
+        }
+    },
+
+    serviceTokenRegister: async function(res, body) {
+        const serviceID = body.serviceID
+        const serviceSecret = body.serviceSecret
+        
+        if (serviceID !== process.env.SERVICE_ID || serviceSecret !== process.env.SERVICE_SECRET) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    source: "POST api/v1/service/token",
+                    title: "Bad request",
+                    detail: "Invalid service credentials"
+                }
+            });            
+        }
+
+        const token = jwt.sign(
+            {
+                sub: serviceID,
+                type: "service"
+            },
+            process.env.SERVICE_JWT_SECRET,
+            { expiresIn: "1hr"}
+        );
+
+        return res.json({serviceToken: token, expires: 60 * 60 })
+    },
+
     register: async function(res, body) {
         const mail = body.mail;
         const password = body.password;
@@ -150,7 +216,7 @@ const auth = {
                 });
             }
 
-            if (!user.verified) {
+/*             if (!user.verified) {
                 return res.status(403).json({
                     error: {
                         status: 403,
@@ -159,7 +225,7 @@ const auth = {
                         detail: "User is not verified, please verify before logging in"
                     }
                 });
-            }            
+            }      */       
             
             return auth.comparePasswords(
                 res,

@@ -17,6 +17,7 @@ const history = require("./routes/v1/history.js");
 const city = require("./routes/v1/city.js");
 const zone = require("./routes/v1/zone.js");
 const station = require("./routes/v1/station.js");
+const service = require("./routes/v1/service.js");
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/v1/history', history);
 app.use('/api/v1/city', city);
 app.use('/api/v1/zone', zone);
 app.use('/api/v1/station', station);
+app.use('/api/v1/service', service);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {

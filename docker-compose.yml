@@ -7,24 +7,22 @@ services:
       - mongo-data:/data/db
     ports:
       - "27017:27017"
-  
+    networks:
+      - scooter-network 
+      
   backend:
     build: ./backend
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
-    environment:
-      NODE_ENV: development
-      MONGO_URI: mongodb://mongo:27017/scooterdb
-      STRIPE_KEY: test_dummy
-      API_BASE: http://backend:3000
-
+      - ./.env
     depends_on:
       - mongo
     restart: unless-stopped
     command: > 
       sh -c "node server.js"
+    networks:
+      - scooter-network
 
   admin-webb:
     build: ./admin-webb
@@ -32,7 +30,13 @@ services:
       - "8081:80"
     depends_on:
       - backend
+    env_file:
+      - ./.env
+    environment:
+      BASE_API_URL: http://backend:3000
     restart: unless-stopped
+    networks:
+      - scooter-network
 
   user-webb:
     build: ./user-webb
@@ -40,6 +44,10 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    env_file:
+      - ./.env
+    environment:
+      BASE_API_URL: http://backend:3000
     restart: unless-stopped
 
   user-mobile:
@@ -48,23 +56,39 @@ services:
       - "8082:80"
     depends_on:
       - backend
+    env_file:
+      - ./.env
+    environment:
+      BASE_API_URL: http://backend:3000
     restart: unless-stopped
 
   bike:
     build: ./bike
-    environment:
-      API_BASE: http://backend:3000
     depends_on:
       - backend
+    environment:
+      BASE_API_URL: http://backend:3000
+    env_file:
+      - ./.env
     restart: unless-stopped
+    networks:
+      - scooter-network
 
   simulation:
     build: ./simulation
     environment:
-      API_BASE: http://backend:3000
+      BASE_API_URL: http://backend:3000
     depends_on:
       - backend
+    env_file:
+      - ./.env
     restart: unless-stopped
+    networks:
+      - scooter-network
+
+networks:
+  scooter-network:
+    driver: bridge
 
 volumes:
   mongo-data:
