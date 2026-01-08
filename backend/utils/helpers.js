@@ -4,7 +4,7 @@ const minBalance = 100.0;
 const startingFee = 12.0;
 const minuteFee = 3.0;
 const LOG_DELAY = 10000;
-const BIKES_PER_STATION = 15;
+const BIKES_PER_STATION = 30;
 
 function getTimeString() {
     const now = new Date();

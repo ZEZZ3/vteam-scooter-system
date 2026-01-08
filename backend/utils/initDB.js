@@ -72,13 +72,13 @@ async function createZones() {
     let dbZones = await database.getDb("zones");
     let dbCities = await database.getDb("cities");
 
-    const minLength = standardData.zones.length;
+/*     const minLength = standardData.zones.length;
     const currentLength = await dbZones.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Zones already in exist. Skipping.")
         return;
     }
-
+ */
 
     await dbZones.collection.deleteMany({});   
 
@@ -103,8 +103,9 @@ async function createZones() {
 
     const zones = await dbZones.collection.find().toArray();
     for (const city of cities) {
-        cityZones = zones.filter(zone => zone.cityID.toString() === city._id.toString())
-        zoneIDs = cityZones.map(zone => zone._id)
+        // all zones beloning to city
+        const cityZones = zones.filter(zone => zone.cityID.toString() === city._id.toString())
+        const zoneIDs = cityZones.map(zone => zone._id)
 
         if (zoneIDs.length > 0) {
             await dbCities.collection.findOneAndUpdate(
@@ -131,12 +132,12 @@ async function createStations() {
     let dbCities = await database.getDb("cities");
     let dbZones = await database.getDb("zones");
 
-    const minLength = standardData.stations.length;
+/*     const minLength = standardData.stations.length;
     const currentLength = await dbStations.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Stations already exist. Skipping.")   
         return;
-    }
+    } */
 
     await dbStations.collection.deleteMany({});   
 
@@ -166,8 +167,9 @@ async function createStations() {
 
     const stations = await dbStations.collection.find().toArray();
     for (const city of cities) {
-        cityStations = stations.filter(station => station.cityID.toString() === city._id.toString())
-        stationIDs = cityStations.map(station => station._id)
+        // all stations belonging to city
+        const cityStations = stations.filter(station => station.cityID.toString() === city._id.toString())
+        const stationIDs = cityStations.map(station => station._id)
 
         if (stationIDs.length > 0) {
             await dbCities.collection.findOneAndUpdate(
@@ -228,7 +230,6 @@ async function createBikes() {
         const zoneID = bike.currentZoneName ? zoneMap.get(bike.currentZoneName) : null;
         const stationID = bike.currentStationName ? stationMap.get(bike.currentStationName)._id: null;
         const stationPos = bike.currentStationName ? stationMap.get(bike.currentStationName).position: null;
-        
 
         for (let index = 0; index < helpers.BIKES_PER_STATION; index++) {
             bikes.push({
@@ -275,7 +276,7 @@ async function createPayments() {
     const users = await dbUsers.collection.find().toArray();
 
     for (const payment of standardData.payments) {
-        findUser = users.find(user => user.mail === payment.user)
+        const findUser = users.find(user => user.mail === payment.user)
         
         await dbPayments.collection.insert(
             {
@@ -356,7 +357,8 @@ async function initDB() {
         await createPayments();
         await createRides();
         helpers.print("Database", "ready.")
-    } catch (e) {
+    } catch (e) {    
+        helpers.print("Database: err", `Database initialization failed: ${e.message}`)
         return new Error(e);
     }
 };

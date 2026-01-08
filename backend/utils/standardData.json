@@ -653,6 +653,240 @@
             "status": "free",
             "position": { "lat": 59.362810, "long": 17.989920 },
             "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Skogskyrkogården Östra",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.273025, "long": 18.109120 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Skogskyrkogården Norr",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.279550, "long": 18.097429 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Sockenplan",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.283229, "long": 18.071810 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Enskede gård",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.288803, "long": 18.071186 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Globen",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.294421, "long": 18.082972 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Gullmarsplans torg",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.298636, "long": 18.080050 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Sköntorpsvägen",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.299322, "long": 18.058597 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Årstafältet",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.296197, "long": 18.040531 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Sofielundsvägen",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.289151, "long": 18.091645 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Hammarbyhöjdens IP",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.296145, "long": 18.106938 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Lumaparken",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.304025, "long": 18.095735 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Mårtensdal",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.302646, "long": 18.088594 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Bagarmossen",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.276427, "long": 18.131054 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Viloparken",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.283099, "long": 18.108924 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Sandborgs kapell",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.282221, "long": 18.098721 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Gamla enskede",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.282446, "long": 18.071746 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Årstafältet",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.288470, "long": 18.044749 },
+            "createdAt": ""
+        },
+        {
+            "city": "Stockholm",
+            "cityID": "",
+            "currentZone": "",
+            "currentZoneName": "Söderort",
+            "currentStation": "",
+            "currentStationName": "Älvsjö torg",
+            "number": 0,
+            "battery": 100,
+            "status": "free",
+            "position": { "lat": 59.278944, "long": 18.009140 },
+            "createdAt": ""
         }
     ],
     "zones": [
@@ -803,14 +1037,41 @@
                 ]
             },
             "createdAt": ""
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Söderort",
+            "area": {
+                "coordinates": [
+                    {"lat": 59.303020, "long": 18.080789 },
+                    {"lat": 59.306377, "long": 18.095599 },
+                    {"lat": 59.302406, "long": 18.108352 },
+                    {"lat": 59.301060, "long": 18.113049 },
+                    {"lat": 59.281955, "long": 18.124024 },
+                    {"lat": 59.281779, "long": 18.132423 },
+                    {"lat": 59.274360, "long": 18.147712 },
+                    {"lat": 59.270750, "long": 18.125810 },
+                    {"lat": 59.264018, "long": 18.102255 },
+                    {"lat": 59.261893, "long": 18.064212 },
+                    {"lat": 59.266492, "long": 18.021563 },
+                    {"lat": 59.285308, "long": 17.991440 },
+                    {"lat": 59.296153, "long": 17.976023 },
+                    {"lat": 59.308432, "long": 18.024465 },
+                    {"lat": 59.301326, "long": 18.073390 },
+                    {"lat": 59.303020, "long": 18.080789 }
+                ]
+            },
+            "createdAt": ""
         }
     ],
+
     "stations": [
         {
             "cityID": "Stockholm",
             "name": "Karlaplan",
             "zoneID": "Östermalm",
             "position": { "lat": 59.337527, "long": 18.090962 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -818,6 +1079,7 @@
             "name": "Humlegården",
             "zoneID": "Östermalm",
             "position": { "lat": 59.340783, "long": 18.074177 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -825,6 +1087,7 @@
             "name": "Strandvägen",
             "zoneID": "Östermalm",
             "position": { "lat": 59.331876, "long": 18.086445 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -832,6 +1095,7 @@
             "name": "Artillerigatan",
             "zoneID": "Östermalm",
             "position": { "lat": 59.333749, "long": 18.080810 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -839,6 +1103,7 @@
             "name": "Djurgårdsbron",
             "zoneID": "Djurgården",
             "position": { "lat": 59.330593, "long": 18.093916 },
+            "radius": 30,            
             "createdAt": ""
         },
         {
@@ -846,6 +1111,7 @@
             "name": "Skansen",
             "zoneID": "Djurgården",
             "position": { "lat":  59.324092, "long": 18.101789 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -853,6 +1119,7 @@
             "name": "Blockhusudden",
             "zoneID": "Djurgården",
             "position": { "lat":  59.322833, "long": 18.146629 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -860,6 +1127,7 @@
             "name": "Djurgårdsbrunnsbron",
             "zoneID": "Djurgården",
             "position": { "lat":  59.329278, "long": 18.131882 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -867,6 +1135,7 @@
             "name": "Folke Bernadottes bro",
             "zoneID": "Djurgården",
             "position": { "lat":  59.329850, "long": 18.119150},
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -874,6 +1143,7 @@
             "name": "Kärleksudden",
             "zoneID": "Djurgården",
             "position": { "lat":  59.329471, "long": 18.105414},
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -881,6 +1151,7 @@
             "name": "Fotografiska Stockholm",
             "zoneID": "Södermalm",
             "position": { "lat":  59.318026, "long": 18.084122 },
+            "radius": 30,
             "createdAt": ""
         },
         {
@@ -888,6 +1159,7 @@
             "name": "Kvarteret Sommaren",
             "zoneID": "Södermalm",
             "position": { "lat":  59.313399, "long": 18.100487 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -895,6 +1167,7 @@
             "name": "Vitabergsparken",
             "zoneID": "Södermalm",
             "position": { "lat":  59.310906, "long": 18.088316 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -902,6 +1175,7 @@
             "name": "Ringvägen",
             "zoneID": "Södermalm",
             "position": { "lat":  59.308220, "long": 18.080275 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -909,6 +1183,7 @@
             "name": "Hammarby idrottsplats",
             "zoneID": "Södermalm",
             "position": { "lat":  59.307201, "long": 18.083682 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -916,6 +1191,7 @@
             "name": "Södersjukhuset",
             "zoneID": "Södermalm",
             "position": { "lat":  59.309568, "long": 18.059346 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -923,6 +1199,7 @@
             "name": "Tantolunden",
             "zoneID": "Södermalm",
             "position": { "lat":  59.313707, "long": 18.038069 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -930,6 +1207,7 @@
             "name": "Hornstull",
             "zoneID": "Södermalm",
             "position": { "lat":  59.315673, "long": 18.034213 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -937,6 +1215,7 @@
             "name": "Högalidskyrkan",
             "zoneID": "Södermalm",
             "position": { "lat":  59.318170, "long": 18.037575 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -944,6 +1223,7 @@
             "name": "Heleneborgsgatan",
             "zoneID": "Södermalm",
             "position": { "lat":  59.320071, "long": 18.045103 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -951,6 +1231,7 @@
             "name": "Södermalmstorg",
             "zoneID": "Södermalm",
             "position": { "lat":  59.320080, "long": 18.070567 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -958,6 +1239,7 @@
             "name": "Katarina kyrka",
             "zoneID": "Södermalm",
             "position": { "lat":  59.317257, "long": 18.079526 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -965,6 +1247,7 @@
             "name": "Södra Latin",
             "zoneID": "Södermalm",
             "position": { "lat":  59.317055, "long": 18.068123 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -972,6 +1255,7 @@
             "name": "Södra Teatern",
             "zoneID": "Södermalm",
             "position": { "lat":  59.318289, "long": 18.074589 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -979,6 +1263,7 @@
             "name": "Fridhelmsplan",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat":  59.332221, "long": 18.029348 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -986,6 +1271,7 @@
             "name": "Kungholms kyrka",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.329109, "long": 18.049230 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -993,6 +1279,7 @@
             "name": "Stockholms stadshus",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.327880, "long": 18.052751 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1000,6 +1287,7 @@
             "name": "Norr Mälarstrand",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.327344, "long": 18.038265 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1007,6 +1295,7 @@
             "name": "Kronobergsparken",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.332298, "long": 18.033450 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1014,6 +1303,7 @@
             "name": "Stadshagen",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.338348, "long": 18.013728 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1021,6 +1311,7 @@
             "name": "Sankt Eriksgatan",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.336767, "long": 18.034215 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1028,6 +1319,7 @@
             "name": "Grubbensparken",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.333778, "long": 18.042585 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1035,6 +1327,7 @@
             "name": "Rådhuset",
             "zoneID": "S:t Eriksområdet",
             "position": { "lat": 59.330145, "long": 18.047016 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1042,6 +1335,7 @@
             "name": "Stockholms Central",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.330513, "long": 18.058801 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1049,6 +1343,7 @@
             "name": "Sergels torg",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.332323, "long": 18.064508 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1056,6 +1351,7 @@
             "name": "Hötorget",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.335447, "long": 18.063269 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1063,6 +1359,8 @@
             "name": "Drottninggatan",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.335610, "long": 18.059647 },
+
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1070,6 +1368,7 @@
             "name": "Norra Latin",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.335857, "long": 18.055511 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1077,6 +1376,7 @@
             "name": "Vasaparken",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.340177, "long": 18.045109 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1084,6 +1384,7 @@
             "name": "Rådmansgatan",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.340229, "long": 18.057867 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1091,6 +1392,7 @@
             "name": "Olof Palmes gata",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.336157, "long": 18.061198 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1098,6 +1400,7 @@
             "name": "Observatoriegatan",
             "zoneID": "Norrmalm",
             "position": { "lat": 59.340468, "long": 18.050403 },
+            "radius": 30,
             "createdAt": ""            
         },
         {
@@ -1105,6 +1408,7 @@
             "name": "Skytteholmsparken",
             "zoneID": "Solna",
             "position": { "lat": 59.359796, "long": 17.990188 },
+            "radius": 30,
             "createdAt": ""         
         },
         {
@@ -1112,6 +1416,7 @@
             "name": "Solna centrum",
             "zoneID": "Solna",
             "position": { "lat": 59.358702, "long": 18.000029 },
+            "radius": 30,
             "createdAt": ""         
         },
         {
@@ -1119,6 +1424,151 @@
             "name": "Råsunda",
             "zoneID": "Solna",
             "position": { "lat": 59.362810, "long": 17.989920 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Skogskyrkogården Östra",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.273025, "long": 18.109120 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Skogskyrkogården Norr",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.279550, "long": 18.097429 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Sockenplan",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.283229, "long": 18.071810 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Enskede gård",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.288803, "long": 18.071186 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Globen",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.294421, "long": 18.082972 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Gullmarsplans torg",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.298636, "long": 18.080050 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Sköntorpsvägen",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.299322, "long": 18.058597 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Årstafältet",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.296197, "long": 18.040531 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Sofielundsvägen",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.289151, "long": 18.091645 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Hammarbyhöjdens IP",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.296145, "long": 18.106938 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Lumaparken",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.304025, "long": 18.095735 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Mårtensdal",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.302646, "long": 18.088594 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Bagarmossen",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.276427, "long": 18.131054 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Viloparken",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.283099, "long": 18.108924 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Sandborgs kapell",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.282221, "long": 18.098721 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Gamla enskede",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.282446, "long": 18.071746 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Årstafältet",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.288470, "long": 18.044749 },
+            "radius": 30,
+            "createdAt": ""         
+        },
+        {
+            "cityID": "Stockholm",
+            "name": "Älvsjö torg",
+            "zoneID": "Söderort",
+            "position": { "lat": 59.278944, "long": 18.009140 },
+            "radius": 30,
             "createdAt": ""         
         }
     ],

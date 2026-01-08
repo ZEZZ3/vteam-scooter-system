@@ -72,7 +72,7 @@ let lastUpdate = null;
                                 currentStation: currentStationID,
                                 currentStationName: currentStationName,
                                 currentZone: currentZoneID,
-                                currentZoneName: currentZoneName
+                                currentZoneName: currentZoneName,
                             }
                         }
                     );
