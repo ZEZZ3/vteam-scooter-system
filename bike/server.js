@@ -9,6 +9,7 @@ const app = express();
 app.use(express.json());
 
 const port = process.env.BIKE_SERVER_PORT;
+const routeURL = process.env.ROUTE_URL;
 const API = process.env.BASE_API_URL || "http://backend:3000";
 const bikes = new Map();
 const stations = [];
@@ -22,12 +23,15 @@ let simulationRunning = false;
 let simulationInterval = null;
 let simulationMoveCounter = 0;
 let broadcastInterval = null;
+let finishedSimulatedRoutes = 0;
 
 let configuration = {
     broadcastRate: helpers.constants.BROADCAST_RATE || 5000,
     simulationRate: helpers.constants.SIMULATION_RATE || 5000,
     simulationBikeLimit: helpers.constants.BIKE_LIMIT || bikes.size,
-    simulationMoveLimit: helpers.constants.SIMULATION_MOVE_LIMIT
+    simulationMoveLimit: helpers.constants.SIMULATION_MOVE_LIMIT,
+    simulationReRouteLimit: 10,
+    verbose: false
 }
 
 async function connectToBackend() {
@@ -242,25 +246,6 @@ function stopBroadcast() {
     clearInterval(broadcastInterval);
 }
 
-function moveBike(bike, random=true) {
-    
-    if (random) {
-        bike.randomMove();
-        
-        // try to midigate leaving zone (mainly try to not go into water)
-        // random movement so its hard to prevent
-        const currPos = bike.position;
-        const zone = locateZone(currPos.lat, currPos.long);
-        if (!zone) {
-            bike.speed.lat = bike.speed.lat * -1;
-            bike.speed.long = bike.speed.long * -1;
-        }
-    } else {
-        bike.moveBy();
-    }
-    //console.log(`${bike.position.lat} : ${bike.position.long}`)
-}
-
 // find the closest station based on a station radius. 
 // if there is not station within station radius null is returned.
 function locateCloseStation(lat, long) {
@@ -293,6 +278,42 @@ function locateZone(lat, long) {
     return null;
 }
 
+async function getRoute(start, end) {
+    const url = `${routeURL}/route/v1/driving/${start.long},${start.lat};${end.long},${end.lat}?overview=full&geometries=geojson`;
+    const result = await axios.get(url);
+    const route = result.data.routes[0].geometry.coordinates;
+    const distance = result.data.routes[0].distance;
+    return {route, distance};
+}
+
+async function setRandomRoute(bike) {
+    try {
+        const randomStation = stations[Math.floor(Math.random() * stations.length)];
+        //const randomStation = stations[3];
+        const start = bike.position;
+        const end = randomStation.position;
+        const nearbyStation = locateCloseStation(start.lat, start.long);
+        const zone = locateZone(start.lat, start.long);
+
+        const {route, distance} = await getRoute(start, end);
+        bike.initSimulationRun(route, distance, randomStation.stationName, 
+            zone.zoneName, zone.zoneID, nearbyStation.stationName, nearbyStation.stationID)
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+async function setRandomRoutes() {
+    for(const [_, bike] of bikes) {
+        try {
+            await setRandomRoute(bike);
+        } catch (e) {
+            helpers.print("Server: warn", `Bike routing error: ${e.message}`);
+            continue;
+        }
+    }
+}
+
 async function enableDefaultServerFunctionality() {
     try {
         await connectToBackend();
@@ -306,7 +327,140 @@ async function enableDefaultServerFunctionality() {
     }
 }
 
-function startSimulation() {
+
+function createSimulationIntervalSingle() {
+    
+    let finishedCount = 0;
+
+    simulationInterval = setInterval(async () => {
+        helpers.print("Simulation", `Simulation tick: ${simulationMoveCounter}`);
+
+        if (simulationMoveCounter >= configuration.simulationMoveLimit) {
+            helpers.print("Simulation", `Ending simulation, reached tick-limit (${simulationMoveCounter}/${configuration.simulationMoveLimit})`);
+            stopSimulation();
+            return;
+        }
+
+        finishedCount = 0;
+
+        for(const bike of bikes.values()) {
+
+            if (bike.simulationRuns[bike.simulationRunIndex].done) {
+                finishedCount++;
+                continue;
+            }
+
+            const res = bike.moveBy();
+
+            switch (res.status) {
+                case 0:
+                    helpers.print("Simulation: warn", "Attempted to move without route!")
+                    break;
+                case 1:
+                    const bikeLat = bike.position.lat;
+                    const bikeLong = bike.position.long;
+                    
+                    const nearbyStation = locateCloseStation(bikeLat, bikeLong);
+                    if (nearbyStation) {
+                        bike.setStationInformation(nearbyStation.stationName, nearbyStation.stationID);
+                    } else {
+                        bike.setStationInformation(null, null);
+                    }
+
+                    const zone = locateZone(bikeLat, bikeLong);
+                    if (zone) {
+                        bike.setZoneInformation(zone.zoneName, zone.zoneID);
+                    } else {
+                        bike.setZoneInformation(null, null);
+                    }
+
+                    const snapshots = bike.getSimulationRunSnapshots()
+                    const distance = helpers.calculateDistance(snapshots);
+                    bike.setSimulationRunDone(distance, simulationMoveCounter);
+
+                    finishedCount += 1;
+                    break;
+                case 2:
+                    // steps left
+                    
+                    helpers.print("Simulation", `Route step: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()}`)
+                    break;
+            }
+        }
+
+        if (finishedCount === bikes.size) {
+            helpers.print("Simulation", `All ${bikes.size} bikes finished their routes.`);
+            stopSimulation();
+            return;
+        }
+        simulationMoveCounter++;      
+
+    }, configuration.simulationRate);
+}
+
+function createSimulationIntervalLoop() {
+    
+    finishedSimulatedRoutes = 0;
+
+    simulationInterval = setInterval(async () => {
+        helpers.print("Simulation", `Simulation tick: ${simulationMoveCounter}`);
+
+        for(const bike of bikes.values()) {
+
+            const res = bike.moveBy();
+            
+            switch (res.status) {
+                case 0:
+                    helpers.print("Simulation: warn", "Attempted to move without route!")
+                    break;
+                case 1:
+                    bike.setSimulationDone(true);
+                    const lat = bike.position.lat;
+                    const long = bike.position.long;
+                    const nearbyStation = locateCloseStation(lat, long);
+
+                    if (nearbyStation) {
+                        bike.setStationInformation(nearbyStation.stationName, nearbyStation.stationID);
+                    } else {
+                        bike.setStationInformation(null, null);
+                    }
+
+                    const zone = locateZone(lat, long);
+                    if (zone) {
+                        bike.setZoneInformation(zone.zoneName, zone.zoneID);
+                    } else {
+                        bike.setZoneInformation(null, null);
+                    }
+
+                    const travelSteps = bike.log.snapshots;
+                    const distance = helpers.calculateDistance(travelSteps);
+                    bike.log.distance = distance;
+
+                    console.log(
+                        `Bike ${bike.id} finished.
+                        \nStart zone: ${bike.startZoneName}, End zone: ${bike.endZoneName}
+                        \nStart station: ${bike.startStationName}, End station: ${bike.endStationName}
+                        \nRoute steps: ${bike.route.length}
+                        \nosrm-distance: ${bike.preDefinedRouteDistance}
+                        \ncalc-distance: ${bike.log.distance}
+                        \nSimulation tick: ${simulationMoveCounter}
+                        \n------------------------------------------------------` 
+                    );
+
+                    finishedCount += 1;
+                    break;
+                case 2:
+                    // steps left
+                    helpers.print("Simulation", `Route length: ${bike.route.length}\nRoute index: ${bike.routeIndex}`)
+                    break;
+            }
+        }
+        simulationMoveCounter++;      
+
+    }, configuration.simulationRate);
+}
+
+async function startSimulation(loop = false) {
     if (simulationRunning) {
         helpers.print("Server: warn", "Simulation is already running.")
         return
@@ -316,19 +470,14 @@ function startSimulation() {
     simulationRunning = true;
     simulationMoveCounter = 0;
 
-    for(let i = 0; i < configuration.simulationMoveLimit; i++) {
-        helpers.print(
-            "Simulation", 
-            `Move: ${simulationMoveCounter}/${configuration.simulationMoveLimit}`
-        )
-        
-        for(const [_, bike] of bikes) {
-            moveBike(bike)
-        }
-        simulationMoveCounter++;
+    await setRandomRoutes();
+
+    if(loop) {
+        createSimulationIntervalLoop();
+    } else {
+        createSimulationIntervalSingle();
     }
     
-    stopSimulation();
 }
 
 function stopSimulation() {
@@ -339,44 +488,29 @@ function stopSimulation() {
     helpers.print("Server", "Stopping simulation.")
     
     simulationRunning = false;
-    //clearInterval(simulationInterval);
-
-    bikes.forEach(bike => {
-
-        const lat = bike.position.lat;
-        const long = bike.position.long;
-        const nearbyStation = locateCloseStation(lat, long);
-
-        if (nearbyStation) {
-            bike.setStationInformation(nearbyStation.stationName, nearbyStation.stationID);
-        } else {
-            bike.setStationInformation(null, null);
-        }
-
-        const zone = locateZone(lat, long);
-        if (zone) {
-            bike.setZoneInformation(zone.zoneName, zone.zoneID);
-        } else {
-            bike.setZoneInformation(null, null);
-        }
-
-        const travelSteps = bike.log.snapshots;
-        const distance = helpers.calculateDistance(travelSteps);
-        bike.log.distance = distance;
-        const slat = travelSteps[0].beforeMove.lat
-        const slong = travelSteps[0].beforeMove.long
-        const elat = travelSteps[travelSteps.length - 1].afterMove.lat
-        const elong = travelSteps[travelSteps.length - 1].afterMove.long
-        console.log("----------------")
-        console.log("start zone: ", bike.startZoneName);
-        console.log("end zone: ", bike.endZoneName);
-        console.log("start station: ", bike.startStationName);
-        console.log("end station: ", bike.endStationName);
-        console.log("distance: ", distance);
-        console.log(`start coord: ${slat}, ${slong}`)
-        console.log(`end coord: ${elat}, ${elong}`)
-
-    });
+    clearInterval(simulationInterval);
+    stopBroadcast();
+    
+    console.log("----------------------------------------")
+    helpers.print("Simulation", "Simulation recap")
+    console.log("----------------------------------------")
+    for (const bike of bikes.values()) {
+        const run = bike.simulationRuns[bike.simulationRunIndex];
+        const endStamp = run.endStamp;
+        console.log(
+            `Bike: ${bike.id}
+            Start station: ${endStamp.startStationName}, ID: ${endStamp.startStationID}
+            End station: ${endStamp.endStationName}, ID: ${endStamp.endStationID}
+            Start zone: ${endStamp.startZoneName}, ID: ${endStamp.startZoneID}
+            End zone: ${endStamp.endZoneName}, ID: ${endStamp.endZoneID}
+            Expected End Station: ${run.expectedEndStation}
+            Route steps: ${run.routeLength}
+            osrm-distance: ${run.preDefinedRouteDistance}
+            calc-distance: ${run.calcDistance}
+            End on tick: ${run.lastTick}
+            Finished at: ${run.finishAt}`
+        );
+    }
 }
 
 async function startBikeServer() {

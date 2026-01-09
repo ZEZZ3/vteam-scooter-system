@@ -9,7 +9,22 @@ services:
       - "27017:27017"
     networks:
       - scooter-network 
-      
+
+  osrm:
+    image: osrm/osrm-backend
+    container_name: osrm
+    volumes:
+      - ./osrm-data:/data
+    command: >
+      osrm-routed
+      --algorithm mld
+      /data/sweden.osrm
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - scooter-network
+
   backend:
     build: ./backend
     ports:
@@ -66,6 +81,7 @@ services:
     build: ./bike
     depends_on:
       - backend
+      - osrm
     environment:
       BASE_API_URL: http://backend:3000
     env_file:
@@ -80,6 +96,7 @@ services:
       BASE_API_URL: http://backend:3000
     depends_on:
       - backend
+      - osrm
     env_file:
       - ./.env
     restart: unless-stopped

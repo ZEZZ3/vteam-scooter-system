@@ -12,9 +12,9 @@ constants.RETRY_DELAY = 2000;
 constants.BROADCAST_RATE = 5000;
 constants.EARTH_RADIUS = 6371000;
 
-constants.SIMULATION_RATE = 1000;
-/* constants.BIKE_LIMIT = 10; */
-constants.SIMULATION_MOVE_LIMIT = 20;
+constants.SIMULATION_RATE = 500;
+constants.BIKE_LIMIT = 3;
+constants.SIMULATION_MOVE_LIMIT = 2000; // backup if something makes a bike not finish
 
 
 function toRadians(coord) {
