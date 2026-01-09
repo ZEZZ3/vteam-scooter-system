@@ -24,6 +24,7 @@ let simulationInterval = null;
 let simulationMoveCounter = 0;
 let broadcastInterval = null;
 let finishedSimulatedRoutes = 0;
+let longestRoute = 0;
 
 let configuration = {
     broadcastRate: helpers.constants.BROADCAST_RATE || 5000,
@@ -31,7 +32,7 @@ let configuration = {
     simulationBikeLimit: helpers.constants.BIKE_LIMIT || bikes.size,
     simulationMoveLimit: helpers.constants.SIMULATION_MOVE_LIMIT,
     simulationReRouteLimit: 10,
-    verbose: false
+    verbose: true
 }
 
 async function connectToBackend() {
@@ -218,7 +219,7 @@ async function getZones() {
 
 function startBroadcast() {
     broadcastInterval = setInterval(() => {
-        helpers.print("Socket: log", "Broadcasting to backend.")
+        helpers.print("Socket", "Broadcasting to backend.")
         let broadcastCounter = 0;
         for(const [_, bike] of bikes) {
 
@@ -233,7 +234,7 @@ function startBroadcast() {
                 }
             } 
         }
-        helpers.print("Socket: log", `Broadcasted: ${broadcastCounter} changes.`)
+        helpers.print("Socket", `Broadcasted: ${broadcastCounter} changes.`)
     }, configuration.broadcastRate)
 }
 
@@ -304,9 +305,17 @@ async function setRandomRoute(bike) {
 }
 
 async function setRandomRoutes() {
+    longestRoute = 0;
+
     for(const [_, bike] of bikes) {
         try {
             await setRandomRoute(bike);
+            const len = bike.simulationRuns[bike.simulationRunIndex].routeLength;
+            
+            if (len > longestRoute) {
+                longestRoute = len;
+            } 
+
         } catch (e) {
             helpers.print("Server: warn", `Bike routing error: ${e.message}`);
             continue;
@@ -330,10 +339,22 @@ async function enableDefaultServerFunctionality() {
 
 function createSimulationIntervalSingle() {
     
-    let finishedCount = 0;
-
+    //let finishedCount = 0;
+    finishedSimulatedRoutes = 0;
+    helpers.print(
+        "Simulation", 
+        `tick | longest route | progress | tickrate | tick-limit `
+    );
     simulationInterval = setInterval(async () => {
-        helpers.print("Simulation", `Simulation tick: ${simulationMoveCounter}`);
+        const t = simulationMoveCounter;
+        const fSR = finishedSimulatedRoutes
+        const fR = configuration.simulationRate
+        const sML = configuration.simulationMoveLimit
+        helpers.print(
+            "Simulation", 
+            `t: ${t} | l_r: ${longestRoute} | ${fSR}/${bikes.size} | t_r: ${fR}ms | t_l: ${sML}`
+        );
+
 
         if (simulationMoveCounter >= configuration.simulationMoveLimit) {
             helpers.print("Simulation", `Ending simulation, reached tick-limit (${simulationMoveCounter}/${configuration.simulationMoveLimit})`);
@@ -341,12 +362,13 @@ function createSimulationIntervalSingle() {
             return;
         }
 
-        finishedCount = 0;
+        //finishedCount = 0;
 
         for(const bike of bikes.values()) {
-
+            
+            // skip if bike is done.
             if (bike.simulationRuns[bike.simulationRunIndex].done) {
-                finishedCount++;
+                //finishedCount++;
                 continue;
             }
 
@@ -377,18 +399,18 @@ function createSimulationIntervalSingle() {
                     const snapshots = bike.getSimulationRunSnapshots()
                     const distance = helpers.calculateDistance(snapshots);
                     bike.setSimulationRunDone(distance, simulationMoveCounter);
-
-                    finishedCount += 1;
+                    
+                    finishedSimulatedRoutes++;
+                    //finishedCount += 1;
                     break;
                 case 2:
                     // steps left
-                    
-                    helpers.print("Simulation", `Route step: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()}`)
+                    //helpers.print("Simulation", `Route step: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()}`)
                     break;
             }
         }
 
-        if (finishedCount === bikes.size) {
+        if (finishedSimulatedRoutes === bikes.size) {
             helpers.print("Simulation", `All ${bikes.size} bikes finished their routes.`);
             stopSimulation();
             return;
@@ -494,6 +516,7 @@ function stopSimulation() {
     console.log("----------------------------------------")
     helpers.print("Simulation", "Simulation recap")
     console.log("----------------------------------------")
+    console.log("Finished routes: ", finishedSimulatedRoutes)
     for (const bike of bikes.values()) {
         const run = bike.simulationRuns[bike.simulationRunIndex];
         const endStamp = run.endStamp;

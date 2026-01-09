@@ -9,7 +9,7 @@ constants.STOCKHOLM_LONG_MIN = 17.900000;
 
 constants.MAX_RETRY = 10;
 constants.RETRY_DELAY = 2000;
-constants.BROADCAST_RATE = 5000;
+constants.BROADCAST_RATE = 4000;
 constants.EARTH_RADIUS = 6371000;
 
 constants.SIMULATION_RATE = 500;
@@ -110,7 +110,11 @@ function findPointInZone(lat, long, area) {
     }
     
     return inside
-} 
+}
+
+function staticPrint(text) {
+    process.stdout.write(`\r\x1b[2K${text}`)
+}
 
 module.exports = {
     constants,
@@ -120,5 +124,6 @@ module.exports = {
     toRadians,
     twoPointDistance,
     calculateDistance,
-    findPointInZone
+    findPointInZone,
+    staticPrint
 }
