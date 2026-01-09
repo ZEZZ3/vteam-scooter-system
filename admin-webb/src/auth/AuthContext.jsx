@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { client } from "../api/client";
 
 const AuthCtx = createContext(null);
 
@@ -12,23 +13,35 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (token) localStorage.setItem("admintoken", token);
     else localStorage.removeItem("admintoken");
+
     if (user) localStorage.setItem("adminuser", JSON.stringify(user));
     else localStorage.removeItem("adminuser");
   }, [token, user]);
 
   async function login(email, password) {
-    // MOCK tills backend är klar:
-    if (email && password) {
-      setToken("mock-token");
-      setUser({ id: "u1", email, role: "admin" });
-      return;
-    }
-    throw new Error("Fel inloggning");
+    const res = await client.post("/api/v1/users/login", {
+      mail: email,
+      password,
+    });
+
+    const data = res.data?.data;
+    if (!data?.token) throw new Error("Login misslyckades");
+
+    setToken(data.token);
+
+    const u = data.user || {};
+    setUser({
+      id: u.id || u._id,
+      mail: u.mail,
+      email: u.mail,
+      role: u.role,
+    });
   }
 
   function logout() {
     setToken(null);
     setUser(null);
+    window.location.href = "/login";
   }
 
   return (

@@ -3,7 +3,7 @@ import { useAuth } from "../auth/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -12,23 +12,53 @@ export default function Login() {
     e.preventDefault();
     setErr(null);
     setLoading(true);
+
     try {
-      await login(email, password);
-      window.location.href = "/"; // vidare till admin
+      await login(mail, password);
+      window.location.href = "/";
     } catch (e) {
-      setErr(e.message || "Login failed");
+      const msg =
+        e?.response?.data?.error?.title ||
+        e?.message ||
+        "Fel vid inloggning";
+      setErr(msg);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ maxWidth: 360, margin: "4rem auto", display: "grid", gap: 8 }}>
+    <form
+      onSubmit={onSubmit}
+      style={{
+        maxWidth: 360,
+        margin: "4rem auto",
+        display: "grid",
+        gap: 8,
+      }}
+    >
       <h2>Admin – Logga in</h2>
-      <input placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input placeholder="Lösenord" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+
+      <input
+        placeholder="E-post"
+        value={mail}
+        onChange={(e) => setMail(e.target.value)}
+        disabled={loading}
+      />
+
+      <input
+        placeholder="Lösenord"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={loading}
+      />
+
       {err && <div style={{ color: "crimson" }}>{err}</div>}
-      <button disabled={loading}>{loading ? "Loggar in…" : "Logga in"}</button>
+
+      <button disabled={loading}>
+        {loading ? "Loggar in…" : "Logga in"}
+      </button>
     </form>
   );
 }

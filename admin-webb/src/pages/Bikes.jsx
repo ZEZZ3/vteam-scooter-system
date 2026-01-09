@@ -2,91 +2,192 @@ import { useEffect, useMemo, useState } from "react";
 import { getBikes } from "../lib/api";
 
 function Battery({ pct }) {
-  const color = pct >= 60 ? "#1e8f4d" : pct >= 30 ? "#c7a100" : "#b42323";
+  const n = Number.isFinite(pct) ? pct : Number(pct);
+  const safe = Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null;
+
+  const bg =
+    safe === null ? "rgba(148,163,184,.18)" : safe >= 60 ? "rgba(46,204,113,.18)" : safe >= 30 ? "rgba(245,158,11,.18)" : "rgba(255,99,99,.18)";
+  const border =
+    safe === null ? "rgba(148,163,184,.35)" : safe >= 60 ? "rgba(46,204,113,.35)" : safe >= 30 ? "rgba(245,158,11,.35)" : "rgba(255,99,99,.35)";
+
   return (
-    <span style={{
-      padding:"2px 8px", borderRadius:999, background: color, color:"#fff", fontWeight:600
-    }}>{pct}%</span>
+    <span
+      className="badge"
+      style={{
+        background: bg,
+        borderColor: border,
+        minWidth: 62,
+        justifyContent: "center",
+        fontWeight: 900,
+      }}
+    >
+      {safe === null ? "—" : `${safe}%`}
+    </span>
   );
+}
+
+function getCity(b) {
+  return b?.city ?? b?.cityName ?? b?.city_id ?? "";
+}
+
+function getId(b) {
+  return b?.id ?? b?._id ?? b?.bikeId ?? b?.serial ?? "";
 }
 
 export default function Bikes() {
   const [bikes, setBikes] = useState([]);
   const [status, setStatus] = useState("");
   const [city, setCity] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function load() {
-    setLoading(true); setErr(null);
+    setLoading(true);
+    setError("");
+
     try {
       const data = await getBikes();
-      setBikes(data);
+      setBikes(Array.isArray(data) ? data : []);
     } catch (e) {
-      setErr("Kunde inte hämta cyklar.");
+      setError("Kunde inte hämta cyklar. Försök igen.");
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const cities = useMemo(() => {
-    return Array.from(new Set(bikes.map(b => b.city))).sort();
+    const list = [];
+    for (const b of bikes) {
+      const c = String(getCity(b) ?? "").trim();
+      if (c) list.push(c);
+    }
+    return Array.from(new Set(list)).sort();
   }, [bikes]);
 
-  const filtered = bikes.filter(b =>
-    (!status || b.status === status) &&
-    (!city || b.city === city)
-  );
+  const filtered = useMemo(() => {
+    return bikes.filter((b) => {
+      const bStatus = b?.status ?? "";
+      const bCity = String(getCity(b) ?? "");
+      return (!status || bStatus === status) && (!city || bCity === city);
+    });
+  }, [bikes, status, city]);
+
+  const emptyText =
+    bikes.length === 0
+      ? "Inga cyklar ännu."
+      : "Inga cyklar matchade filtren. Prova att rensa filter.";
+
+  function clearFilters() {
+    setStatus("");
+    setCity("");
+  }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Cyklar</h2>
+    <div className="container">
+      <h1 className="h1">Cyklar</h1>
+      <p className="muted" style={{ marginTop: -4 }}>
+        Filtrera på status och stad. Batteri visas som chip.
+      </p>
 
-      <div style={{ display:"flex", gap:8, marginBottom:8 }}>
-        <select value={status} onChange={(e)=>setStatus(e.target.value)}>
-          <option value="">Status: Alla</option>
-          <option value="available">available</option>
-          <option value="in_use">in_use</option>
-          <option value="service">service</option>
-        </select>
+      <div className="card" style={{ marginTop: 14 }}>
+        <div className="cardHead">
+          <div className="row" style={{ width: "100%", flexWrap: "wrap" }}>
+            <span className="badge">🛴 Bikes</span>
 
-        <select value={city} onChange={(e)=>setCity(e.target.value)}>
-          <option value="">Stad: Alla</option>
-          {cities.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">Status: Alla</option>
+              <option value="available">available</option>
+              <option value="in_use">in_use</option>
+              <option value="service">service</option>
+            </select>
 
-        <button onClick={() => { setStatus(""); setCity(""); }}>Rensa filter</button>
-        <button onClick={load} disabled={loading}>Uppdatera</button>
-      </div>
+            <select value={city} onChange={(e) => setCity(e.target.value)}>
+              <option value="">Stad: Alla</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
 
-      {loading && <p>Laddar…</p>}
-      {err && (
-        <div style={{ background:"#431", color:"#fff", padding:8, borderRadius:6 }}>
-          {err} <button onClick={load}>Försök igen</button>
+            <div className="spacer" />
+
+            <button className="btn" onClick={clearFilters} disabled={loading}>
+              Rensa filter
+            </button>
+            <button className="btn btnPrimary" onClick={load} disabled={loading}>
+              {loading ? "Laddar…" : "Uppdatera"}
+            </button>
+          </div>
         </div>
-      )}
 
-      {!loading && !err && filtered.length === 0 && <p>Inga cyklar hittades.</p>}
+        <div className="cardBody">
+          {error ? (
+            <div
+              style={{
+                padding: 12,
+                borderRadius: 12,
+                border: "1px solid rgba(255,99,99,.25)",
+                background: "rgba(255,99,99,.10)",
+                marginBottom: 12,
+              }}
+            >
+              <div style={{ marginBottom: 10, fontWeight: 700 }}>{error}</div>
+              <button className="btn" onClick={load}>
+                Försök igen
+              </button>
+            </div>
+          ) : null}
 
-      {!loading && !err && filtered.length > 0 && (
-        <table border={1} cellPadding={6} style={{ width:"100%", marginTop:8 }}>
-          <thead>
-            <tr><th>ID</th><th>Status</th><th>Batteri</th><th>Stad</th></tr>
-          </thead>
-          <tbody>
-            {filtered.map(b => (
-              <tr key={b.id}>
-                <td>{b.id}</td>
-                <td>{b.status}</td>
-                <td><Battery pct={b.battery} /></td>
-                <td>{b.city}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          {loading ? (
+            <div className="muted" style={{ padding: 10 }}>
+              Laddar cyklar…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="muted" style={{ padding: 10 }}>
+              {emptyText}
+            </div>
+          ) : (
+            <div className="tableWrap">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 220 }}>ID</th>
+                    <th>Status</th>
+                    <th style={{ width: 120 }}>Batteri</th>
+                    <th>Stad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((b) => {
+                    const id = getId(b);
+                    const bCity = String(getCity(b) ?? "");
+                    return (
+                      <tr key={id || JSON.stringify(b)}>
+                        <td style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                          {id || "—"}
+                        </td>
+                        <td>
+                          <span className="badge">{b?.status || "—"}</span>
+                        </td>
+                        <td>
+                          <Battery pct={b?.battery ?? b?.batteryPct ?? b?.battery_level} />
+                        </td>
+                        <td>{bCity || "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
