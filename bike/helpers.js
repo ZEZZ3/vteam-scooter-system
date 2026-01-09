@@ -12,8 +12,8 @@ constants.RETRY_DELAY = 2000;
 constants.BROADCAST_RATE = 4000;
 constants.EARTH_RADIUS = 6371000;
 
-constants.SIMULATION_RATE = 500;
-constants.BIKE_LIMIT = 3;
+constants.SIMULATION_RATE = 100;
+constants.BIKE_LIMIT = 50;
 constants.SIMULATION_MOVE_LIMIT = 2000; // backup if something makes a bike not finish
 
 

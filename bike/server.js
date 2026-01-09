@@ -25,13 +25,15 @@ let simulationMoveCounter = 0;
 let broadcastInterval = null;
 let finishedSimulatedRoutes = 0;
 let longestRoute = 0;
+let shortestRoute = Infinity;
 
 let configuration = {
+    broadcastEnable: true,
     broadcastRate: helpers.constants.BROADCAST_RATE || 5000,
     simulationRate: helpers.constants.SIMULATION_RATE || 5000,
     simulationBikeLimit: helpers.constants.BIKE_LIMIT || bikes.size,
     simulationMoveLimit: helpers.constants.SIMULATION_MOVE_LIMIT,
-    simulationReRouteLimit: 10,
+    simulationReRouteLimit: 5,
     verbose: true
 }
 
@@ -218,24 +220,29 @@ async function getZones() {
 }
 
 function startBroadcast() {
-    broadcastInterval = setInterval(() => {
-        helpers.print("Socket", "Broadcasting to backend.")
-        let broadcastCounter = 0;
-        for(const [_, bike] of bikes) {
+    if (configuration.broadcastEnable) {
+        broadcastInterval = setInterval(() => {
+            helpers.print("Socket", "Broadcasting to backend.")
+            let broadcastCounter = 0;
+            for(const [_, bike] of bikes) {
+    
+                const lastUpdate = bike?.lastUpdate?.getTime() || 0;
+                const lastBroadcast = bike.broadcast?.getTime() || 0;
+                
+                if(socket && socket.connected) {
+                    if (lastBroadcast < lastUpdate) {
+                        socket.emit("bike-update", bike)
+                        bike.setBroadcast(new Date());
+                        broadcastCounter++;
+                    }
+                } 
+            }
+            helpers.print("Socket", `Broadcasted: ${broadcastCounter} changes.`)
+        }, configuration.broadcastRate)
+        return
+    } 
+    return;
 
-            const lastUpdate = bike?.lastUpdate?.getTime() || 0;
-            const lastBroadcast = bike.broadcast?.getTime() || 0;
-            
-            if(socket && socket.connected) {
-                if (lastBroadcast < lastUpdate) {
-                    socket.emit("bike-update", bike)
-                    bike.setBroadcast(new Date());
-                    broadcastCounter++;
-                }
-            } 
-        }
-        helpers.print("Socket", `Broadcasted: ${broadcastCounter} changes.`)
-    }, configuration.broadcastRate)
 }
 
 function stopBroadcast() {
@@ -279,6 +286,7 @@ function locateZone(lat, long) {
     return null;
 }
 
+
 async function getRoute(start, end) {
     const url = `${routeURL}/route/v1/driving/${start.long},${start.lat};${end.long},${end.lat}?overview=full&geometries=geojson`;
     const result = await axios.get(url);
@@ -294,7 +302,8 @@ async function setRandomRoute(bike) {
         const start = bike.position;
         const end = randomStation.position;
         const nearbyStation = locateCloseStation(start.lat, start.long);
-        const zone = locateZone(start.lat, start.long);
+        //const zone = locateZone(start.lat, start.long);
+        const zone = zones.find(z => z.zoneID === nearbyStation.zoneID)
 
         const {route, distance} = await getRoute(start, end);
         bike.initSimulationRun(route, distance, randomStation.stationName, 
@@ -304,18 +313,33 @@ async function setRandomRoute(bike) {
     }
 }
 
+function findLongestRoute() {
+    let longest = 0;
+    for (const bike of bikes.values()) {
+        const len = bike.simulationRuns[bike.simulationRunIndex].route.length;
+        if (len > longest) {
+            longest = len;
+        }
+    }
+    return longest;
+}
+
+function findShortestRoute() {
+    let shortest = Infinity;
+    for (const bike of bikes.values()) {
+        const len = bike.simulationRuns[bike.simulationRunIndex].route.length;
+        if (len < shortest) {
+            shortest = len;
+        }
+    }
+    return shortest;
+}
+
 async function setRandomRoutes() {
-    longestRoute = 0;
 
     for(const [_, bike] of bikes) {
         try {
             await setRandomRoute(bike);
-            const len = bike.simulationRuns[bike.simulationRunIndex].routeLength;
-            
-            if (len > longestRoute) {
-                longestRoute = len;
-            } 
-
         } catch (e) {
             helpers.print("Server: warn", `Bike routing error: ${e.message}`);
             continue;
@@ -338,12 +362,13 @@ async function enableDefaultServerFunctionality() {
 
 
 function createSimulationIntervalSingle() {
-    
-    //let finishedCount = 0;
     finishedSimulatedRoutes = 0;
+    longestRoute = findLongestRoute();
+    shortestRoute = findShortestRoute();
+
     helpers.print(
         "Simulation", 
-        `tick | longest route | progress | tickrate | tick-limit `
+        `tick | shortest/longest route | progress | tickrate | tick-limit `
     );
     simulationInterval = setInterval(async () => {
         const t = simulationMoveCounter;
@@ -352,7 +377,7 @@ function createSimulationIntervalSingle() {
         const sML = configuration.simulationMoveLimit
         helpers.print(
             "Simulation", 
-            `t: ${t} | l_r: ${longestRoute} | ${fSR}/${bikes.size} | t_r: ${fR}ms | t_l: ${sML}`
+            `t: ${t} | s_r/l_r: ${shortestRoute}/${longestRoute} | ${fSR}/${bikes.size} | t_r: ${fR}ms | t_l: ${sML}`
         );
 
 
@@ -405,7 +430,7 @@ function createSimulationIntervalSingle() {
                     break;
                 case 2:
                     // steps left
-                    //helpers.print("Simulation", `Route step: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()}`)
+                    //helpers.print("Simulation", `B-${bike.number}: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()}`)
                     break;
             }
         }
@@ -420,83 +445,172 @@ function createSimulationIntervalSingle() {
     }, configuration.simulationRate);
 }
 
-function createSimulationIntervalLoop() {
-    
-    finishedSimulatedRoutes = 0;
+function checkIfDone() {
 
+    for(const bike of bikes.values()) {
+        const run = bike.simulationRuns[bike.simulationRunIndex];
+        if(!run) {
+            return false;
+        }
+
+        if (!run.done) {
+            return false
+        }
+
+        if (bike.simulationRuns.length < configuration.simulationReRouteLimit && 
+            simulationMoveCounter < configuration.simulationMoveLimit
+        ) {
+            return false;                        
+        }
+    }
+    return true;
+
+}
+
+function createSimulationIntervalLoop() {
+    finishedSimulatedRoutes = 0;
+    longestRoute = findLongestRoute();
+    shortestRoute = findShortestRoute();
+
+    helpers.print(
+        "Simulation", 
+        `tick | shortest/longest route | active | finished | tickrate | tick-limit `
+    );
     simulationInterval = setInterval(async () => {
-        helpers.print("Simulation", `Simulation tick: ${simulationMoveCounter}`);
+        const t = simulationMoveCounter;
+        const fSR = finishedSimulatedRoutes
+        const fR = configuration.simulationRate
+        const sML = configuration.simulationMoveLimit
+        
+        let active = 0;
+        for (const bike of bikes.values()) {
+            const run = bike.simulationRuns[bike.simulationRunIndex];
+            if(!run) {
+                helpers.print("Simulation: warn", `Bike ${bike.number} has invalid run index ${bike.simulationRunIndex}`)
+                helpers.print("Simulation: warn", `${bike.simulationRuns.length}`)
+                continue;
+            } 
+            if (!run.done) {
+                active++;
+            }
+        }
+        
+        helpers.print(
+            "Simulation", 
+            `t: ${t} | s_r/l_r: ${shortestRoute}/${longestRoute} | ${active} | ${fSR} | t_r: ${fR}ms | t_l: ${sML}`
+        );
+
+        let bikeStr = ""
+        if (active < 10) {
+            for(const bike of bikes.values()) {
+                bikeStr += `B${bike.number}: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()} (${bike.simulationRuns.length}) | `
+            }
+            helpers.print("Simulation", bikeStr);
+        }
+
+       
+        if (checkIfDone()) {
+            helpers.print("Simulation", `Ending simulation, passed tick-limit (${simulationMoveCounter}/${configuration.simulationMoveLimit})`);
+            stopSimulationLoop();
+            return;
+        }
 
         for(const bike of bikes.values()) {
+            const run = bike.simulationRuns[bike.simulationRunIndex];
+
+            if(!run) {
+                helpers.print("Simulation: warn", `Bike ${bike.number} has invalid run index ${bike.simulationRunIndex}`)
+                helpers.print("Simulation: warn", `${bike.simulationRuns.length}`)
+                continue;
+            } 
+
+            // new route needed
+            if (run.done) {
+                if (bike.simulationRuns.length < configuration.simulationReRouteLimit && 
+                    simulationMoveCounter < configuration.simulationMoveLimit
+                ) {
+                    bike.reRouteNeeded = true;                        
+                } 
+                continue;
+            }
 
             const res = bike.moveBy();
-            
+
             switch (res.status) {
                 case 0:
                     helpers.print("Simulation: warn", "Attempted to move without route!")
                     break;
                 case 1:
-                    bike.setSimulationDone(true);
-                    const lat = bike.position.lat;
-                    const long = bike.position.long;
-                    const nearbyStation = locateCloseStation(lat, long);
-
+                    const bikeLat = bike.position.lat;
+                    const bikeLong = bike.position.long;
+                    
+                    const nearbyStation = locateCloseStation(bikeLat, bikeLong);
                     if (nearbyStation) {
                         bike.setStationInformation(nearbyStation.stationName, nearbyStation.stationID);
                     } else {
                         bike.setStationInformation(null, null);
                     }
 
-                    const zone = locateZone(lat, long);
+                    const zone = locateZone(bikeLat, bikeLong);
                     if (zone) {
                         bike.setZoneInformation(zone.zoneName, zone.zoneID);
                     } else {
                         bike.setZoneInformation(null, null);
                     }
 
-                    const travelSteps = bike.log.snapshots;
-                    const distance = helpers.calculateDistance(travelSteps);
-                    bike.log.distance = distance;
+                    const snapshots = bike.getSimulationRunSnapshots()
+                    const distance = helpers.calculateDistance(snapshots);
+                    bike.setSimulationRunDone(distance, simulationMoveCounter);
 
-                    console.log(
-                        `Bike ${bike.id} finished.
-                        \nStart zone: ${bike.startZoneName}, End zone: ${bike.endZoneName}
-                        \nStart station: ${bike.startStationName}, End station: ${bike.endStationName}
-                        \nRoute steps: ${bike.route.length}
-                        \nosrm-distance: ${bike.preDefinedRouteDistance}
-                        \ncalc-distance: ${bike.log.distance}
-                        \nSimulation tick: ${simulationMoveCounter}
-                        \n------------------------------------------------------` 
-                    );
+                    finishedSimulatedRoutes++;
 
-                    finishedCount += 1;
+                    //finishedCount += 1;
                     break;
                 case 2:
                     // steps left
-                    helpers.print("Simulation", `Route length: ${bike.route.length}\nRoute index: ${bike.routeIndex}`)
+                    //helpers.print("Simulation", `Route step: ${bike.getSimulationRouteIndex()}/${bike.getSimulationRouteLength()}`)
                     break;
             }
         }
-        simulationMoveCounter++;      
+        
+        for(const bike of bikes.values()) {
+            if (!bike.reRouteNeeded) {
+                continue;
+            }
+            try {
+                bike.simulationRunIndex++;
+                await setRandomRoute(bike);
+                bike.reRouteNeeded = false;
+                longestRoute = findLongestRoute();
+                shortestRoute = findShortestRoute();
+            } catch (e) {
+                helpers.print("Simulation: warn", `Bike routing error: ${e.message}`)
+            }
+        }
 
-    }, configuration.simulationRate);
+/*         longestRoute = findLongestRoute();
+        shortestRoute = findShortestRoute(); */
+        simulationMoveCounter++;
+
+    }, configuration.simulationRate);   
 }
 
-async function startSimulation(loop = false) {
+async function startSimulation(loop = true) {
     if (simulationRunning) {
         helpers.print("Server: warn", "Simulation is already running.")
         return
     }
 
-    helpers.print("Server", "Starting simulation.")
     simulationRunning = true;
     simulationMoveCounter = 0;
-
+    
     await setRandomRoutes();
-
+    
     if(loop) {
+        helpers.print("Server", `Starting simulation. Run all bikes through ${configuration.simulationReRouteLimit} routes.`)
         createSimulationIntervalLoop();
     } else {
+        helpers.print("Server", "Starting simulation. Runs all bikes once")
         createSimulationIntervalSingle();
     }
     
@@ -520,6 +634,7 @@ function stopSimulation() {
     for (const bike of bikes.values()) {
         const run = bike.simulationRuns[bike.simulationRunIndex];
         const endStamp = run.endStamp;
+        console.log()
         console.log(
             `Bike: ${bike.id}
             Start station: ${endStamp.startStationName}, ID: ${endStamp.startStationID}
@@ -533,6 +648,44 @@ function stopSimulation() {
             End on tick: ${run.lastTick}
             Finished at: ${run.finishAt}`
         );
+    }
+}
+
+function stopSimulationLoop() {
+    if (!simulationRunning) {
+        helpers.print("Server: warn", "No simulation running.")
+        return
+    }
+    helpers.print("Server", "Stopping simulation.")
+    
+    simulationRunning = false;
+    clearInterval(simulationInterval);
+    stopBroadcast();
+    
+    console.log("----------------------------------------")
+    helpers.print("Simulation", "Simulation recap")
+    console.log("----------------------------------------")
+    //console.log("Finished routes: ", finishedSimulatedRoutes)
+    for (const bike of bikes.values()) {
+        const runs = bike.simulationRuns;
+        
+        console.log(`Bike: ${bike.id} ran ${runs.length} routes. `
+        );
+        let runNum = 1;
+        runs.forEach(run => {
+            console.log(`
+                tick: ${run.lastTick}/${simulationMoveCounter}
+                Route ${runNum}: ${run.endStamp.startStationName} -> ${run.endStamp.endStationName}. 
+                End as excpected: ${run.endStamp.endStationName === run.expectedEndStation}
+                steps: ${run.routeLength}
+                calc-distance: ${run.calcDistance}
+                osrm-distance: ${run.preDefinedRouteDistance}
+                `
+            )
+            
+            runNum++;
+        });
+        console.log("----------------------------------------")
     }
 }
 

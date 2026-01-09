@@ -26,13 +26,14 @@ class bike {
     this.currentZoneName = bike.currentZoneName;
     this.currentZoneID = bike.currentZone;
     this.startZoneName = bike.currentZoneName;
-    this.startZoneID = bike.currentZoneID;
+    this.startZoneID = bike.currentZone;
     this.endZoneName = null;
     this.endZoneID = null;
 
     // simulation
     this.simulationRunIndex = 0
     this.simulationRuns = [];
+    this.reRouteNeeded = false;
 
     // logging
     this.lastUpdate = null;
