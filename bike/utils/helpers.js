@@ -1,4 +1,5 @@
 const axios = require("axios");
+const printer = require("./print")
 /* require("dotenv").config(); */
 
 const constants = {}
@@ -14,8 +15,54 @@ constants.EARTH_RADIUS = 6371000;
 
 constants.SIMULATION_RATE = 100;
 constants.BIKE_LIMIT = 50;
+constants.SIMULATION_REROUTE_LIMIT = 5;
 constants.SIMULATION_MOVE_LIMIT = 2000; // backup if something makes a bike not finish
 
+constants.HELP = `
+        Use 'simulate' to start a simulation.
+        To start a simulation with X bikes that run Y routes each:
+            >   simulate start bikes <X> routes <Y>
+        
+        **note: this will run X * Y simulations, use reasonable numbers or be ready to wait
+        ---
+
+        To start a simulation with X bikes that each run 1 route:
+            >   simulate start bikes <X> 
+        ---
+
+        To see status of the simulation:
+            > simulate status
+        ---
+
+        To view a summary of the simulation:
+            > simulate result
+        ---
+
+        To clear simulation data:
+            > simulate clear
+        ---
+
+        To stop a simulation:
+            >   simulate stop
+        **note: progress may be lost if simulation isnt finished.
+        ---
+
+        Use 'set' to configure:
+            >   set 'parameter' <value>
+        Available parameters: 
+            - broadcastEnable: <true/false> (default=true)
+            - broadcastRate: <rate in ms> (default=4000)
+            - simulationRate: <rate in ms> (default=1000)
+            - tickLimit: max simulation tick (default=2000)
+        ---
+
+        Use 'exit' to terminate server:
+            >   exit
+        `
+
+function splitCommand(input) {
+    return input.trim().split(/\s+/)
+}
 
 function toRadians(coord) {
     return coord * Math.PI/180;
@@ -24,7 +71,7 @@ function toRadians(coord) {
 async function getServiceToken(accessToken = null, tokenExpires = 0) {
     let result = {}
     if (accessToken && Date.now() < tokenExpires) {
-        print("Auth", "Service token found.")
+        printer.print("Auth", "Service token found.")
         result.token = accessToken;
         result.expiry = tokenExpires;       
         return result;
@@ -36,24 +83,8 @@ async function getServiceToken(accessToken = null, tokenExpires = 0) {
 
     result.token = response.data.serviceToken;
     result.expiry = Date.now() + (response.data.expires - 40) * 1000;
-    print("Auth", "New service token created.")
+    printer.print("Auth", "New service token created.")
     return result;
-}
-
-function getTimeString() {
-    const now = new Date();
-    const seconds = now.getSeconds().toString().padStart(2, "0");
-    const minutes = now.getMinutes().toString().padStart(2, "0");
-    const hours = now.getHours().toString().padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`
-}
-
-function print(source, text) {
-    console.log(`${getTimeString()} [${source}] ${text}`);
-}
-
-function coordToString(lat, long) {
-    return `${lat.toFixed(6)},${long.toFixed(6)}`
 }
 
 // haversine
@@ -112,18 +143,36 @@ function findPointInZone(lat, long, area) {
     return inside
 }
 
-function staticPrint(text) {
-    process.stdout.write(`\r\x1b[2K${text}`)
+function findLongestRoute(bikes) {
+    let longest = 0;
+    for (const bike of bikes.values()) {
+        const len = bike.simulationRuns[bike.simulationRunIndex].route.length;
+        if (len > longest) {
+            longest = len;
+        }
+    }
+    return longest;
+}
+
+function findShortestRoute(bikes) {
+    let shortest = Infinity;
+    for (const bike of bikes.values()) {
+        const len = bike.simulationRuns[bike.simulationRunIndex].route.length;
+        if (len < shortest) {
+            shortest = len;
+        }
+    }
+    return shortest;
 }
 
 module.exports = {
     constants,
     getServiceToken,
-    print,
-    coordToString,
     toRadians,
     twoPointDistance,
     calculateDistance,
     findPointInZone,
-    staticPrint
+    splitCommand,
+    findLongestRoute,
+    findShortestRoute,
 }

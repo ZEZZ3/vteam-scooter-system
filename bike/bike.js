@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const helpers = require("./helpers");
+const helpers = require("./utils/helpers");
 
 class bike {
   constructor(bike, simSetup = null) {
@@ -88,6 +88,7 @@ class bike {
         done: false,
         lastTick: null,
         finishAt: null,
+        battery: 100,
         snapshots: [],
         endStamp: {
           startStationName: startStationName,
@@ -101,6 +102,7 @@ class bike {
         }
       }
     );
+    this.battery = 100;
     this.lastUpdate = new Date();
   }
 
@@ -110,7 +112,9 @@ class bike {
     run.calcDistance = distance;
     run.lastTick = tick;
     run.finishAt = new Date(); 
+    run.battery = this.battery;
     this.lastUpdate = new Date();
+    this.battery = 100;
   }
 
   getSimulationRouteLength() {
@@ -172,7 +176,6 @@ class bike {
       id: this.id,
       position: this.position,
       battery: this.battery,
-      log: this.log
     }
   }
 
