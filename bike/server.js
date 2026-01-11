@@ -313,8 +313,8 @@ function createSimulationIntervalSingle() {
             active: (bikes.size - finishedSimulatedRoutes)
         }
 
-        if (simulationMoveCounter >= configuration.simulationMoveLimit) {
-            log.status = "Simulation tick limit hit."
+        if (checkIfDone()) {
+            log.status = `Ending simulation, passed tick-limit (${simulationMoveCounter}/${configuration.simulationMoveLimit})`;
             stopSimulationSingle();
             return;
         }

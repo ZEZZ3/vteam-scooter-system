@@ -38,6 +38,22 @@ services:
       sh -c "node server.js"
     networks:
       - scooter-network
+  backend-test:
+    build: ./backend
+    profiles:
+      - test
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./.env
+    depends_on:
+      - mongo
+    command: "npm run test"
+    environment:
+      - NODE_ENV=test
+      - MONGO_URI=mongodb://mongo:27017/test
+    networks:
+      - scooter-network
 
   admin-webb:
     build: ./admin-webb

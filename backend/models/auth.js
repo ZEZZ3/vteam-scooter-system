@@ -86,9 +86,6 @@ const auth = {
         const phone = body.phone;
         const balance = 0;
         const role = "customer";
-        const verified = false;
-        const verificationToken = crypto.randomBytes(32).toString("hex");
-        const tokenValidity = Date.now() + 1000 * 60 * 30; // 30 min
 
         if (!mail || !password) {
             return res.status(400).json({
@@ -152,9 +149,6 @@ const auth = {
                     phone,
                     balance,
                     role,
-                    verified,
-                    verificationToken,
-                    tokenExpires: new Date(tokenValidity),
                     createdAt: new Date()
                 });
 
@@ -216,17 +210,6 @@ const auth = {
                 });
             }
 
-/*             if (!user.verified) {
-                return res.status(403).json({
-                    error: {
-                        status: 403,
-                        source: "POST api/v1/users/login",
-                        title: "User not verified",
-                        detail: "User is not verified, please verify before logging in"
-                    }
-                });
-            }      */       
-            
             return auth.comparePasswords(
                 res,
                 password,

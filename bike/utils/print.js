@@ -114,7 +114,7 @@ function simulationRecapSingle(bikes, finishedSimulatedRoutes) {
     console.log(`Average route length was ${averageRouteLength.toFixed(2)} steps.`)
     console.log(`Average route distance by osrm estimation was ${averageOsrm.toFixed(2)}m.`)
     console.log(`Average route distance by server-side haversine calculation was ${averageCalc.toFixed(2)}m.`)
-    console.log("For a full simulation log use 'simulate result")
+    console.log("For a full simulation log use 'simulate log")
 
 }
 

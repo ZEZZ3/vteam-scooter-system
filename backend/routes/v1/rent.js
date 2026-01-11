@@ -4,6 +4,14 @@ var router = express.Router();
 const auth = require("../../models/auth.js");
 const rent = require("../../models/rent.js");
 
+/*************************************************************************************************
+| Uri                                       |  GET  | POST | PUT | PATCH | DELETE |
+|-------------------------------------------|:-----:|:----:|:---:|:-----:|:------:|
+| /v1/rent/{bikeid}                         |  Yes  | -    | -   |  -    |  -     |
+| /v1/rent/start/{bikeid}                   |  -    | Yes  | -   |  -    |  -     |
+| /v1/rent/stop/{bikeid}                    |  -    | Yes  | -   |  -    |  -     |
+**************************************************************************************************/
+
 // GET api/v1/rent/:id
 // Get bikes rental status
 router.get('/:bikeID',

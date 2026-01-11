@@ -14,10 +14,10 @@ constants.RETRY_DELAY = 2000;
 constants.BROADCAST_RATE = 4000;
 constants.EARTH_RADIUS = 6371000;
 
-constants.SIMULATION_RATE = 500;
+constants.SIMULATION_RATE = 1000;
 constants.BIKE_LIMIT = 200;
 constants.SIMULATION_REROUTE_LIMIT = 5;
-constants.SIMULATION_MOVE_LIMIT = 2000; // backup if something makes a bike not finish
+constants.SIMULATION_MOVE_LIMIT = 4000; // backup if something makes a bike not finish
 
 constants.HELP = `
         Use 'simulate' to start a simulation.
@@ -48,7 +48,7 @@ constants.HELP = `
             - broadcastEnable: <true/false> (default=true)
             - broadcastRate: <rate in ms> (default=4000)
             - tickrate: <rate in ms> (default=1000)
-            - tickLimit: max simulation tick (default=2000)
+            - tickLimit: max simulation tick (default=4000)
         ---
 
         Use 'config' to see configuration:

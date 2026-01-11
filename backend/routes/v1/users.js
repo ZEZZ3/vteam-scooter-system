@@ -4,6 +4,17 @@ var router = express.Router();
 const auth = require("../../models/auth.js");
 const users = require("../../models/users.js");
 
+/**************************************************************************************************
+ | Uri                                       |  GET  | POST | PUT | PATCH | DELETE |
+ |-------------------------------------------|:-----:|:----:|:---:|:-----:|:------:|
+ | /v1/users                                 |  Yes  | Yes  | -   |  -    |  -     |
+ | /v1/users/login                           |  -    | Yes  | -   |  -    |  -     |
+ | /v1/users/register                        |  -    | Yes  | -   |  -    |  -     |
+ | /v1/users/{id}                            |  Yes  | -    | Yes |  Yes  |  Yes   |
+ | /v1/users/verify?token=...                |  Yes  | -    | -   |  -    |  -     |
+***************************************************************************************************/
+
+
 // login
 router.post('/login', (req, res) => {
     auth.login(res, req.body);
@@ -27,12 +38,6 @@ router.post('/',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => users.addUser(res, req)
 );
-
-// GET api/v1/users/verify?token=ABC
-// verify user
-router.get('/verify', (req, res) => {
-   users.verifyUser(res, req)
-});
 
 // GET api/v1/users/:id
 // get user

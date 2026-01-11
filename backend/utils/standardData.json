@@ -57,7 +57,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat": 59.337527, "long": 18.090962 },
             "createdAt": ""
         },
         {
@@ -70,7 +70,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat": 59.340783, "long": 18.074177},
             "createdAt": ""
         },
         {
@@ -83,7 +83,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat": 59.331876, "long": 18.086445},
             "createdAt": ""
         },
         {
@@ -96,7 +96,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat": 59.333749, "long": 18.080810},
             "createdAt": ""
         },
         {
@@ -109,7 +109,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat": 59.330593, "long": 18.093916},
             "createdAt": ""
         },
         {
@@ -122,7 +122,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat":  59.324092, "long": 18.101789},
             "createdAt": ""
         },
         {
@@ -135,7 +135,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat":  59.322833, "long": 18.146629},
             "createdAt": ""
         },
         {   
@@ -148,7 +148,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat":  59.329278, "long": 18.131882},
             "createdAt": ""
         },
         {
@@ -161,7 +161,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
+            "position": {"lat":  59.329850, "long": 18.119150},
             "createdAt": ""
         },
         {
@@ -174,29 +174,7 @@
             "number": 0,
             "battery": 100,
             "status": "free",
-            "position": {},
-            "createdAt": ""
-        },
-        {
-            "city": "Linköping",
-            "cityID": "",
-            "currentZone": "",
-            "currentStation": "",
-            "number": 0,
-            "battery": 100,
-            "status": "free",
-            "position": {},
-            "createdAt": ""
-        },
-        {
-            "city": "Malmö",
-            "cityID": "",
-            "currentZone": "",
-            "currentStation": "",
-            "number": 0,
-            "battery": 100,
-            "status": "free",
-            "position": {},
+            "position": {"lat":  59.329471, "long": 18.105414},
             "createdAt": ""
         },
         {

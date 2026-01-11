@@ -5,6 +5,13 @@ const auth = require("../../models/auth.js");
 const bikes = require("../../models/bikes.js");
 
 
+/**************************************************************************************************
+| Uri                                       |  GET  | POST | PUT | PATCH | DELETE |
+|-------------------------------------------|:-----:|:----:|:---:|:-----:|:------:|
+| /v1/bikes                                 |  Yes  | Yes  | -   |  -    |  -     |
+| /v1/bikes/{bikeid}                        |  Yes  | -    | -   |  Yes  |  Yes   |
+***************************************************************************************************/
+
 // GET api/v1/bikes/
 // Get all bikes
 // Admins can use queries like ?rented, ?free
