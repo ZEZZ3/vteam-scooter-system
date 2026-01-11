@@ -18,6 +18,7 @@ const city = require("./routes/v1/city.js");
 const zone = require("./routes/v1/zone.js");
 const station = require("./routes/v1/station.js");
 const service = require("./routes/v1/service.js");
+const simulation = require("./routes/v1/simulation.js");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/v1/city', city);
 app.use('/api/v1/zone', zone);
 app.use('/api/v1/station', station);
 app.use('/api/v1/service', service);
+app.use('/api/v1/simulation', simulation);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {

@@ -1,6 +1,7 @@
+require("dotenv").config();
 const axios = require("axios");
 const printer = require("./print")
-/* require("dotenv").config(); */
+const routeURL = process.env.ROUTE_URL;
 
 const constants = {}
 constants.STOCKHOLM_LAT_MAX = 59.360000;
@@ -13,8 +14,8 @@ constants.RETRY_DELAY = 2000;
 constants.BROADCAST_RATE = 4000;
 constants.EARTH_RADIUS = 6371000;
 
-constants.SIMULATION_RATE = 100;
-constants.BIKE_LIMIT = 50;
+constants.SIMULATION_RATE = 500;
+constants.BIKE_LIMIT = 200;
 constants.SIMULATION_REROUTE_LIMIT = 5;
 constants.SIMULATION_MOVE_LIMIT = 2000; // backup if something makes a bike not finish
 
@@ -30,21 +31,15 @@ constants.HELP = `
             >   simulate start bikes <X> 
         ---
 
-        To see status of the simulation:
-            > simulate status
-        ---
-
-        To view a summary of the simulation:
-            > simulate result
-        ---
-
-        To clear simulation data:
-            > simulate clear
+        To view log of simulation:
+            > simulate log
+        **note: this result is overwritten every time the simulation starts, 
+                simulation recap history is accesible on the admin page.
         ---
 
         To stop a simulation:
             >   simulate stop
-        **note: progress may be lost if simulation isnt finished.
+        **note: progress may be lost if simulation isnt finished. this is a forceful exit.
         ---
 
         Use 'set' to configure:
@@ -52,9 +47,15 @@ constants.HELP = `
         Available parameters: 
             - broadcastEnable: <true/false> (default=true)
             - broadcastRate: <rate in ms> (default=4000)
-            - simulationRate: <rate in ms> (default=1000)
+            - tickrate: <rate in ms> (default=1000)
             - tickLimit: max simulation tick (default=2000)
         ---
+
+        Use 'config' to see configuration:
+            >   config 
+
+        Use 'enable' to enable broadcast of all bikes:
+            >   enable
 
         Use 'exit' to terminate server:
             >   exit
@@ -85,6 +86,46 @@ async function getServiceToken(accessToken = null, tokenExpires = 0) {
     result.expiry = Date.now() + (response.data.expires - 40) * 1000;
     printer.print("Auth", "New service token created.")
     return result;
+}
+
+async function storeSimulation(ticks, bikes, finishedRoutes, config, serviceToken, serviceTokenExpiresIn) {
+    
+    // not storing the bike data since it will be huge with 1000s of bikes...
+    // storing it once temporary in the log, which can be printed. will be deleted after re run
+    // each logged bike has a route with average size of about 300, 1000 bikes, 1000 ticks = 300M
+    
+    const res = await getServiceToken(serviceToken, serviceTokenExpiresIn)
+    let token = res.token;
+    
+    const response = await axios.post(`${process.env.BASE_API_URL}/api/v1/service/simulation`,
+        {
+            ticks: ticks,
+            totalBikes: bikes,
+            finishedBikes: finishedRoutes,
+            finishedAt: new Date(),
+            configuration: config,
+        },
+        {
+            headers: {
+                "x-access-token": token
+            },
+        }
+    );
+    
+    if (response.status === 201) {
+        printer.print("Server", "Stored simulation in backend.")
+    } else {
+        printer.print("Server: warn", `Unexpected response from backend: ${response.status}`);
+    }
+    return response;
+}
+
+async function getRoute(start, end) {
+    const url = `${routeURL}/route/v1/driving/${start.long},${start.lat};${end.long},${end.lat}?overview=full&geometries=geojson`;
+    const result = await axios.get(url);
+    const route = result.data.routes[0].geometry.coordinates;
+    const distance = result.data.routes[0].distance;
+    return {route, distance};
 }
 
 // haversine
@@ -165,6 +206,38 @@ function findShortestRoute(bikes) {
     return shortest;
 }
 
+// find the closest station based on a station radius. 
+// if there is not station within station radius null is returned.
+function locateCloseStation(lat, long, stations) {
+    let closestStation = null;
+    let closestStationDistance = Infinity;
+    
+    for(const station of stations) {
+        const d = twoPointDistance(
+            lat, long, station.position.lat, station.position.long
+        );
+
+        if (d <= station.radius) {
+            if (d < closestStationDistance) {
+                closestStationDistance = d;
+                closestStation = station
+            }
+        }
+    }
+    
+    return closestStation;
+}
+
+function locateZone(lat, long, zones) {
+    for(const zone of zones) {
+        let isInZone = findPointInZone(lat, long, zone.zoneArea)
+        if (isInZone) {
+            return zone;
+        }
+    }
+    return null;
+}
+
 module.exports = {
     constants,
     getServiceToken,
@@ -175,4 +248,8 @@ module.exports = {
     splitCommand,
     findLongestRoute,
     findShortestRoute,
+    storeSimulation,
+    getRoute,
+    locateCloseStation,
+    locateZone
 }

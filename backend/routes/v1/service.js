@@ -5,10 +5,16 @@ const auth = require("../../models/auth.js");
 const service = require("../../models/service.js");
 const station = require("../../models/station.js");
 const zone = require("../../models/zone.js");
+const simulation = require("../../models/simulation.js");
 
 router.post('/token', (req, res) => {
     auth.serviceTokenRegister(res, req.body);
 });
+
+router.post('/simulation',
+    (req, res, next) => auth.checkServiceToken(req, res, next),
+    (req, res) => simulation.createSimulation(res, req)
+);
 
 router.get('/bikes',
     (req, res, next) => auth.checkServiceToken(req, res, next),

@@ -6,6 +6,7 @@ class bike {
   constructor(bike, simSetup = null) {
     // general
     this.id = bike._id;
+    this.status = bike.status;
     this.number = bike.number;
     this.battery = bike.battery;
     this.position = bike.position;
@@ -37,10 +38,6 @@ class bike {
 
     // logging
     this.lastUpdate = null;
-    this.log = {
-      snapshots: [],
-      distance: null
-    }
     this.broadcast = null;
   }
 
@@ -73,9 +70,13 @@ class bike {
   }
 
   initSimulationRun(
-    route, distance, expectedEndStation, 
-    startZoneName, startZoneID, 
-    startStationName, startStationID
+    route, 
+    distance, 
+    expectedEndStation, 
+    startZoneName, 
+    startZoneID, 
+    startStationName,
+    startStationID
   ) {
     this.simulationRuns.push(
       {
@@ -102,6 +103,7 @@ class bike {
         }
       }
     );
+    this.status = "rented";
     this.battery = 100;
     this.lastUpdate = new Date();
   }
@@ -115,6 +117,7 @@ class bike {
     run.battery = this.battery;
     this.lastUpdate = new Date();
     this.battery = 100;
+    this.status = "free";
   }
 
   getSimulationRouteLength() {

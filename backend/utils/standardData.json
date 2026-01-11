@@ -385,7 +385,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Fridhelmsplan",
             "number": 0,
@@ -398,7 +398,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Kungholms kyrka",
             "number": 0,
@@ -411,7 +411,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Stockholms stadshus",
             "number": 0,
@@ -424,7 +424,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Norr Mälarstrand",
             "number": 0,
@@ -437,7 +437,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Kronobergsparken",
             "number": 0,
@@ -450,7 +450,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Stadshagen",
             "number": 0,
@@ -463,7 +463,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Sankt Eriksgatan",
             "number": 0,
@@ -476,7 +476,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Grubbensparken",
             "number": 0,
@@ -489,7 +489,7 @@
             "city": "Stockholm",
             "cityID": "",
             "currentZone": "",
-            "currentZoneName": "S:t Eriksområdet",
+            "currentZoneName": "St Eriksområde",
             "currentStation": "",
             "currentStationName": "Rådhuset",
             "number": 0,
@@ -970,7 +970,7 @@
         },
         {
             "cityID": "Stockholm",
-            "name": "S:t Eriksområdet",
+            "name": "St Eriksområde",
             "area": {
                 "coordinates": [
                     {"lat": 59.336716, "long": 18.034292},
@@ -1261,7 +1261,7 @@
         {
             "cityID": "Stockholm",
             "name": "Fridhelmsplan",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat":  59.332221, "long": 18.029348 },
             "radius": 30,
             "createdAt": ""            
@@ -1269,7 +1269,7 @@
         {
             "cityID": "Stockholm",
             "name": "Kungholms kyrka",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.329109, "long": 18.049230 },
             "radius": 30,
             "createdAt": ""            
@@ -1277,7 +1277,7 @@
         {
             "cityID": "Stockholm",
             "name": "Stockholms stadshus",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.327880, "long": 18.052751 },
             "radius": 30,
             "createdAt": ""            
@@ -1285,7 +1285,7 @@
         {
             "cityID": "Stockholm",
             "name": "Norr Mälarstrand",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.327344, "long": 18.038265 },
             "radius": 30,
             "createdAt": ""            
@@ -1293,7 +1293,7 @@
         {
             "cityID": "Stockholm",
             "name": "Kronobergsparken",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.332298, "long": 18.033450 },
             "radius": 30,
             "createdAt": ""            
@@ -1301,7 +1301,7 @@
         {
             "cityID": "Stockholm",
             "name": "Stadshagen",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.338348, "long": 18.013728 },
             "radius": 30,
             "createdAt": ""            
@@ -1309,7 +1309,7 @@
         {
             "cityID": "Stockholm",
             "name": "Sankt Eriksgatan",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.336767, "long": 18.034215 },
             "radius": 30,
             "createdAt": ""            
@@ -1317,7 +1317,7 @@
         {
             "cityID": "Stockholm",
             "name": "Grubbensparken",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.333778, "long": 18.042585 },
             "radius": 30,
             "createdAt": ""            
@@ -1325,7 +1325,7 @@
         {
             "cityID": "Stockholm",
             "name": "Rådhuset",
-            "zoneID": "S:t Eriksområdet",
+            "zoneID": "St Eriksområde",
             "position": { "lat": 59.330145, "long": 18.047016 },
             "radius": 30,
             "createdAt": ""            

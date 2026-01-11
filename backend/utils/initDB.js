@@ -198,13 +198,13 @@ async function createBikes() {
     let dbZones = await database.getDb("zones");
     let dbStations = await database.getDb("stations");
 
-/*     const minLength = standardData.bikes.length;
+    const minLength = standardData.bikes.length;
     const currentLength = await dbBikes.collection.countDocuments({});
     if (currentLength >= minLength) {
         console.log("[Database] Bikes already exist. Skipping.");
         return;
     }
-    */
+   
     await dbBikes.collection.deleteMany({});
 
     const cities = await dbCities.collection.find().toArray();
@@ -278,7 +278,7 @@ async function createPayments() {
     for (const payment of standardData.payments) {
         const findUser = users.find(user => user.mail === payment.user)
         
-        await dbPayments.collection.insert(
+        await dbPayments.collection.insertOne(
             {
                 user: findUser._id,
                 price: payment.price,
@@ -323,7 +323,7 @@ async function createRides() {
 
     for (const ride of standardData.rides) {
         
-        await dbRides.collection.insert(
+        await dbRides.collection.insertOne(
             {
                 user: user,
                 bike: id,

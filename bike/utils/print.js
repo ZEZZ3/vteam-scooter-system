@@ -38,19 +38,52 @@ function staticPrintLines(lines) {
     process.stdout.write("\x1b[u");
 }
 
-function runtimePrint(sMC, sML, done, bikes, bc, br, tr, sr, lr) {
+function runtimePrint(simulationMoveCount, simulationMoveLimit, done, bikesSize, bc, br, tr, shortest, longest) {
     staticPrintLines([
         `${getTimeString()} [Simulation]` ,
         `------------------------------------------`,
-        `tick: ${sMC}/${sML}`,
-        `shortest route: ${sr} ticks`,
-        `longest route: ${lr} ticks`,
-        `bikes finished: ${done}/${bikes}`,
+        `tick: ${simulationMoveCount}/${simulationMoveLimit}`,
+        `shortest route: ${shortest} ticks`,
+        `longest route: ${longest} ticks`,
+        `bikes finished: ${done}/${bikesSize}`,
         `broadcasts: ${bc}`,
         `broadcast rate: ${br} ms, tickrate: ${tr} ms`,
         `------------------------------------------`
     ]);
 }
+
+function runtimePrintLoop(
+    simulationMoveCount, 
+    simulationMoveLimit,
+    done, 
+    broadcastCount,
+    broadcastRate,
+    tickRate,
+    shortest, 
+    longest, 
+    active,
+    totalBikes,
+    sampleBikes
+) {
+    let bikeStr = "";
+    for (const bike of sampleBikes) {
+        bikeStr += `B${bike.number}: ${bike.routeStep}/${bike.routeLen} (${bike.runs}) | `
+    }
+
+    staticPrintLines([
+        `${getTimeString()} [Simulation]` ,
+        `------------------------------------------`,
+        `tick: ${simulationMoveCount}/${simulationMoveLimit}`,
+        `${bikeStr}`,
+        `shortest route: ${shortest} ticks | longest route: ${longest} ticks`,
+        `bikes finished: ${done}`,
+        `active: ${active}/${totalBikes}`,
+        `broadcasts: ${broadcastCount}`,
+        `broadcast rate: ${broadcastRate} ms, tickrate: ${tickRate} ms`,
+        `------------------------------------------`
+    ]);
+}
+
 
 function clearScreen() {
     for (let i = 0; i < SINGLE_RUN_PRINT_ROWS; i++) {
@@ -58,28 +91,87 @@ function clearScreen() {
     }
 }
 
-/*     console.log("----------------------------------------")
-    printer.print("Simulation", "Simulation recap")
-    console.log("----------------------------------------")
-    console.log("Finished routes: ", finishedSimulatedRoutes)
+function simulationRecapSingle(bikes, finishedSimulatedRoutes) {
+    console.log("------------------------------------------");
+    print("Simulation", "Simulation recap");
+    console.log("------------------------------------------");
+    console.log(`Simulated: ${bikes.size}.`)
+    console.log(`Finished: ${finishedSimulatedRoutes} routes.`)
+    
+    let totalSteps = 0;
+    let totalOsrm = 0;
+    let totalCalc = 0;
     for (const bike of bikes.values()) {
         const run = bike.simulationRuns[bike.simulationRunIndex];
-        const endStamp = run.endStamp;
+        totalSteps += run.routeLength;
+        totalOsrm += run.preDefinedRouteDistance;
+        totalCalc += run.calcDistance;
+    }
+    const averageRouteLength = totalSteps/bikes.size
+    const averageOsrm = totalOsrm/bikes.size
+    const averageCalc = totalCalc/bikes.size
+    
+    console.log(`Average route length was ${averageRouteLength.toFixed(2)} steps.`)
+    console.log(`Average route distance by osrm estimation was ${averageOsrm.toFixed(2)}m.`)
+    console.log(`Average route distance by server-side haversine calculation was ${averageCalc.toFixed(2)}m.`)
+    console.log("For a full simulation log use 'simulate result")
+
+}
+
+function simulationRecapLoop(bikes, config, finishedSimulatedRoutes, simulationMoveCounter) {
+    console.log("------------------------------------------");
+    print("Simulation", "Simulation recap");
+    console.log("------------------------------------------");
+    console.log("Finished routes: ", finishedSimulatedRoutes)
+    console.log("Expect: ", config.simulationReRouteLimit * bikes.size);
+    console.log("Finished routes can vary depending on the set ticklimit.");
+    for (const bike of bikes.values()) {
+        const runs = bike.simulationRuns;
+        
+        console.log(`Bike: ${bike.id} ran ${runs.length} routes. `);
+        let runNum = 1;
+        runs.forEach(run => {
+            console.log(`
+                tick: ${run.lastTick}/${simulationMoveCounter}
+                Route ${runNum}: ${run.endStamp.startStationName} -> ${run.endStamp.endStationName}. 
+                End as excpected: ${run.endStamp.endStationName === run.expectedEndStation}
+                steps: ${run.routeLength}
+                calc-distance: ${run.calcDistance.toFixed(1)}
+                osrm-distance: ${run.preDefinedRouteDistance.toFixed(1)}
+                `
+            )
+            runNum++;
+        });
+        console.log("----------------------------------------")
+    }
+}
+
+function logDump(log) {
+    console.log("----------------------------------------")
+    print("Simulation", "Simulation log dump")
+    console.log("----------------------------------------")
+    for (const entry of log) {
         console.log(
+            `Tick: ${entry.tick}
+                shortestRoute: ${entry.shortestRoute} steps
+                longestRoute: ${entry.longestRoute} steps
+                finished: ${entry.finishedBikes} bikes
+                errors: ${entry.errors.length}
+                ${entry.active ? "active bikes: " + entry.active : ""}
+                ${entry.status ? "status: " + entry.status : ""}
             `
-            Bike: ${bike.id}
-            Start station: ${endStamp.startStationName}, ID: ${endStamp.startStationID}
-            End station: ${endStamp.endStationName}, ID: ${endStamp.endStationID}
-            Start zone: ${endStamp.startZoneName}, ID: ${endStamp.startZoneID}
-            End zone: ${endStamp.endZoneName}, ID: ${endStamp.endZoneID}
-            Expected End Station: ${run.expectedEndStation}
-            Route steps: ${run.routeLength}
-            osrm-distance: ${run.preDefinedRouteDistance}
-            calc-distance: ${run.calcDistance}
-            End on tick: ${run.lastTick}
-            Finished at: ${run.finishAt}`
         );
-    } */
+    }
+}
+
+function config(configuration) {
+    console.log(`
+        broadcastEnable: ${configuration.broadcastEnable}
+        broadcastRate: ${configuration.broadcastRate}
+        tickrate: ${configuration.simulationRate}
+        ticklimit: ${configuration.simulationMoveLimit}
+    `);
+}
 
 module.exports = {
     getTimeString,
@@ -87,5 +179,10 @@ module.exports = {
     coordToString,
     staticPrint,
     runtimePrint,
-    clearScreen
+    runtimePrintLoop,
+    clearScreen,
+    simulationRecapSingle,
+    simulationRecapLoop,
+    logDump,
+    config
 }
