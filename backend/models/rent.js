@@ -461,7 +461,7 @@ const rent = {
                     ride: new ObjectId(rideID),
                     price: price,
                     type: "ride",
-                    status: "finished",
+                    status: "success",
                     createdAt: new Date()
                 }
             );

@@ -29,6 +29,7 @@ Alternativt
 
 | Uri                                       |  GET  | POST | PUT | PATCH | DELETE | Tested     |
 |-------------------------------------------|:-----:|:----:|:---:|:-----:|:------:|:----------:|
+| /v1/index                                 |  Yes  | -    | -   |  -    |  -     |   **Yes**  |
 | /v1/users                                 |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/login                           |  -    | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/users/register                        |  -    | Yes  | -   |  -    |  -     |   **Yes**  |
