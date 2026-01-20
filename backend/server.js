@@ -47,6 +47,12 @@ let lastUpdate = null;
                 const bikeID = data.id;
                 clients.set(bikeID, socket.id)
                 socketToBike.set(socket.id, bikeID)
+                socket.data.type = "bike";
+            });
+
+            socket.on("client-connect", () => {
+                console.log("Client connected.")
+                socket.data.type = "client";
             });
 
             socket.on("bike-update", async (data) =>{
@@ -95,10 +101,14 @@ let lastUpdate = null;
             });
 
             socket.on("disconnect", () => {
-                const bikeID = socketToBike.get(socket.id);
-                clients.delete(bikeID);
-                socketToBike.delete(socket.id);
-                helpers.print("Socket", `Disconnected bike with ID: ${bikeID}`);
+                if (socket.data.type === "bike") {
+                    const bikeID = socketToBike.get(socket.id);
+                    clients.delete(bikeID);
+                    socketToBike.delete(socket.id);
+                    helpers.print("Socket", `Disconnected bike with ID: ${bikeID}`);
+                } else if (socket.data.type === "client") {
+                    helpers.print("Socket", `Disconnected client with ID: ${socket.id}`);
+                }
             })
 
             socket.on("error", (e) => {

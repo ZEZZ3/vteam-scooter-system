@@ -1,75 +1,154 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
+import { getZones, getStations, getCity } from "../lib/api";
+import { useSocket } from "../socket/useSocket";
 
 // mockstäder och zoner
 const CITIES = [
-  { id: "sthlm", name: "Stockholm", center: [59.334, 18.063] },
-  { id: "gbg",   name: "Göteborg",  center: [57.708, 11.974] },
-  { id: "malmo", name: "Malmö",     center: [55.605, 13.003] },
-];
-
-const MOCK_ZONES = {
-  sthlm: {
-    parking: [
-      [59.334, 18.063],
-      [59.336, 18.07],
-      [59.331, 18.075],
-    ],
-    noride: [
-      [59.33, 18.06],
-      [59.329, 18.07],
-      [59.327, 18.06],
-    ],
-  },
-  gbg: {
-    parking: [[57.708, 11.974],[57.71, 11.98],[57.705, 11.985]],
-    noride:  [[57.705, 11.97],[57.704, 11.98],[57.702, 11.97]],
-  },
-  malmo: {
-    parking: [[55.605, 13.003],[55.607, 13.01],[55.603, 13.012]],
-    noride:  [[55.603, 13.0],[55.602, 13.01],[55.601, 13.0]],
-  },
-};
+  { name: "Stockholm", center: [59.334, 18.063] },
+  { name: "Göteborg",  center: [57.708, 11.974] },
+  { name: "Malmö",     center: [55.605, 13.003] },
+  { name: "Linköping",     center: [58.408406, 15.618392] },
+]; 
 
 export default function Cities() {
-  const [city, setCity] = useState(CITIES[0]);
+  const [city, setCity] = useState(null);
+  const [cities, setCities] = useState([]);
+  const [zones, setZones] = useState([]);
+  const [stations, setStations] = useState([]);
   const mapRef = useRef(null);
-  const layerRef = useRef({ parking: null, noride: null });
+  const layerRef = useRef([]);
+  const bikeRef = useRef(new Map());
+  const [loading, setLoading] = useState(true);
+  const {bikes, connected} = useSocket();
+  const [limit, setLimit] = useState(50);
+
+  async function load() {
+    try {
+      const zoneData = await getZones();
+      setZones(zoneData);
+      setStations(await getStations());
+      
+      const cities = await getCity();
+      const citiesExtend = cities.map(city => {
+        const match = CITIES.find(c => c.name.toLowerCase() === city.name.toLowerCase());
+        return {
+          ...city,
+          center: match?.center || [59.334, 18.063]
+        }
+        
+      });
+
+      setCity(citiesExtend[0]);
+      setCities(citiesExtend);
+    } catch (e) {
+      console.log("Kunde inte hämta zoner eller stationer: ", e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const map = L.map("map", { zoomControl: true }).setView(city.center, 13);
+    load(); 
+    const map = L.map("map", { zoomControl: true }).setView(CITIES[0].center, 13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap",
     }).addTo(map);
     mapRef.current = map;
     return () => map.remove();
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !city || zones.length === 0) return;
+    
     const map = mapRef.current;
-    map.setView(city.center, 13);
+    map.setView(city.center, 13); 
+    layerRef.current.forEach(layer => layer && map.removeLayer(layer));
+    layerRef.current = [];
+    const cityZones = zones.filter(z => z.cityID === city._id)
+    
+    cityZones.forEach(z => {
+      const latlong = z.area.coordinates.map(coord => [coord.lat, coord.long])
+      const polygong = L.polygon(latlong, {
+        color: "#079743ff",
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.3
+      }).addTo(map);
+      polygong.bindPopup(`<span>${z.name}</span>`)
+      layerRef.current.push(polygong);
+    });
 
-    Object.values(layerRef.current).forEach(layer => layer && map.removeLayer(layer));
+  }, [zones, city]);
 
-    const z = MOCK_ZONES[city.id];
-    const parking = L.polygon(z.parking, { color:"#1e8f4d", fillOpacity:0.25 }).addTo(map);
-    const noride  = L.polygon(z.noride,  { color:"#b42323", fillOpacity:0.25 }).addTo(map);
-    parking.bindPopup("Parking zone");
-    noride.bindPopup("No-ride zone");
-    layerRef.current = { parking, noride };
-  }, [city]);
+  useEffect(() => {
+    if (!mapRef.current || !city || bikes.length === 0) return;
+    const map = mapRef.current;
+    bikeRef.current.forEach(m => map.removeLayer(m))
+    bikeRef.current.clear();
+    
+    const cityBikes = bikes.filter(b => b.city === city.name).slice(0, limit)
+
+    cityBikes.forEach(b => {
+      if(!b.position) {
+        return;
+      }
+      const pos = b.position;
+      const markerID = b._id;
+      
+      if (bikeRef.current.has(markerID)) {
+        const marker = bikeRef.current.get(markerID);
+        marker.setLatLng([pos.lat, pos.long])
+      } else {
+        const bikeIcon = L.divIcon({
+          html: `<div style="display: flex; align-items: center; justify-content: center; width: 50%; height: 100%; background: #ff6b6a; color: white; padding: 2px 6px; border-radius: 2px; font-size: 11px; font-weight: bold;">${b.number}</div>`,
+          iconSize: [33, 15],
+          className: 'bike-marker'
+        });
+
+        const marker = L.marker([pos.lat, pos.long], { icon: bikeIcon })
+          .addTo(map)
+          .bindPopup(`<b>Bike ${b.number}</b><br/>Battery: ${b.battery}%<br/>Status: ${b.status}`);
+        
+        bikeRef.current.set(markerID, marker);
+      }
+    });
+
+  }, [bikes, city, limit]);
 
   return (
     <div style={{ padding:16 }}>
       <h2>Städer & zoner</h2>
-      <select value={city.id} onChange={(e)=>setCity(CITIES.find(c => c.id === e.target.value))}>
-        {CITIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-      </select>
+      
+      <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+        <select 
+          className="search-input"
+          value={city?._id} 
+          onChange={(e) => {setCity(cities.find(c => c._id === e.target.value))}}
+          >
+          {cities.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+        </select>
 
-      <div id="map" style={{ height: "520px", marginTop: 12, borderRadius: 8, overflow:"hidden" }} />
+        <select 
+          value={limit} 
+          onChange={(e)=>setLimit(Number(e.target.value))} 
+          className="search-input"
+          >
+          <option value={10}>Visa: 10</option>
+          <option value={50}>Visa: 50</option>
+          <option value={100}>Visa: 100</option>
+          <option value={200}>Visa: 200</option>
+          <option value={500}>Visa: 500</option>
+          <option value={bikes.length}>Visa: {bikes.length}</option>
+        </select>
+
+        <div className="live-status" style={{ color: connected ? "green" : "red" }}>
+          Live spårning: {connected ? "Aktiv" : "Frånkopplad"}
+        </div>
+      </div>
+
+      <div id="map" style={{ height: "620px", marginTop: 12, borderRadius: 8, overflow:"hidden" }} />
       <p style={{ opacity:0.8, marginTop:8 }}>
-        Grön polygon = parkering. Röd polygon = förbjudet område.
+        Grön polygon = giltig zon. 
       </p>
     </div>
   );

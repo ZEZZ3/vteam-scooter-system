@@ -21,7 +21,7 @@ export default function AppShell({ children }) {
   );
 
   return (
-    <div>
+    <div className="root-container">
       <header style={{ display:"flex", gap:12, padding:12, borderBottom:"1px solid #333", alignItems:"center" }}>
         <strong>Scooter Admin</strong>
         <nav style={{ display:"flex", gap:8 }}>

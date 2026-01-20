@@ -23,10 +23,21 @@ export default function Login() {
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ maxWidth: 360, margin: "4rem auto", display: "grid", gap: 8 }}>
+    <form className = "login-form" onSubmit={onSubmit}>
       <h2>Admin – Logga in</h2>
-      <input placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input placeholder="Lösenord" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <input 
+        placeholder="E-post" 
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input 
+        placeholder="Lösenord"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
       {err && <div style={{ color: "crimson" }}>{err}</div>}
       <button disabled={loading}>{loading ? "Loggar in…" : "Logga in"}</button>
     </form>

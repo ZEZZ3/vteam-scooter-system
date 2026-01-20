@@ -1,0 +1,45 @@
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #FFFFFFDE;
+  font-size: 14px;
+  line-height: 1.5;
+  table-layout: fixed;
+}
+
+.table.bikes {
+  max-width: 80%;
+  width: 100%;
+}
+
+.table thead th {
+  color: white;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid gray;
+}
+
+.table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid gray;
+  color: white;
+  word-break: break-word;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table th,
+.table td {
+  white-space: nowrap;
+}
+
+.table caption {
+  caption-side: bottom;
+  padding: 10px 0;
+  font-size: 13px;
+  color: white;
+}

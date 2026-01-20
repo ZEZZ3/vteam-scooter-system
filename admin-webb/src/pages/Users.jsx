@@ -22,7 +22,7 @@ export default function Users() {
   useEffect(() => { load(); }, []);
 
   const filtered = users.filter(u =>
-    !q || u.email.toLowerCase().includes(q.toLowerCase())
+    !q || u.mail.toLowerCase().includes(q.toLowerCase())
   );
 
   return (
@@ -31,11 +31,11 @@ export default function Users() {
 
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         <input
+          className="search-input"
           placeholder="Sök e-post…"
           value={q}
           onChange={(e)=>setQ(e.target.value)}
         />
-        <button onClick={load} disabled={loading}>Uppdatera</button>
       </div>
 
       {loading && <p>Laddar…</p>}
@@ -48,11 +48,23 @@ export default function Users() {
       {!loading && !err && filtered.length === 0 && <p>Inga användare hittades.</p>}
 
       {!loading && !err && filtered.length > 0 && (
-        <table border={1} cellPadding={6} style={{ width:"100%", marginTop:8 }}>
-          <thead><tr><th>ID</th><th>E-post</th><th>Roll</th></tr></thead>
+        <table className="table" border={1} cellPadding={6}>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>E-post</th>
+              <th>Roll</th>
+              <th>Saldo</th>
+            </tr>
+          </thead>
           <tbody>
             {filtered.map(u => (
-              <tr key={u.id}><td>{u.id}</td><td>{u.email}</td><td>{u.role}</td></tr>
+              <tr key={u._id}>
+                <td>{u._id}</td>
+                <td>{u.mail}</td>
+                <td>{u.role}</td>
+                <td>{u.balance}</td>
+              </tr>
             ))}
           </tbody>
         </table>

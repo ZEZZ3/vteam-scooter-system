@@ -43,12 +43,12 @@ async function createCities() {
     helpers.print("Database", "Adding cities.")
     let db = await database.getDb("cities");
 
-    const minLength = standardData.cities.length;
+/*     const minLength = standardData.cities.length;
     const currentLength = await db.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Cities already exist. Skipping.")
         return;
-    }
+    } */
 
 
     await db.collection.deleteMany({});
@@ -201,7 +201,7 @@ async function createBikes() {
     const minLength = standardData.bikes.length;
     const currentLength = await dbBikes.collection.countDocuments({});
     if (currentLength >= minLength) {
-        console.log("[Database] Bikes already exist. Skipping.");
+        helpers.print("Database", "Bikes already exist. Skipping.")  
         return;
     }
    
@@ -308,7 +308,7 @@ async function createRides() {
         return;
     }
 
-    await dbPayments.collection.deleteMany({});
+    await dbRides.collection.deleteMany({});
 
     const users = await dbUsers.collection.find().toArray();
     const bike1 = await dbBikes.collection.findOne({number: 1});

@@ -1,3 +1,10 @@
+@import './styles/table.css';
+@import './styles/form.css';
+@import './styles/error.css';
+@import './styles/loader.css';
+@import './styles/input.css';
+@import './styles/boxes.css';
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -24,15 +31,16 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+h2 {
+  margin: 0.5rem 0;
 }
 
 button {

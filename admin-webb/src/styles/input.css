@@ -1,0 +1,6 @@
+.search-input {
+    padding: 0.5rem;
+}
+.search-input.space {
+    margin-right: 0.2rem;
+}

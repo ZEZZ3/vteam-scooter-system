@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getBikes } from "../lib/api";
+import { useSocket } from "../socket/useSocket";
 
 function Battery({ pct }) {
   const color = pct >= 60 ? "#1e8f4d" : pct >= 30 ? "#c7a100" : "#b42323";
@@ -11,25 +11,12 @@ function Battery({ pct }) {
 }
 
 export default function Bikes() {
-  const [bikes, setBikes] = useState([]);
+/*   const [bikes, setBikes] = useState([]); */
   const [status, setStatus] = useState("");
   const [city, setCity] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [limit, setLimit] = useState(50);
   const [err, setErr] = useState(null);
-
-  async function load() {
-    setLoading(true); setErr(null);
-    try {
-      const data = await getBikes();
-      setBikes(data);
-    } catch (e) {
-      setErr("Kunde inte hämta cyklar.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { load(); }, []);
+  const {bikes, connected, bikesLoading} = useSocket();
 
   const cities = useMemo(() => {
     return Array.from(new Set(bikes.map(b => b.city))).sort();
@@ -40,48 +27,79 @@ export default function Bikes() {
     (!city || b.city === city)
   );
 
+  const display = filtered.slice(0, limit)
+
   return (
     <div style={{ padding: 16 }}>
       <h2>Cyklar</h2>
 
       <div style={{ display:"flex", gap:8, marginBottom:8 }}>
-        <select value={status} onChange={(e)=>setStatus(e.target.value)}>
+        <select value={status} onChange={(e)=>setStatus(e.target.value)} style={{padding: "0.5rem"}}>
           <option value="">Status: Alla</option>
-          <option value="available">available</option>
-          <option value="in_use">in_use</option>
-          <option value="service">service</option>
+          <option value="free">free</option>
+          <option value="rented">rented</option>
         </select>
 
-        <select value={city} onChange={(e)=>setCity(e.target.value)}>
+        <select value={city} onChange={(e)=>setCity(e.target.value)} style={{padding: "0.5rem"}}>
           <option value="">Stad: Alla</option>
           {cities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
 
-        <button onClick={() => { setStatus(""); setCity(""); }}>Rensa filter</button>
-        <button onClick={load} disabled={loading}>Uppdatera</button>
+        <select 
+          value={limit} 
+          onChange={(e)=>setLimit(Number(e.target.value))} 
+          style={{padding: "0.5rem"}}
+        >
+          <option value={10}>Visa: 10</option>
+          <option value={20}>Visa: 20</option>
+          <option value={30}>Visa: 30</option>
+          <option value={50}>Visa: 50</option>
+          <option value={100}>Visa: 100</option>
+          <option value={filtered.length}>Visa: {filtered.length}</option>
+        </select>
+
+        <button onClick={() => { setStatus(""); setCity(""); setLimit(50) }}>Rensa filter</button>
+        {/* <button onClick={load} disabled={loading}>Uppdatera</button> */}
+
+        <div className="live-status" style={{ color: connected ? "green" : "red" }}>
+          Live spårning: {connected ? "Aktiv" : "Frånkopplad"}
+        </div>
       </div>
 
-      {loading && <p>Laddar…</p>}
+      {bikesLoading && <span className="loader"></span>}
       {err && (
         <div style={{ background:"#431", color:"#fff", padding:8, borderRadius:6 }}>
           {err} <button onClick={load}>Försök igen</button>
         </div>
       )}
 
-      {!loading && !err && filtered.length === 0 && <p>Inga cyklar hittades.</p>}
+      {!bikesLoading && !err && filtered.length === 0 && <p>Inga cyklar hittades.</p>}
 
-      {!loading && !err && filtered.length > 0 && (
-        <table border={1} cellPadding={6} style={{ width:"100%", marginTop:8 }}>
+      {!bikesLoading && !err && filtered.length > 0 && (
+        <table className = "table bikes" border={1} cellPadding={6} >
           <thead>
-            <tr><th>ID</th><th>Status</th><th>Batteri</th><th>Stad</th></tr>
+            <tr>
+              <th>ID</th>
+              <th>Nummer</th>
+              <th>Status</th>
+              <th>Batteri</th>
+              <th>Stad</th>
+              <th>Zon</th>
+              <th>Station</th>
+              <th>Uppdaterad</th>
+            </tr>
           </thead>
           <tbody>
-            {filtered.map(b => (
-              <tr key={b.id}>
-                <td>{b.id}</td>
+            {display.map(b => (
+              <tr key={b._id}>
+                <td>{b._id}</td>
+                <td>{b.number}</td>
                 <td>{b.status}</td>
                 <td><Battery pct={b.battery} /></td>
                 <td>{b.city}</td>
+                <td>{b.currentZoneName}</td>
+                <td>{b.currentStationName ? b.currentStationName : "N/A"}</td>
+                <td>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString() : "N/A"}</td>
               </tr>
             ))}
           </tbody>

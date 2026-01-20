@@ -9,14 +9,16 @@ export const client = axios.create({
 
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem("admintoken");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) config.headers["x-access-token"] = token;
   return config;
 });
 
 client.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err?.response?.status === 401) {
+    console.log(err)
+    const url = err?.config?.url;
+    if (err?.response?.status === 401 && !url?.includes("/login") && window.location.href !== "/login") {
       localStorage.removeItem("admintoken");
       localStorage.removeItem("adminuser");
       window.location.href = "/login";

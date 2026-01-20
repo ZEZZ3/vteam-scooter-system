@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -17,13 +18,40 @@ export function AuthProvider({ children }) {
   }, [token, user]);
 
   async function login(email, password) {
-    // MOCK tills backend är klar:
-    if (email && password) {
-      setToken("mock-token");
-      setUser({ id: "u1", email, role: "admin" });
-      return;
+
+    const res = await fetch(`${API_BASE}/api/v1/users/login`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            mail: email,
+            password: password
+        })
+    });    
+    
+    const data = await res.json();
+    const user = data.data?.user;
+    if (!res.ok) {
+        console.log(data.error.title)
+        if (data?.error?.title === "Wrong password") {
+            throw new Error("Fel lösenord!");
+        }
+        if (data?.error?.title === "User not found") {
+            throw new Error("Användare hittades ej!")
+          }
+        if (data?.error?.title === "Email or password missing") {
+          throw new Error("Lösenord eller mail saknades.")
+        }
+        throw new Error("Något blev fel!")
     }
-    throw new Error("Fel inloggning");
+
+    if (user.role !== "admin") {
+      throw new Error("Obehörig användare!")
+    }
+
+    setToken(data.data.token);
+    setUser({ id: user.id, email: user.mail, role: user.role });
   }
 
   function logout() {
