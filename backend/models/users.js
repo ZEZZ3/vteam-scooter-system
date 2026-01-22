@@ -385,7 +385,7 @@ const users = {
         try {
             db = await database.getDb("users");
 
-            const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone", "password"]
+            const fields = ["firstName", "lastName", "adress", "postcode", "city", "phone", "password", "mail", "role", "balance"]
             const newData = helpers.checkPatchData(req.body, fields);
             
             if (newData.password) {

@@ -61,11 +61,14 @@ export default function Cities() {
     if (!mapRef.current || !city || zones.length === 0) return;
     
     const map = mapRef.current;
-    map.setView(city.center, 13); 
+    map.setView(city.center, 13);
     layerRef.current.forEach(layer => layer && map.removeLayer(layer));
     layerRef.current = [];
-    const cityZones = zones.filter(z => z.cityID === city._id)
     
+    const cityZones = zones.filter(z => z.cityID === city._id)
+    const cityStations = stations.filter(s => s.cityID === city._id)
+    const cityBikes = bikes.filter(b => b.city === city.name)
+
     cityZones.forEach(z => {
       const latlong = z.area.coordinates.map(coord => [coord.lat, coord.long])
       const polygong = L.polygon(latlong, {
@@ -78,14 +81,30 @@ export default function Cities() {
       layerRef.current.push(polygong);
     });
 
-  }, [zones, city]);
+    cityStations.forEach(s => {
+      const pos = s.position
+
+      const bikesAtStation = cityBikes.filter(b => b.currentStationName === s.name).length
+
+      const stationIcon = L.circleMarker([pos.lat, pos.long], {
+        radius: 9,
+        fillColor: "#87ceeb",
+        weight: 4,
+        opacity: 0.8,
+        fillOpacity: 0.6,
+      }).addTo(map).bindPopup(`<b>${s.name}</b><br/>Bikes: ${bikesAtStation}`);
+
+      layerRef.current.push(stationIcon);
+    });
+
+  }, [zones, city, stations]);
 
   useEffect(() => {
     if (!mapRef.current || !city || bikes.length === 0) return;
     const map = mapRef.current;
     bikeRef.current.forEach(m => map.removeLayer(m))
     bikeRef.current.clear();
-    
+
     const cityBikes = bikes.filter(b => b.city === city.name).slice(0, limit)
 
     cityBikes.forEach(b => {
@@ -99,21 +118,24 @@ export default function Cities() {
         const marker = bikeRef.current.get(markerID);
         marker.setLatLng([pos.lat, pos.long])
       } else {
-        const bikeIcon = L.divIcon({
-          html: `<div style="display: flex; align-items: center; justify-content: center; width: 50%; height: 100%; background: #ff6b6a; color: white; padding: 2px 6px; border-radius: 2px; font-size: 11px; font-weight: bold;">${b.number}</div>`,
-          iconSize: [33, 15],
-          className: 'bike-marker'
-        });
-
-        const marker = L.marker([pos.lat, pos.long], { icon: bikeIcon })
-          .addTo(map)
-          .bindPopup(`<b>Bike ${b.number}</b><br/>Battery: ${b.battery}%<br/>Status: ${b.status}`);
         
-        bikeRef.current.set(markerID, marker);
+        const bikeIcon = L.circleMarker([pos.lat, pos.long], {
+          radius: 6,
+          fillColor: "#ff6b6a",
+          weight: 1,
+          opacity: 0.8,
+          fillOpacity: 0.6,
+        }).addTo(map).bindPopup(`<b>Bike ${b.number}</b><br/>Battery: ${b.battery}%<br/>Status: ${b.status}`);
+
+        bikeRef.current.set(markerID, bikeIcon);
       }
     });
 
   }, [bikes, city, limit]);
+
+
+    console.log(stations)
+    console.log(bikes)
 
   return (
     <div style={{ padding:16 }}>
@@ -146,7 +168,7 @@ export default function Cities() {
         </div>
       </div>
 
-      <div id="map" style={{ height: "620px", marginTop: 12, borderRadius: 8, overflow:"hidden" }} />
+      <div id="map" style={{ height: "720px", marginTop: 12, borderRadius: 8, overflow:"hidden" }} />
       <p style={{ opacity:0.8, marginTop:8 }}>
         Grön polygon = giltig zon. 
       </p>

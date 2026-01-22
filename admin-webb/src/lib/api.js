@@ -45,3 +45,32 @@ export async function getCity() {
   return data.data;
 }
 
+export async function addUser(usrData) {
+  const { data } = await client.post(`/api/v1/users/`, usrData);
+
+  return data.data;
+}
+
+export async function getUser(id) {
+  const { data } = await client.get(`/api/v1/users/${id}`);
+
+  return data.data;
+}
+
+export async function updateUser(id, usrData) {
+  const { data } = await client.patch(`/api/v1/users/${id}`, usrData);
+  return data.data;
+}
+
+export async function removeUser(id) {
+  const { data } = await client.delete(`/api/v1/users/${id}`);
+  return data.data;
+}
+
+export async function getHistory() {
+  const { data } = await client.get(`/api/v1/history`);
+  return data.data;
+}
+
+
+

@@ -120,6 +120,11 @@ class bike {
     this.status = "free";
   }
 
+  simulationForceExit() {
+    this.battery = 100;
+    this.status = "free";
+  }
+
   getSimulationRouteLength() {
     const run = this.simulationRuns[this.simulationRunIndex];
     return run.routeLength;

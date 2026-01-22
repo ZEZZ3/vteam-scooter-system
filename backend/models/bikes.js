@@ -5,6 +5,46 @@ const helpers = require("../utils/helpers.js");
 const bikes = {
     
     /**
+     * Get all bikes, requires service token. 
+     */
+    getAllBikes: async function (res, req) {
+        const isService = req.user && req.user.type === "service";
+
+        if (!isService) {
+            return res.status(403).json({
+                error: {
+                    status: 403,
+                    path: "GET api/v1/bikes/",
+                    title: "Forbidden",
+                    message: "Action not allowed."
+                }
+            });
+        }
+        
+        let db;
+
+        try {
+            db = await database.getDb("bikes");
+            const bikes = await db.collection.find({}).toArray();
+
+            return res.status(200).json({ data: bikes });
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: req.path,
+                    title: "Database error",
+                    message: e.message
+                }
+            })
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        } 
+    },
+
+    /**
      * Get all bikes
      */
     getBikes: async function (res, req) {

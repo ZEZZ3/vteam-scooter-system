@@ -45,10 +45,11 @@ export function SocketProvider({ children }) {
                 b._id === data.bikeID ? 
             {
                 ...b,
+                status: data.status,
                 position: data.position,
                 battery: data.battery,
                 updatedAt: data.broadcastAt
-            } : bike
+            } : b
         ));
     });
 

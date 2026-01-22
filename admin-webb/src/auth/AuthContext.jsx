@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     const user = data.data?.user;
     if (!res.ok) {
-        console.log(data.error.title)
+
         if (data?.error?.title === "Wrong password") {
             throw new Error("Fel lösenord!");
         }

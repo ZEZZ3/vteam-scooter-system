@@ -3,13 +3,17 @@
   width: 100%;
   border-collapse: collapse;
   color: #FFFFFFDE;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.2;
   table-layout: fixed;
+  width: 80%;
 }
 
 .table.bikes {
-  max-width: 80%;
+  width: 80%;
+}
+
+.table.full {
   width: 100%;
 }
 
@@ -17,12 +21,12 @@
   color: white;
   font-weight: 600;
   text-align: left;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid gray;
 }
 
 .table tbody td {
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid gray;
   color: white;
   word-break: break-word;
@@ -34,7 +38,7 @@
 
 .table th,
 .table td {
-  white-space: nowrap;
+  white-space: wrap;
 }
 
 .table caption {

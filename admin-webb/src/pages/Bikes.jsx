@@ -99,7 +99,7 @@ export default function Bikes() {
                 <td>{b.city}</td>
                 <td>{b.currentZoneName}</td>
                 <td>{b.currentStationName ? b.currentStationName : "N/A"}</td>
-                <td>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString() : "N/A"}</td>
+                <td>{b.updatedAt ? new Date(b.updatedAt).toLocaleTimeString() : "N/A"}</td>
               </tr>
             ))}
           </tbody>

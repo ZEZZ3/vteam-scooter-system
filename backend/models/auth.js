@@ -9,7 +9,7 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const auth = {
 
-    checkServiceToken: function(req, res, next) {
+    checkServiceToken: async function(req, res, next) {
         let token = req.headers['x-access-token'];
         if (!token) {
             return res.status(401).json({
@@ -34,6 +34,19 @@ const auth = {
                     }
                 });                
             }
+
+            // hacky solution to give the simulation access to rent 
+            const dbUsers = await database.getDb("users");
+            const user = await dbUsers.collection.findOne(
+                { mail: "service@test.com" }
+            );
+
+            req.user = {};
+            req.user.type = payload.type;
+            
+            req.user.mail = user.mail;
+            req.user.role = user.role;
+            req.user.id = user._id;
             
             return next();
         } catch (e) {

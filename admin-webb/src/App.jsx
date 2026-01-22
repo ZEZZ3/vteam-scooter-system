@@ -10,6 +10,10 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Users from "./pages/Users";
 import Bikes from "./pages/Bikes";
 import Cities from "./pages/Cities"; // om du skapade Cities
+import EditUser from "./pages/EditUser";
+import AddUser from "./pages/AddUser"; 
+import History from "./pages/History"; 
+
 
 export default function App() {
   return (
@@ -31,6 +35,18 @@ export default function App() {
               </RequireAuth>
             } />
 
+            <Route path="/users/add" element={
+              <RequireAuth>
+                <AppShell><AddUser/></AppShell>
+              </RequireAuth>
+            } />
+
+            <Route path="/users/:id" element={
+              <RequireAuth>
+                <AppShell><EditUser/></AppShell>
+              </RequireAuth>
+            } />
+
             <Route path="/bikes" element={
               <RequireAuth>
                 <AppShell><Bikes /></AppShell>
@@ -40,6 +56,12 @@ export default function App() {
             <Route path="/cities" element={
               <RequireAuth>
                 <AppShell><Cities /></AppShell>
+              </RequireAuth>
+            } />
+
+            <Route path="/history" element={
+              <RequireAuth>
+                <AppShell><History /></AppShell>
               </RequireAuth>
             } />
 

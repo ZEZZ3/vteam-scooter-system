@@ -18,7 +18,7 @@ client.interceptors.response.use(
   (err) => {
     console.log(err)
     const url = err?.config?.url;
-    if (err?.response?.status === 401 && !url?.includes("/login") && window.location.href !== "/login") {
+    if (err?.response?.status === 401 && !url?.includes("/login") && window.location.pathname !== "/login") {
       localStorage.removeItem("admintoken");
       localStorage.removeItem("adminuser");
       window.location.href = "/login";

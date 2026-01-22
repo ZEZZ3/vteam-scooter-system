@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { getUsers } from "../lib/api";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
-
+  const navigate = useNavigate();
+  
   async function load() {
     setLoading(true); setErr(null);
     try {
@@ -36,7 +38,9 @@ export default function Users() {
           value={q}
           onChange={(e)=>setQ(e.target.value)}
         />
+        <button onClick={() => navigate("/users/add")} style={{ padding: 8, marginRight: 8 }}>Lägg till</button>
       </div>
+
 
       {loading && <p>Laddar…</p>}
       {err && (
@@ -60,7 +64,9 @@ export default function Users() {
           <tbody>
             {filtered.map(u => (
               <tr key={u._id}>
-                <td>{u._id}</td>
+                <td>
+                  <Link to={`/users/${u._id}`}>{u._id}</Link>
+                </td>
                 <td>{u.mail}</td>
                 <td>{u.role}</td>
                 <td>{u.balance}</td>

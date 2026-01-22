@@ -56,5 +56,7 @@ Alternativt
 | /v1/service/simulation                    |  -    | Yes  | -   |   -   |  -     |   **No**   |     
 | /v1/service/bikes                         |  Yes  | -    | -   |   -   |  -     |   **No**   |     
 | /v1/service/stations                      |  Yes  | -    | -   |   -   |  -     |   **No**   |     
-| /v1/service/zones                         |  Yes  | -    | -   |   -   |  -     |   **No**   |     
+| /v1/service/zones                         |  Yes  | -    | -   |   -   |  -     |   **No**   |
+| /v1/service/rent/start/{bikeid}           |  -    | Yes  | -   |   -   |  -     |   **No**   |
+| /v1/service/rent/stop/{bikeid}            |  -    | Yes  | -   |   -   |  -     |   **No**   |    
 *************************************************************************************************/

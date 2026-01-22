@@ -219,7 +219,8 @@ const rent = {
                 duration: null,
                 price: null,
                 parking: null,
-                active: true
+                active: true,
+                distance: null
             });
 
             if (!createRide || !createRide.insertedId) {
@@ -383,14 +384,22 @@ const rent = {
         }        
     },
 
-    calculateCost: function(start, stop) {
+    calculateCost: function(start, stop, parkingType) {
         const time = stop - start;
         const minutes = Math.ceil(time/ (1000 * 60))
-        const price = helpers.startingFee + helpers.minuteFee * minutes;
+        let price = helpers.startingFee + helpers.minuteFee * minutes;
+        if (parkingType !== "station") {
+            if (parkingType === "inZone") {
+                price += helpers.outsideStationFee;
+            } else if (parkingType === "outOfZone") {
+                price += (helpers.outsideStationFee + helpers.outsideZoneFee);
+            }
+        }
+        
         return { minutes, price }
     },
 
-    endRide: async function (bikeID, rideID, userID, bikePos, parkingType) {
+    endRide: async function (bikeID, rideID, userID, bikePos, parkingType, distance) {
         let dbRides;
         let dbUsers;
         let dbPayments;
@@ -410,7 +419,7 @@ const rent = {
             }
             
             const stop = new Date();
-            const { minutes, price } = this.calculateCost(ride.start, stop);
+            const { minutes, price } = this.calculateCost(ride.start, stop, parkingType);
             const update = await dbRides.collection.findOneAndUpdate(
                 { _id: new ObjectId(rideID) },
                 {
@@ -420,7 +429,8 @@ const rent = {
                         duration: minutes,
                         price: price,
                         parking: parkingType,
-                        active: false
+                        active: false,
+                        distance: distance
                     }
                 },
                 { returnDocument: "after" }
@@ -490,7 +500,8 @@ const rent = {
     stopRide: async function (res, req) {
         const bikeID = req.params.bikeID;
         const parkingType = req.body.parkingType;
-        
+        const distance = req.body.distance;
+
         if (!bikeID) {
             return res.status(400).json({
                 error: {
@@ -533,7 +544,7 @@ const rent = {
             }
             const bikePos = validateRes.position;
 
-            validateRes = await this.endRide(bikeID, activeRideID, req.user.id, bikePos, parkingType)
+            validateRes = await this.endRide(bikeID, activeRideID, req.user.id, bikePos, parkingType, distance)
             if (validateRes.error) {
                 return res.status(validateRes.error.status).json({error: validateRes.error});
             }
@@ -546,14 +557,15 @@ const rent = {
                     rideID: validateRes.ride._id,
                     duration: validateRes.duration,
                     price: validateRes.price,
-                    balance: validateRes.balance
+                    balance: validateRes.balance,
+                    distance: distance
                  }
             });
         } catch (e) {
             return res.status(500).json({
                 error: {
                     status: 500,
-                    path: `POST api/v1/rent/start/${bikeID}`,
+                    path: `POST api/v1/rent/stop/${bikeID}`,
                     title: "Database error",
                     message: e.message,
                     stack: process.env.NODE_ENV === "test" ? e.stack : undefined

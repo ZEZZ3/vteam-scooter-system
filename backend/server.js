@@ -59,7 +59,7 @@ let lastUpdate = null;
                 try {
                     const bikeID = data.id;
                     const position = data.position;
-                    const battery = data.battery;
+                    const battery = Number(data.battery.toFixed(2));
                     const status = data.status;
                     const currentStationID = data.currentStationID;
                     const currentStationName = data.currentStationName;
@@ -87,6 +87,7 @@ let lastUpdate = null;
                         bikeID: bikeID,
                         position: position,
                         battery: battery,
+                        status: status,
                         broadcastAt: new Date()
                     })
                     //console.log(`[Socket] Bike with ID: ${bikeID} broadcasted.`)

@@ -2,6 +2,8 @@
 
 const minBalance = 100.0;
 const startingFee = 12.0;
+const outsideStationFee = 20;
+const outsideZoneFee = 40;
 const minuteFee = 3.0;
 const LOG_DELAY = 10000;
 const BIKES_PER_STATION = 30;
@@ -61,5 +63,7 @@ module.exports = {
     startingFee,
     minuteFee,
     LOG_DELAY,
-    BIKES_PER_STATION
+    BIKES_PER_STATION,
+    outsideStationFee,
+    outsideZoneFee
 }

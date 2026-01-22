@@ -39,6 +39,7 @@ function staticPrintLines(lines) {
 }
 
 function runtimePrint(simulationMoveCount, simulationMoveLimit, done, bikesSize, bc, br, tr, shortest, longest) {
+    const time = (simulationMoveCount * tr)/1000
     staticPrintLines([
         `${getTimeString()} [Simulation]` ,
         `------------------------------------------`,
@@ -48,6 +49,7 @@ function runtimePrint(simulationMoveCount, simulationMoveLimit, done, bikesSize,
         `bikes finished: ${done}/${bikesSize}`,
         `broadcasts: ${bc}`,
         `broadcast rate: ${br} ms, tickrate: ${tr} ms`,
+        `time: ${time}s`,
         `------------------------------------------`
     ]);
 }
@@ -69,7 +71,7 @@ function runtimePrintLoop(
     for (const bike of sampleBikes) {
         bikeStr += `B${bike.number}: ${bike.routeStep}/${bike.routeLen} (${bike.runs}) | `
     }
-
+    const time = (simulationMoveCount * tickRate)/1000
     staticPrintLines([
         `${getTimeString()} [Simulation]` ,
         `------------------------------------------`,
@@ -80,6 +82,7 @@ function runtimePrintLoop(
         `active: ${active}/${totalBikes}`,
         `broadcasts: ${broadcastCount}`,
         `broadcast rate: ${broadcastRate} ms, tickrate: ${tickRate} ms`,
+        `time: ${time}s`,
         `------------------------------------------`
     ]);
 }

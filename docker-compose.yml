@@ -64,7 +64,7 @@ services:
     env_file:
       - ./.env
     environment:
-      BASE_API_URL: http://backend:3000
+      VITE_API_BASE: http://localhost:3000
     restart: unless-stopped
     networks:
       - scooter-network
