@@ -13,15 +13,15 @@ const simulation = require("../../models/simulation.js");
 
 // GET api/v1/simulation/
 // Get all simulations
-router.get('/simulation',
-    (req, res, next) => auth.checkServiceToken(req, res, next),
+router.get('/',
+    (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => simulation.getAllSimulations(res, req)
 );
 
 // GET api/v1/simulation/simulationID
 // Get all simulation by ID
-router.get('/simulation/:simulationID',
-    (req, res, next) => auth.checkServiceToken(req, res, next),
+router.get('/:simulationID',
+    (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => simulation.getSimulationByID(res, req)
 );
 

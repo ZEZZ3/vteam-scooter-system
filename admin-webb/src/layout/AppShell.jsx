@@ -30,6 +30,7 @@ export default function AppShell({ children }) {
           <Tab to="/bikes" label="Cyklar" />
           <Tab to="/cities" label="Städer" />
           <Tab to="/history" label="Historik" />
+          <Tab to="/simulation" label="Simulering" />
         </nav>
         <div style={{ marginLeft:"auto", display:"flex", gap:12, alignItems:"center" }}>
           <span style={{ opacity:0.8 }}>{user?.email}</span>

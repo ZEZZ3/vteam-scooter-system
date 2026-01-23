@@ -13,7 +13,10 @@ import Cities from "./pages/Cities"; // om du skapade Cities
 import EditUser from "./pages/EditUser";
 import AddUser from "./pages/AddUser"; 
 import History from "./pages/History"; 
-
+import EditBike from "./pages/EditBike"; 
+import AddBike from "./pages/AddBike"; 
+import UserHistory from "./pages/UserHistory"; 
+import Simulation from "./pages/Simulation"; 
 
 export default function App() {
   return (
@@ -53,6 +56,18 @@ export default function App() {
               </RequireAuth>
             } />
 
+            <Route path="/bikes/add" element={
+              <RequireAuth>
+                <AppShell><AddBike /></AppShell>
+              </RequireAuth>
+            } />
+
+            <Route path="/bikes/:id" element={
+              <RequireAuth>
+                <AppShell><EditBike /></AppShell>
+              </RequireAuth>
+            } />
+
             <Route path="/cities" element={
               <RequireAuth>
                 <AppShell><Cities /></AppShell>
@@ -62,6 +77,18 @@ export default function App() {
             <Route path="/history" element={
               <RequireAuth>
                 <AppShell><History /></AppShell>
+              </RequireAuth>
+            } />
+
+            <Route path="/history/:id" element={
+              <RequireAuth>
+                <AppShell><UserHistory /></AppShell>
+              </RequireAuth>
+            } />
+
+            <Route path="/simulation" element={
+              <RequireAuth>
+                <AppShell><Simulation /></AppShell>
               </RequireAuth>
             } />
 

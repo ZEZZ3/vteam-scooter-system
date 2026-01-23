@@ -45,6 +45,16 @@ export async function getCity() {
   return data.data;
 }
 
+export async function getSimulation() {
+  const { data } = await client.get("/api/v1/simulation");
+
+  return data.data;
+}
+
+/**
+ * USERS
+ */
+
 export async function addUser(usrData) {
   const { data } = await client.post(`/api/v1/users/`, usrData);
 
@@ -67,8 +77,42 @@ export async function removeUser(id) {
   return data.data;
 }
 
+/**
+ * HISTORY
+ */
+
 export async function getHistory() {
   const { data } = await client.get(`/api/v1/history`);
+  return data.data;
+}
+
+export async function getUserHistory(id) {
+  const { data } = await client.get(`api/v1/history?${id}`);
+  return data.data;
+}
+
+/**
+ * BIKES
+ */
+
+export async function getBike(id) {
+  const { data } = await client.get(`/api/v1/bikes/${id}`);
+  return data.data;
+}
+
+export async function addBike(bikeData) {
+  const { data } = await client.post(`/api/v1/bikes/`, bikeData);
+  console.log(data)
+  return data.data;
+}
+
+export async function updateBike(id, bikeData) {
+  const { data } = await client.patch(`/api/v1/bikes/${id}`, bikeData);
+  return data.data;
+}
+
+export async function removeBike(id) {
+  const { data } = await client.delete(`/api/v1/bikes/${id}`);
   return data.data;
 }
 

@@ -117,10 +117,13 @@ const bikes = {
 
         const city = req.body.city;
         const currentZone = req.body.currentZone;
+        const currentZoneName = req.body.currentZoneName;
         const currentStation = req.body.currentStation;
+        const currentStationName = req.body.currentStationName;
         const battery = 100;
         const position = req.body.position;
-        
+        const bikeStatus = req.body.status;
+
         if (!city || !currentZone || !currentStation || !position) {
             return res.status(400).json({
                 error: {
@@ -163,10 +166,12 @@ const bikes = {
                 city,
                 cityID,
                 currentZone,
+                currentZoneName,
                 currentStation,
+                currentStationName,
                 battery,
                 position,
-                status: "free",
+                status: bikeStatus,
                 number: nextBikeNumber,
                 createdAt: new Date()
             });
@@ -279,10 +284,14 @@ const bikes = {
 
             const fields = [
                 "city", 
-                "currentZone", 
+                "cityID",
+                "currentZone",
+                "currentZoneName", 
                 "currentStation", 
+                "currentStationName",
                 "battery", 
-                "position"
+                "position",
+                "status"
             ];
 
             const newData = helpers.checkPatchData(req.body, fields);

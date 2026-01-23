@@ -10,7 +10,9 @@ const axios = require("axios");
 const readline = require("readline");
 
 const app = express();
+
 app.use(express.json());
+
 
 const port = process.env.BIKE_SERVER_PORT;
 const API = process.env.BASE_API_URL || "http://backend:3000";
@@ -73,7 +75,7 @@ async function connectToBackend() {
             if (totalAttempts >= constants.MAX_RETRY) {
                 reject(new Error("Could not connect to backend."))
             }
-        })
+        });
 
         socket.on("error", (e) =>{
             printer.print("Socket", `Websocket error: ${e}`)

@@ -10,6 +10,7 @@ export function SocketProvider({ children }) {
   const [bikes, setBikes] = useState([]);
   const [connected, setConnected] = useState(false);
   const [loadingBikes, setLoadingBikes] = useState(true);
+  const [refetch, setRefetch] = useState(0);
 
   useEffect(()=>{
 
@@ -36,6 +37,10 @@ export function SocketProvider({ children }) {
         console.log("Socket connected.");
         socketInst.emit("client-connect");
         setConnected(true);
+    });
+
+    socketInst.on("bikes-list", (data) => {
+        setBikes(data);
     });
 
     socketInst.on("bike-position", (data) => {
@@ -67,14 +72,14 @@ export function SocketProvider({ children }) {
     return () => {
         socketInst.disconnect();
     }
-  }, []);
+  }, [refetch]);
 
 /*   const updateBikes = (b) => {
     setBikes(b);
   } */
 
   return (
-    <SocketCtx.Provider value={{ socket, bikes, connected, loadingBikes}}>{children}</SocketCtx.Provider>
+    <SocketCtx.Provider value={{ socket, bikes, connected, loadingBikes, triggerRefetch: () => setRefetch(r => r + 1)}}>{children}</SocketCtx.Provider>
   )
 
 

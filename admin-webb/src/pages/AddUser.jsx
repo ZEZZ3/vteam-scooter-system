@@ -37,8 +37,6 @@ export default function AddUser() {
     }
   }
 
-
-
   return (
     <div style={{ padding: 16, maxWidth: 600 }}>
       <h2>Användardetaljer</h2>
