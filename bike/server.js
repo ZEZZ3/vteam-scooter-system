@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const io = require("socket.io-client");
-const Bike = require("./bike");
+const Simulation = require("./simulation");
 const helpers = require("./utils/helpers")
 const {constants} = require("./utils/constants");
-const calculations = require("./utils/calculations");
+
 const printer = require("./utils/print")
 const axios = require("axios");
 const readline = require("readline");
@@ -17,28 +17,21 @@ app.use(express.json());
 const port = process.env.BIKE_SERVER_PORT;
 const API = process.env.BASE_API_URL || "http://backend:3000";
 
-let bikes = new Map();
-let stations = [];
-let zones = [];
-let simulationLog = [];
-let socket;
 let server;
+let simulation = null;
+let socket;
 let serviceToken = null;
 let serviceTokenExpiresIn = 0;
-let simulationRunning = false;
-let simulationInterval = null;
-let simulationMoveCounter = 0;
-let broadcastInterval = null;
-let finishedSimulatedRoutes = 0;
-let longestRoute = 0;
-let shortestRoute = Infinity;
-let broadcastToServer = 0;
+let zones = [];
+let stations = [];
+const bikes = new Map();
+
 
 let configuration = {
     broadcastEnable: true,
     broadcastRate: constants.BROADCAST_RATE || 5000,
     simulationRate: constants.SIMULATION_RATE || 5000,
-    simulationBikeLimit: constants.BIKE_LIMIT || bikes.size,
+    simulationBikeLimit: bikes.size,
     simulationMoveLimit: constants.SIMULATION_MOVE_LIMIT,
     simulationReRouteLimit: constants.SIMULATION_REROUTE_LIMIT,
     verbose: false
@@ -87,64 +80,6 @@ async function connectToBackend() {
             }
         }, 30000);
     });
-}
-
-function startNewBike(id, data) {
-    try {
-        bikes.set(id, new Bike(data));
-        socket.emit("bike-connect", {
-            id: id
-        });
-    } catch (e) {
-        printer.print("Server: warn", `Could not initialize bike with ID: ${id}. Error: ${e.message}`)
-    }
-}
-
-async function initializeBikes() {
-    try {
-        bikes = new Map();
-
-        printer.print("Server", "Initializing bikes.")
-        const res = await helpers.getServiceToken(serviceToken, serviceTokenExpiresIn)
-
-        serviceToken = res.token;
-        serviceTokenExpiresIn = res.expiry;
-
-        printer.print("Server", "Getting bike data from backend.")
-        const response = await axios.get(`${API}/api/v1/service/bikes`, {
-            headers: {
-                "x-access-token": serviceToken
-            }
-        });
-        
-        let allBikes = response.data.data
-        if (!Array.isArray(allBikes) || allBikes.length === 0) {
-            printer.print("Server: warn", "No bikes found.")
-            return;
-        }
-        
-        if(!socket || !socket.connected) {
-            throw new Error("No socket connection to backend.")
-        }
-        
-        const limit = configuration.simulationBikeLimit;
-        if (limit > 0) {
-            allBikes = allBikes.slice(0, limit)
-            printer.print("Server", `Set bike limit to: ${limit}/${allBikes.length}`)
-        }
-        //console.log(allBikes)
-        for (const bikeData of allBikes) {
-            if (bikeData.position) {
-                const bikeID = bikeData._id;
-                startNewBike(bikeID, bikeData);
-            }
-        }
-        printer.print("Server", `Mapped: ${bikes.size} bikes.`)
-        printer.print("Server", "Bikes initialized.")
-    } catch (e) {
-        //console.log(e.stack)
-        printer.print("Server: warn", `Could not initialize bikes. Error: ${e.message}`)
-    }
 }
 
 async function getStations() {
@@ -229,433 +164,6 @@ async function getZones() {
     }
 }
 
-function startBroadcast() {
-    broadcastToServer = 0;
-    if (configuration.broadcastEnable) {
-        broadcastInterval = setInterval(() => {
-            for(const [_, bike] of bikes) {
-    
-                const lastUpdate = bike?.lastUpdate?.getTime() || 0;
-                const lastBroadcast = bike.broadcast?.getTime() || 0;
-                
-                if(socket && socket.connected) {
-                    if (lastBroadcast < lastUpdate) {
-                        socket.emit("bike-update", bike)
-                        bike.setBroadcast(new Date());
-                        broadcastToServer++;
-                    }
-                } 
-            }
-        }, configuration.broadcastRate)
-        return
-    } 
-    return;
-
-}
-
-function stopBroadcast() {
-    if (!broadcastInterval) {
-        printer.print("Server: warn", "No active broadcast.")
-        return
-    }
-    printer.print("Server", "Stopping broadcast.")
-    clearInterval(broadcastInterval);
-}
-
-
-
-async function setRandomRoute(bike) {
-    try {
-        const randomStation = stations[Math.floor(Math.random() * stations.length)];
-        const start = bike.position;
-        const end = randomStation.position;
-
-        const {route, distance} = await helpers.getRoute(start, end);
-        
-        bike.initSimulationRun(
-            route, 
-            distance, 
-            randomStation.stationName, 
-            bike.currentZoneName ?? null, 
-            bike.currentZoneID ?? null, 
-            bike.currentStationName ?? null, 
-            bike.currentStationID ?? null
-        )
-    } catch (e) {
-        throw new Error(e);
-    }
-}
-
-async function setRandomRoutes() {
-
-    for(const [_, bike] of bikes) {
-        try {
-            //console.log(bike)
-            await setRandomRoute(bike);
-        } catch (e) {
-            printer.print("Server: warn", `Bike routing error: ${e.message}`);
-            continue;
-        }
-    }
-}
-
-function createSimulationIntervalSingle() {
-    finishedSimulatedRoutes = 0;
-    longestRoute = calculations.findLongestRoute(bikes);
-    shortestRoute = calculations.findShortestRoute(bikes);
-
-    simulationInterval = setInterval(async () => {
-        
-        const log = {
-            tick: simulationMoveCounter,
-            shortestRoute: shortestRoute,
-            longestRoute: longestRoute,
-            finishedBikes: finishedSimulatedRoutes,
-            status: "",
-            errors: [],
-            active: (bikes.size - finishedSimulatedRoutes)
-        }
-
-        if (checkIfDone()) {
-            log.status = `Ending simulation, passed tick-limit (${simulationMoveCounter}/${configuration.simulationMoveLimit})`;
-            stopSimulationSingle();
-            return;
-        }
-
-        for(const bike of bikes.values()) {
-            
-            // skip if bike is done.
-            if (bike.simulationRuns[bike.simulationRunIndex].done) {
-                continue;
-            }
-
-            const res = bike.moveBy();
-
-            switch (res.status) {
-                case 0:
-                    log.errors.push(`B${bike.number} attempted to move without route!`) 
-                    break;
-                case 1:
-                    const bikeLat = bike.position.lat;
-                    const bikeLong = bike.position.long;
-                    
-                    const nearbyStation = calculations.locateCloseStation(bikeLat, bikeLong, stations);
-                    if (nearbyStation) {
-                        bike.setStationInformation(nearbyStation.stationName, nearbyStation.stationID);
-                    } else {
-                        bike.setStationInformation(null, null);
-                    }
-
-                    const zone = calculations.locateZone(bikeLat, bikeLong, zones);
-                    if (zone) {
-                        bike.setZoneInformation(zone.zoneName, zone.zoneID);
-                    } else {
-                        bike.setZoneInformation(null, null);
-                    }
-
-                    const snapshots = bike.getSimulationRunSnapshots()
-                    const distance = calculations.calculateDistance(snapshots);
-                    bike.setSimulationRunDone(distance, simulationMoveCounter);
-                    
-                    finishedSimulatedRoutes++;
-                    stopRides(bike);
-                    //console.log(bike)
-                    break;
-                case 2:
-                    // steps left
-                    log.status = "Running."
-                    break;
-            }
-        }
-
-        printer.runtimePrint(
-            simulationMoveCounter, configuration.simulationMoveLimit, 
-            finishedSimulatedRoutes, bikes.size, broadcastToServer,
-            configuration.broadcastRate, configuration.simulationRate, 
-            shortestRoute, longestRoute
-        );
-
-        if (finishedSimulatedRoutes === bikes.size) {
-            log.status = `All ${bikes.size} bikes finished their routes.`
-            simulationLog.push(log)
-            stopSimulationSingle();
-            return;
-        }
-
-        simulationLog.push(log)
-
-        simulationMoveCounter++;      
-    }, configuration.simulationRate);
-}
-
-function checkIfDone() {
-
-    for(const bike of bikes.values()) {
-        const run = bike.simulationRuns[bike.simulationRunIndex];
-        if(!run) {
-            return false;
-        }
-
-        if (!run.done) {
-            return false
-        }
-
-        if (bike.simulationRuns.length < configuration.simulationReRouteLimit && 
-            simulationMoveCounter < configuration.simulationMoveLimit
-        ) {
-            return false;                        
-        }
-    }
-    return true;
-
-}
-
-function createSimulationIntervalLoop() {
-    finishedSimulatedRoutes = 0;
-    longestRoute = calculations.findLongestRoute(bikes);
-    shortestRoute = calculations.findShortestRoute(bikes);
-
-    simulationInterval = setInterval(async () => {
-
-        let active = 0;
-        for (const bike of bikes.values()) {
-            const run = bike.simulationRuns[bike.simulationRunIndex];
-            if(!run) {
-                continue;
-            } 
-            if (!run.done) {
-                active++;
-            }
-        }
-
-        const log = {
-            tick: simulationMoveCounter,
-            shortestRoute: shortestRoute,
-            longestRoute: longestRoute,
-            finishedBikes: finishedSimulatedRoutes,
-            status: "",
-            active: active,
-            errors: []
-        }
-       
-        if (checkIfDone()) {
-            log.status = `Ending simulation, passed tick-limit (${simulationMoveCounter}/${configuration.simulationMoveLimit})`;
-            stopSimulationLoop();
-            return;
-        }
-
-        for(const bike of bikes.values()) {
-            const run = bike.simulationRuns[bike.simulationRunIndex];
-
-            if(!run) {
-                log.errors.push(`Bike ${bike.number} has invalid run index ${bike.simulationRunIndex}`)
-                continue;
-            } 
-
-            // new route needed
-            if (run.done) {
-                if (bike.simulationRuns.length < configuration.simulationReRouteLimit && 
-                    simulationMoveCounter < configuration.simulationMoveLimit
-                ) {
-                    bike.reRouteNeeded = true;                        
-                }
-                continue;
-            }
-
-            const res = bike.moveBy();
-
-            switch (res.status) {
-                case 0:
-                    log.errors.push(`B${bike.number} attempted to move without route!`) 
-                    break;
-                case 1:
-                    const bikeLat = bike.position.lat;
-                    const bikeLong = bike.position.long;
-                    
-                    const nearbyStation = calculations.locateCloseStation(bikeLat, bikeLong, stations);
-                    if (nearbyStation) {
-                        bike.setStationInformation(nearbyStation.stationName, nearbyStation.stationID);
-                    } else {
-                        bike.setStationInformation(null, null);
-                    }
-
-                    const zone = calculations.locateZone(bikeLat, bikeLong, zones);
-                    if (zone) {
-                        bike.setZoneInformation(zone.zoneName, zone.zoneID);
-                    } else {
-                        bike.setZoneInformation(null, null);
-                    }
-
-                    const snapshots = bike.getSimulationRunSnapshots()
-                    const distance = calculations.calculateDistance(snapshots);
-                    bike.setSimulationRunDone(distance, simulationMoveCounter);
-
-                    finishedSimulatedRoutes++;
-                    stopRides(bike);
-                    break;
-                case 2:
-                    // steps left
-                    break;
-            }
-        }
-        
-        for(const bike of bikes.values()) {
-            if (!bike.reRouteNeeded) {
-                continue;
-            }
-            try {
-                bike.simulationRunIndex++;
-                await setRandomRoute(bike);
-                bike.reRouteNeeded = false;
-                longestRoute = calculations.findLongestRoute(bikes);
-                shortestRoute = calculations.findShortestRoute(bikes);
-                startRides(bike.id);
-            } catch (e) {
-                log.errors.push(`Bike routing error: ${e.message}`)
-            }
-        }
-
-        let sampleBikes = []
-        for(const bike of bikes.values()) {
-            const run = bike.simulationRuns[bike.simulationRunIndex];
-            
-            if (run && !run.done) {
-                sampleBikes.push(
-                    {
-                        number: bike.number,
-                        routeLen: bike.getSimulationRouteLength(),
-                        routeStep: bike.getSimulationRouteIndex(),
-                        runs: bike.simulationRuns.length
-                    }    
-                )
-                if (sampleBikes.length === 5) break;
-            }
-        }
-
-        printer.runtimePrintLoop(
-            simulationMoveCounter, configuration.simulationMoveLimit, 
-            finishedSimulatedRoutes, broadcastToServer,
-            configuration.broadcastRate, configuration.simulationRate, 
-            shortestRoute, longestRoute, active, bikes.size, sampleBikes
-        );
-
-        simulationLog.push(log)
-        simulationMoveCounter++;
-
-    }, configuration.simulationRate);   
-}
-
-async function startRides(id = null) {
-    if (!id) {
-        for(const bike of bikes.values()) {
-            await helpers.startRide(bike.id, serviceToken, serviceTokenExpiresIn);
-        }
-    } else {
-        await helpers.startRide(id, serviceToken, serviceTokenExpiresIn);
-    }
-}
-
-async function stopRides(bike = null) {
-    let run = bike.simulationRuns[bike.simulationRunIndex];
-    let parkingType = helpers.findParkingType(bike, zones);
-    await helpers.endRide(bike.id, run.calcDistance, parkingType, serviceToken, serviceTokenExpiresIn);
-}
-
-
-async function startSimulation(loop = false) {
-    if (simulationRunning) {
-        printer.print("Server: warn", "Simulation is already running.")
-        return
-    }
-
-    await initializeBikes();
-    startBroadcast();
-    simulationRunning = true;
-    simulationMoveCounter = 0;
-    
-    await setRandomRoutes();
-    console.log("------------------------------------------")
-    printer.clearScreen();
-    simulationLog = [];
-    startRides();
-
-    if (loop) {
-        createSimulationIntervalLoop(); 
-    } else { 
-        createSimulationIntervalSingle(); 
-    }
-}
-
-function simulationTearDown() {
-    if (!simulationRunning) {
-        printer.print("Server: warn", "No simulation running.")
-        return
-    }
-
-    const status = simulationLog[simulationLog.length - 1].status
-    if (status) {
-        printer.print("Simulation", status)
-    } else {
-        printer.print("Simulation", "Stopping simulation.")
-    }
-
-    simulationRunning = false;
-    clearInterval(simulationInterval);
-    
-    helpers.storeSimulation(
-        simulationMoveCounter, 
-        bikes.size,
-        finishedSimulatedRoutes,
-        configuration,
-        serviceToken,
-        serviceTokenExpiresIn
-    );
-
-    // final transmission
-    for(const [_, bike] of bikes) {
-        if(socket && socket.connected) {
-            socket.emit("bike-update", bike)
-            bike.setBroadcast(new Date());
-        }
-    }
-
-    stopBroadcast();
-}
-
-function stopSimulationSingle() {
-    simulationTearDown();
-    printer.simulationRecapSingle(bikes, finishedSimulatedRoutes, simulationLog);
-}
-
-function stopSimulationLoop() {
-    simulationTearDown();
-    printer.simulationRecapLoop(bikes, configuration, finishedSimulatedRoutes, simulationMoveCounter)
-}
-
-function forceStopSimulation() {
-    if (!simulationRunning) {
-        printer.print("Server: warn", "No simulation running.")
-        return
-    }
-
-    // reset bikes 
-    for(const [_, bike] of bikes) {
-        bike.simulationForceExit()
-        if(socket && socket.connected) {
-            socket.emit("bike-update", bike)
-            bike.setBroadcast(new Date());
-        } 
-    }
-
-    printer.print("Simulation", "Stopping simulation.")
-    printer.print("Simulation", "No data stored with forceful exit.")
-    printer.print("Simulation", "You may still be able to view logged data with 'simulate result' (until next simulation)")
-    
-    simulationRunning = false;
-    clearInterval(simulationInterval);
-    stopBroadcast();
-}
-
 async function enableDefaultServerFunctionality() {
     try {
         await connectToBackend();
@@ -664,6 +172,16 @@ async function enableDefaultServerFunctionality() {
     } catch (e) {
         throw new Error(e.message);
     }
+}
+
+async function startSimulation(loop = false) { 
+    if (simulation) {
+        printer.print("Server: warn", "Simulation is already running.")
+        return
+    }
+
+    simulation = new Simulation(stations, zones, socket, configuration);
+    simulation.startSimulation(loop)
 }
 
 async function startBikeServer() {
@@ -773,11 +291,19 @@ async function handleSimulate(sub, rest) {
                 break;
 
             case "stop":
-                forceStopSimulation();
+                if (simulation) {
+                    simulation.forceStopSimulation();
+                } else {
+                    printer.print("Server", "No simulation running.")
+                }
                 break;
 
             case "log":
-                printer.logDump(simulationLog);
+                if (simulation) {
+                    printer.logDump(simulation.simulationLog);
+                } else {
+                    printer.print("Server", "No simulation running.")
+                }
                 break;
 
             default: 
