@@ -39,7 +39,7 @@ function staticPrintLines(lines) {
 }
 
 function runtimePrint(simulationMoveCount, simulationMoveLimit, done, bikesSize, bc, br, tr, shortest, longest) {
-    const time = (simulationMoveCount * tr)/1000
+    const time = Math.floor((simulationMoveCount * tr)/1000);
     staticPrintLines([
         `${getTimeString()} [Simulation]` ,
         `------------------------------------------`,
@@ -71,14 +71,14 @@ function runtimePrintLoop(
     for (const bike of sampleBikes) {
         bikeStr += `B${bike.number}: ${bike.routeStep}/${bike.routeLen} (${bike.runs}) | `
     }
-    const time = (simulationMoveCount * tickRate)/1000
+    const time = Math.floor((simulationMoveCount * tickRate)/1000);
     staticPrintLines([
         `${getTimeString()} [Simulation]` ,
         `------------------------------------------`,
         `tick: ${simulationMoveCount}/${simulationMoveLimit}`,
         `${bikeStr}`,
         `shortest route: ${shortest} ticks | longest route: ${longest} ticks`,
-        `bikes finished: ${done}`,
+        `routes finished: ${done}`,
         `active: ${active}/${totalBikes}`,
         `broadcasts: ${broadcastCount}`,
         `broadcast rate: ${broadcastRate} ms, tickrate: ${tickRate} ms`,
@@ -88,8 +88,8 @@ function runtimePrintLoop(
 }
 
 
-function clearScreen() {
-    for (let i = 0; i < SINGLE_RUN_PRINT_ROWS; i++) {
+function clearScreen(size) {
+    for (let i = 0; i < size; i++) {
         console.log("");
     }
 }
@@ -118,7 +118,7 @@ function simulationRecapSingle(bikes, finishedSimulatedRoutes) {
     console.log(`Average route distance by osrm estimation was ${averageOsrm.toFixed(2)}m.`)
     console.log(`Average route distance by server-side haversine calculation was ${averageCalc.toFixed(2)}m.`)
     console.log("For a full simulation log use 'simulate log")
-
+    console.log("------------------------------------------");
 }
 
 function simulationRecapLoop(bikes, config, finishedSimulatedRoutes, simulationMoveCounter) {
@@ -139,14 +139,14 @@ function simulationRecapLoop(bikes, config, finishedSimulatedRoutes, simulationM
                 Route ${runNum}: ${run.endStamp.startStationName} -> ${run.endStamp.endStationName}. 
                 End as excpected: ${run.endStamp.endStationName === run.expectedEndStation}
                 steps: ${run.routeLength}
-                calc-distance: ${run.calcDistance.toFixed(1)}
+                calc-distance: ${run.calcDistance?.toFixed(1)}
                 osrm-distance: ${run.preDefinedRouteDistance.toFixed(1)}
                 `
             )
             runNum++;
         });
-        console.log("----------------------------------------")
     }
+    console.log("------------------------------------------");
 }
 
 function logDump(log) {

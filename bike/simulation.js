@@ -24,12 +24,11 @@ class simulation {
         this.longestRoute = 0;
         this.shortestRoute = Infinity;
         this.broadcastToServer = 0;
-
+        this.log = {errors:[]};
     }
 
-
     startBroadcast() {
-        broadcastToServer = 0;
+        this.broadcastToServer = 0;
         if (this.configuration.broadcastEnable) {
             this.broadcastInterval = setInterval(() => {
                 for(const [_, bike] of this.bikes) {
@@ -78,7 +77,7 @@ class simulation {
                     "x-access-token": this.serviceToken
                 }
             });
-            
+
             let allBikes = response.data.data
             if (!Array.isArray(allBikes) || allBikes.length === 0) {
                 printer.print("Server: warn", "No bikes found.")
@@ -95,7 +94,7 @@ class simulation {
                 printer.print("Server", `Set bike limit to: ${limit}/${allBikes.length}`)
             }
             //console.log(allBikes)
-            for (const bikeData of this.allBikes) {
+            for (const bikeData of allBikes) {
                 if (bikeData.position) {
                     const bikeID = bikeData._id;
                     this.startNewBike(bikeID, bikeData);
@@ -212,10 +211,10 @@ class simulation {
 
                         const snapshots = bike.getSimulationRunSnapshots()
                         const distance = calculations.calculateDistance(snapshots);
-                        bike.setSimulationRunDone(distance, simulationMoveCounter);
+                        bike.setSimulationRunDone(distance, this.simulationMoveCounter);
                         
-                        finishedSimulatedRoutes++;
-                        this.stopRides(bike);
+                        this.finishedSimulatedRoutes++;
+                        await this.stopRides(bike);
                         //console.log(bike)
                         break;
                     case 2:
@@ -269,8 +268,8 @@ class simulation {
 
     createSimulationIntervalLoop() {
         this.finishedSimulatedRoutes = 0;
-        this.longestRoute = calculations.findLongestRoute(bikes);
-        this.shortestRoute = calculations.findShortestRoute(bikes);
+        this.longestRoute = calculations.findLongestRoute(this.bikes);
+        this.shortestRoute = calculations.findShortestRoute(this.bikes);
 
         this.simulationInterval = setInterval(async () => {
 
@@ -296,7 +295,7 @@ class simulation {
             }
         
             if (this.checkIfDone()) {
-                this.log.status = `Ending simulation, passed tick-limit (${this.simulationMoveCounter}/${this.configuration.simulationMoveLimit})`;
+                //this.log.status = `Ending simulation, passed tick-limit (${this.simulationMoveCounter}/${this.configuration.simulationMoveLimit})`;
                 this.stopSimulationLoop();
                 return;
             }
@@ -345,10 +344,10 @@ class simulation {
 
                         const snapshots = bike.getSimulationRunSnapshots()
                         const distance = calculations.calculateDistance(snapshots);
-                        bike.setSimulationRunDone(distance, simulationMoveCounter);
+                        bike.setSimulationRunDone(distance, this.simulationMoveCounter);
 
                         this.finishedSimulatedRoutes++;
-                        this.stopRides(bike);
+                        //await this.stopRides(bike);
                         break;
                     case 2:
                         // steps left
@@ -364,9 +363,10 @@ class simulation {
                     bike.simulationRunIndex++;
                     await this.setRandomRoute(bike);
                     bike.reRouteNeeded = false;
-                    longestRoute = calculations.findLongestRoute(this.bikes);
-                    shortestRoute = calculations.findShortestRoute(this.bikes);
-                    this.startRides(bike.id);
+                    // this breaks for some reason
+                    /*longestRoute = calculations.findLongestRoute(this.bikes);
+                    shortestRoute = calculations.findShortestRoute(this.bikes); */
+                    //await this.startRides(bike.id);
                 } catch (e) {
                     this.log.errors.push(`Bike routing error: ${e.message}`)
                 }
@@ -403,56 +403,61 @@ class simulation {
     }
 
     async startRides(id = null) {
+
         if (!id) {
+            let count = 0;
             for(const bike of this.bikes.values()) {
-                await helpers.startRide(bike.id, this.serviceToken, this.serviceTokenExpiresIn);
+                let res = await helpers.startRide(bike.id, this.serviceToken, this.serviceTokenExpiresIn);
+                bike.rideID = res.data.data.rideID;
+                count++
+                printer.staticPrint(`${count}/${this.bikes.size} bikes have been rented.`);
             }
         } else {
-            await helpers.startRide(id, this.serviceToken, this.serviceTokenExpiresIn);
+            let res = await helpers.startRide(id, this.serviceToken, this.serviceTokenExpiresIn);
+            this.bike.rideID = res.data.data.rideID;
         }
     }
 
     async stopRides(bike = null) {
         let run = bike.simulationRuns[bike.simulationRunIndex];
-        let parkingType = helpers.findParkingType(bike, zones);
-        await helpers.endRide(bike.id, run.calcDistance, parkingType, this.serviceToken, this.serviceTokenExpiresIn);
+        let parkingType = helpers.findParkingType(bike, this.zones);
+        await helpers.endRide(bike.id, bike.rideID, run.calcDistance, parkingType, this.serviceToken, this.serviceTokenExpiresIn);
     }
 
-
     async startSimulation(loop = false) {
-/*         if (this.simulationRunning) {
+        if (this.simulationRunning) {
             printer.print("Server: warn", "Simulation is already running.")
             return
-        } */
-       await this.initializeBikes();
-       startBroadcast();
+        }
+        await this.initializeBikes();
+        await this.startRides();
+        this.startBroadcast();
 
         this.simulationRunning = true;
         this.simulationMoveCounter = 0;
         
         await this.setRandomRoutes();
         console.log("------------------------------------------")
-        printer.clearScreen();
         this.simulationLog = [];
-        this.startRides();
-
+        
         if (loop) {
+            printer.clearScreen(9);
             this.createSimulationIntervalLoop(); 
         } else { 
+            printer.clearScreen(11);
             this.createSimulationIntervalSingle(); 
         }
     }
 
     stopSimulationSingle() {
         this.simulationTearDown();
-        printer.simulationRecapSingle(bikes, finishedSimulatedRoutes, simulationLog);
+        printer.simulationRecapSingle(this.bikes, this.finishedSimulatedRoutes, this.simulationLog);
     }
 
     stopSimulationLoop() {
         this.simulationTearDown();
-        printer.simulationRecapLoop(bikes, configuration, finishedSimulatedRoutes, simulationMoveCounter)
+        printer.simulationRecapLoop(this.bikes, this.configuration, this.finishedSimulatedRoutes, this.simulationMoveCounter)
     }
-
 
     simulationTearDown() {
         if (!this.simulationRunning) {
@@ -460,7 +465,7 @@ class simulation {
             return
         } 
         this.stopBroadcast();
-        const status = this.simulationLog[simulationLog.length - 1].status
+        const status = this.simulationLog[this.simulationLog.length - 1].status
         if (status) {
             printer.print("Simulation", status)
         } else {
@@ -490,7 +495,10 @@ class simulation {
 
     }
 
-    forceStopSimulation() {
+    async forceStopSimulation() {
+        for(const bike of this.bikes.values()) {
+            await this.stopRides(bike);
+        }
 
         this.stopBroadcast();
         // reset bikes 
@@ -511,7 +519,12 @@ class simulation {
 
     }
 
+    test() {
+        const d = this.bikes.values().next().value;
+        console.log(d);
+        console.log(d.simulationRuns.length)
+    }
 
 }
 
-module.exports = bike;
+module.exports = simulation;

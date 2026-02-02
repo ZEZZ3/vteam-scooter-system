@@ -51,6 +51,14 @@ export async function getSimulation() {
   return data.data;
 }
 
+export async function deleteSimulations(simulations) {
+  await Promise.all(
+    simulations.map(s =>
+      client.delete(`api/v1/simulation/${s.simulationID}`)
+    )
+  );
+}
+
 /**
  * USERS
  */
@@ -87,8 +95,24 @@ export async function getHistory() {
 }
 
 export async function getUserHistory(id) {
-  const { data } = await client.get(`api/v1/history?${id}`);
+  const { data } = await client.get(`api/v1/history?userID=${id}`);
   return data.data;
+}
+
+export async function deletePayments(payments) {
+  await Promise.all(
+    payments.map(p =>
+      client.delete(`api/v1/history/${p.userID}/payments/${p.paymentID}`)
+    )
+  );
+}
+
+export async function deleteRides(rides) {
+  await Promise.all(
+    rides.map(r =>
+      client.delete(`api/v1/history/${r.userID}/rides/${r.rideID}`)
+    )
+  );
 }
 
 /**
@@ -115,6 +139,8 @@ export async function removeBike(id) {
   const { data } = await client.delete(`/api/v1/bikes/${id}`);
   return data.data;
 }
+
+
 
 
 

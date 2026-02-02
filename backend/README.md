@@ -51,7 +51,7 @@ Alternativt
 | /v1/station                               |  Yes  | Yes  | -   |  -    |  -     |   **Yes**  |
 | /v1/station/{stationid}                   |  Yes  | -    | -   |  Yes  |  Yes   |   **Yes**  |
 | /v1/simulation                            |  Yes  | -    | -   |  -    |  -     |   **No**   |   
-| /v1/simulation/{simulationID}             |  Yes  | -    | -   |  -    |  -     |   **No**   |     
+| /v1/simulation/{simulationID}             |  Yes  | -    | -   |  -    |  Yes   |   **No**   |     
 | /v1/service/token                         |  -    | Yes  | -   |  -    |  -     |   **No**   |     
 | /v1/service/simulation                    |  -    | Yes  | -   |   -   |  -     |   **No**   |     
 | /v1/service/bikes                         |  Yes  | -    | -   |   -   |  -     |   **No**   |     

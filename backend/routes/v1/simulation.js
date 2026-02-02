@@ -8,7 +8,7 @@ const simulation = require("../../models/simulation.js");
 | Uri                               |  GET  | POST | PUT | PATCH | DELETE |
 |-----------------------------------|:-----:|:----:|:---:|:-----:|:------:|
 | /v1/simulation                    |  Yes  | -    | -   |  -    |  -     |   
-| /v1/simulation/{simulationID}     |  Yes  | -    | -   |   -   |  -     |   
+| /v1/simulation/{simulationID}     |  Yes  | -    | -   |   -   |  Yes   |   
 *************************************************************************************************/
 
 // GET api/v1/simulation/
@@ -23,6 +23,13 @@ router.get('/',
 router.get('/:simulationID',
     (req, res, next) => auth.checkToken(req, res, next),
     (req, res) => simulation.getSimulationByID(res, req)
+);
+
+// DELETE api/v1/simulation/simulationID
+// Delete simulation by ID
+router.delete('/:simulationID',
+    (req, res, next) => auth.checkToken(req, res, next),
+    (req, res) => simulation.deleteSimulation(res, req)
 );
 
 module.exports = router;

@@ -73,26 +73,26 @@ async function startRide(bikeID, serviceToken, serviceTokenExpiresIn) {
                 },
             }
         );
-        
         if (response.status === 201) {
-            printer.print("Server", `Started ride for bike: ${bikeID}`)
+            //printer.print("Server", `Started ride for bike: ${bikeID}`)
         } else {
             printer.print("Server: warn", `Unexpected response from backend: ${response.status}`);
         }
         return response;
     } catch(e) {
+        console.log(e.response.data.error)
         printer.print("Server: error", `Could not start ride for ${bikeID}: ${e.code || e.message}`)        
     }
 }
 
-async function endRide(bikeID, distance, parkingType, serviceToken, serviceTokenExpiresIn) {
+async function endRide(bikeID, rideID, distance, parkingType, serviceToken, serviceTokenExpiresIn) {
     try {
 
         const res = await getServiceToken(serviceToken, serviceTokenExpiresIn)
         let token = res.token;
         
         const response = await axios.post(`${process.env.BASE_API_URL}/api/v1/service/rent/stop/${bikeID}`,
-            {parkingType: parkingType, distance: distance},
+            {parkingType: parkingType, distance: distance, rideID: rideID},
             {
                 headers: {
                     "x-access-token": token
@@ -102,7 +102,7 @@ async function endRide(bikeID, distance, parkingType, serviceToken, serviceToken
         );
         
         if (response.status === 200) {
-            printer.print("Server", `Ended ride for bike: ${bikeID}`)
+            //printer.print("Server", `Ended ride for bike: ${bikeID}`)
         } else {
             printer.print("Server: warn", `Unexpected response from backend: ${response.status}`);
         }

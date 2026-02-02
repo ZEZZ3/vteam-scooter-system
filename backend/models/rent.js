@@ -233,7 +233,6 @@ const rent = {
                     }
                 });                
             }
-            
             return createRide.insertedId;
 
         } finally {
@@ -311,13 +310,13 @@ const rent = {
         } 
     },
 
-    validateActiveRide: async function (user, bikeID) {
-        let dbRides
+    validateActiveRide: async function (user, rideID) {
+        let dbRides;
 
         try {
             dbRides = await database.getDb("rides");
             const activeRide = await dbRides.collection.findOne({
-                bike: new ObjectId(bikeID),
+                _id: new ObjectId(rideID),
                 active: true
             });
             
@@ -349,7 +348,6 @@ const rent = {
         } finally {
             if (dbRides && dbRides.client) {
                 await dbRides.client.close();
-
             }
         }        
     },
@@ -501,6 +499,7 @@ const rent = {
         const bikeID = req.params.bikeID;
         const parkingType = req.body.parkingType;
         const distance = req.body.distance;
+        const rideID = req.body.rideID;
 
         if (!bikeID) {
             return res.status(400).json({
@@ -532,11 +531,11 @@ const rent = {
                 return res.status(validateRes.error.status).json({error: validateRes.error});
             }
 
-            validateRes = await this.validateActiveRide(req.user, bikeID)
+            /*             validateRes = await this.validateActiveRide(req.user, rideID)
             if (validateRes.error) {
                 return res.status(validateRes.error.status).json({error: validateRes.error});
             }
-            const activeRideID = validateRes._id
+            const activeRideID = validateRes._id */
 
             validateRes = await this.updateBikeAvailable(bikeID)
             if (validateRes.error) {
@@ -544,7 +543,7 @@ const rent = {
             }
             const bikePos = validateRes.position;
 
-            validateRes = await this.endRide(bikeID, activeRideID, req.user.id, bikePos, parkingType, distance)
+            validateRes = await this.endRide(bikeID, rideID, req.user.id, bikePos, parkingType, distance)
             if (validateRes.error) {
                 return res.status(validateRes.error.status).json({error: validateRes.error});
             }
@@ -554,7 +553,7 @@ const rent = {
                     message: "Ride has ended",
                     bikeID: bikeID,
                     userID: req.user.id,
-                    rideID: validateRes.ride._id,
+                    rideID: rideID,
                     duration: validateRes.duration,
                     price: validateRes.price,
                     balance: validateRes.balance,

@@ -29,7 +29,10 @@ export default function UserHistory() {
   return (
     <div style={{ padding: 16, display: "flex", flexDirection: "column" }}>
       <div>
-        <h2>Betalningar</h2>
+        <div style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
+          <button onClick={() => navigate("/history")} style={{ padding: "0.5rem", marginRight: 5 }}>&lt;</button>
+          <h2>Betalningar</h2>
+        </div>
 
         {loading && <span className="loader"></span>}
         {err && (
@@ -38,9 +41,9 @@ export default function UserHistory() {
             </div>
         )}
 
-        {!loading && !err && payments.length === 0 && <p>Inga betalningar hittades.</p>}
+        {!loading && !err && payments.length === 0 && <p>Inga betalningar för användaren hittades.</p>}
 
-        {!loading && !err && (
+        {!loading && !err && payments.length > 0 && (
             <table className="table full" border={1} cellPadding={6}>
                 <thead>
                     <tr>
@@ -72,8 +75,8 @@ export default function UserHistory() {
       <div>
           <h2>Turer</h2>
           {loading && <span className="loader"></span>}
-          {!loading && !err && payments.length === 0 && <p>Inga turer hittades.</p>}
-          {!loading && !err && (
+          {!loading && !err && rides.length === 0 && <p>Inga turer för användaren hittades.</p>}
+          {!loading && !err && rides.length > 0 && (
               <table className="table full" border={1} cellPadding={6}>
                 <thead>
                   <tr>

@@ -3,7 +3,7 @@ const axios = require("axios");
 const helpers = require("./utils/helpers");
 
 class bike {
-  constructor(bike, simSetup = null) {
+  constructor(bike) {
     // general
     this.id = bike._id;
     this.status = bike.status;
@@ -14,6 +14,7 @@ class bike {
       lat: (Math.random() - 0.5) * 0.001,
       long: (Math.random() - 0.5) * 0.001
     }
+    this.rideID = null;
 
     // stations
     this.currentStationName = bike.currentStationName;

@@ -198,12 +198,12 @@ async function createBikes() {
     let dbZones = await database.getDb("zones");
     let dbStations = await database.getDb("stations");
 
-    const minLength = standardData.bikes.length;
+/*     const minLength = standardData.bikes.length;
     const currentLength = await dbBikes.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Bikes already exist. Skipping.")  
         return;
-    }
+    } */
    
     await dbBikes.collection.deleteMany({});
 
@@ -298,10 +298,11 @@ async function createRides() {
 
     helpers.print("Database", "Adding dummy rides.")    
     let dbRides = await database.getDb("rides");
-    let dbBikes = await database.getDb("bikes");
-    let dbUsers = await database.getDb("users");
     
     const minLength = standardData.rides.length;
+    /* let dbBikes = await database.getDb("bikes");
+    let dbUsers = await database.getDb("users"); */
+    
     const currentLength = await dbRides.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Rides already exist. Skipping.")    
@@ -310,40 +311,6 @@ async function createRides() {
 
     await dbRides.collection.deleteMany({});
 
-    const users = await dbUsers.collection.find().toArray();
-    const bike1 = await dbBikes.collection.findOne({number: 1});
-    const bike2 = await dbBikes.collection.findOne({number: 2});
-    
-    const user = users[0]
-    const startPos = bike1.position;
-    const stopPos = bike2.position;
-    const id = bike1._id;
-    const start = new Date()
-    const stop = new Date(Date.now() + 1000 * 60 * 5)
-
-    for (const ride of standardData.rides) {
-        
-        await dbRides.collection.insertOne(
-            {
-                user: user._id,
-                bike: id,
-                start: start,
-                stop: stop,
-                startPos: startPos,
-                stopPos: stopPos,
-                duration: Math.ceil((stop - start) / (1000 * 60)),
-                price: 100,
-                parking: ride.parking,
-                active: ride.active,
-                createdAt: new Date()
-            },
-        );
-    }
-
-    dbRides.client.close()
-    dbBikes.client.close()
-    dbUsers.client.close()
-    helpers.print("Database", "Dummy rides added.")
 }
 
 async function initDB() {

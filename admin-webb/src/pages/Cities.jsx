@@ -41,6 +41,7 @@ export default function Cities() {
 
       setCity(citiesExtend[0]);
       setCities(citiesExtend);
+
     } catch (e) {
       console.log("Kunde inte hämta zoner eller stationer: ", e);
     } finally {
@@ -133,9 +134,16 @@ export default function Cities() {
 
   }, [bikes, city, limit]);
 
+  useEffect(() => {
+    if (!city) return;
 
-    console.log(stations)
-    console.log(bikes)
+    const cityBikeCount = bikes.filter(b => b.city === city.name).length;
+
+    setLimit(cityBikeCount);
+  }, [bikes, city]);
+
+/*     console.log(stations)
+    console.log(bikes) */
 
   return (
     <div style={{ padding:16 }}>
@@ -151,7 +159,7 @@ export default function Cities() {
         </select>
 
         <select 
-          value={limit} 
+          value={bikes.length ?? limit} 
           onChange={(e)=>setLimit(Number(e.target.value))} 
           className="search-input"
           >

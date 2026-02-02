@@ -143,6 +143,64 @@ const simulation = {
             }
         }        
     },
+
+    /**
+     * Delete simulation by ID
+     */
+    deleteSimulation: async function (res, req) {
+        const simulationID = req.params.simulationID;
+        
+        if (!ObjectId.isValid(simulationID)) {
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    path: `DELETE api/v1/simulation/${simulationID}`,
+                    title: "Bad request",
+                    message: `Invalid ID: ${simulationID}`
+                }
+            });            
+        }
+
+        let db;
+
+        try {
+            db = await database.getDb("simulations");
+            
+            const simulation = await db.collection.findOne({_id: new ObjectId(simulationID)});
+            
+            if (!simulation) {
+                return res.status(404).json({
+                    error: {
+                        status: 404,
+                        path: `DELETE api/v1/simulation/${simulationID}`,
+                        title: "Not found",
+                        message: `Simulation with id '${simulationID}' not found`
+                    }
+                });                
+            }
+
+            await db.collection.deleteOne(
+                { _id: new ObjectId(simulationID) }
+            );
+
+            return res.status(200).json({ data: { message: "Simulation has been deleted" }});
+
+        } catch (e) {
+            return res.status(500).json({
+                error: {
+                    status: 500,
+                    path: `DELETE api/v1/simulation/${simulationID}`,
+                    title: "Database error",
+                    message: e.message
+                }
+            });
+        } finally {
+            if (db && db.client) {
+                await db.client.close();
+            }
+        }
+    },
+
 }
 
 module.exports = simulation;

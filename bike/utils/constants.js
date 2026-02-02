@@ -19,11 +19,14 @@ constants.HELP = `
         To start a simulation with X bikes that run Y routes each:
             >   simulate start bikes <X> routes <Y>
         
-        **note: this will run X * Y simulations, use reasonable numbers or be ready to wait
+        **note: this will run X * Y simulations, use reasonable numbers or be ready to wait.
+                rides are not registered in the database.
         ---
 
         To start a simulation with X bikes that each run 1 route:
             >   simulate start bikes <X> 
+        
+        **note: stores rides & payments in database under "service@test.com".
         ---
 
         To view log of simulation:
@@ -48,9 +51,6 @@ constants.HELP = `
 
         Use 'config' to see configuration:
             >   config 
-
-        Use 'enable' to enable broadcast of all bikes:
-            >   enable
 
         Use 'exit' to terminate server:
             >   exit

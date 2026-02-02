@@ -11,8 +11,6 @@ export default function EditUser() {
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [payments, setPayments] = useState();
-  const [rides, setRides] = useState();
 
   useEffect(() => {
     async function load() {

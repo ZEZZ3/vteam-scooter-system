@@ -175,13 +175,13 @@ async function enableDefaultServerFunctionality() {
 }
 
 async function startSimulation(loop = false) { 
-    if (simulation) {
+    if (simulation && simulation.simulationRunning) {
         printer.print("Server: warn", "Simulation is already running.")
         return
     }
 
     simulation = new Simulation(stations, zones, socket, configuration);
-    simulation.startSimulation(loop)
+    simulation.startSimulation(loop);
 }
 
 async function startBikeServer() {
@@ -192,7 +192,7 @@ async function startBikeServer() {
             printer.print("Server", `Bike server running on port ${port} [Standard operation]`)
             printer.print("Server", `Use the CLI to enter simulation/configure.`)
             printer.print("Server", `Enter 'help' for instructions.`)
-        })
+        });
 
         commandLine();
 
@@ -245,7 +245,7 @@ function handleSet(sub, rest) {
                 break;
             
             case "ticklimit":
-                if ((!Number.isInteger(val) || val < 200)) {
+                if ((!Number.isInteger(val) || val < 500)) {
                     throw new Error("expected 'tickLimit <atleast 500>'")
                 }
                 configuration.simulationMoveLimit = val;
@@ -291,7 +291,7 @@ async function handleSimulate(sub, rest) {
                 break;
 
             case "stop":
-                if (simulation) {
+                if (simulation && simulation.simulationRunning) {
                     simulation.forceStopSimulation();
                 } else {
                     printer.print("Server", "No simulation running.")
@@ -348,8 +348,8 @@ function commandLine() {
             // this would be normal operation if there were real life bikes.
             // defualt is for the simulation to do this and then clear it when done.
             case "enable":
-                await initializeBikes();
-                startBroadcast();
+                /*                 await initializeBikes();
+                    startBroadcast(); */
                 break;
 
             case "help":
@@ -360,6 +360,10 @@ function commandLine() {
                 console.log("Shutting down server.");
                 rl.close();
                 process.exit(0);
+
+            /*case "debug":
+                console.log(simulation.test())
+                break;*/
 
             default: 
                 console.log("Unkown command")
