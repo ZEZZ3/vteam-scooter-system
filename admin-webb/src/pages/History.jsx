@@ -8,7 +8,7 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
-  const [users, setUsers] = useState();
+  const [users, setUsers] = useState(new Map());
   const [selectedPayments, setSelectedPayments] = useState([]);
   const [selectedRides, setSelectedRides] = useState([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -21,7 +21,9 @@ export default function History() {
       setPayments(data.payments);
       setRides(data.rides);
       const user = await getUsers()
+      console.log(user)
       setUsers(new Map(user.map(u => [u._id, u])))
+      console.log(users)
     } catch (e) {
       setErr("Kunde inte hämta användare.");
     } finally {
@@ -105,7 +107,7 @@ export default function History() {
                       <tr key={p._id}>
                         <td>{p._id}</td>
                         <td>
-                          <Link to={`/history/${p.user}`}>{users.get(p.user)?.mail}</Link>
+                          <Link to={`/history/${p.user}`}>{users.get(p.user)?.mail || p.user}</Link>
                         </td>
                         <td>{p.type ?? "N/A"}</td>
                         <td>{p.price ?? "N/A"}</td>
@@ -224,7 +226,7 @@ export default function History() {
                             onChange={() => {
                               setSelectedRides(prev =>
                                 prev.some(s => s.rideID === r._id)
-                                  ? prev.filter(s => s.paymentID !== r._id)
+                                  ? prev.filter(s => s.rideID !== r._id)
                                   : [...prev, { rideID: r._id, userID: r.user }]
                               );
                             }}

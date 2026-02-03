@@ -20,7 +20,6 @@ constants.HELP = `
             >   simulate start bikes <X> routes <Y>
         
         **note: this will run X * Y simulations, use reasonable numbers or be ready to wait.
-                rides are not registered in the database.
         ---
 
         To start a simulation with X bikes that each run 1 route:
@@ -51,9 +50,11 @@ constants.HELP = `
 
         Use 'config' to see configuration:
             >   config 
+        ---
 
         Use 'exit' to terminate server:
             >   exit
+        ---
         `
 
 module.exports = {

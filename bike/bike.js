@@ -91,8 +91,9 @@ class bike {
         lastTick: null,
         finishAt: null,
         battery: 100,
-        snapshots: [],
         endStamp: {
+          startPos: {...this.position},
+          endPos: null,
           startStationName: startStationName,
           startStationID: startStationID,
           startZoneName: startZoneName,
@@ -119,6 +120,7 @@ class bike {
     this.lastUpdate = new Date();
     this.battery = 100;
     this.status = "free";
+    run.endStamp.endPos = {...this.position};
   }
 
   simulationForceExit() {
@@ -134,10 +136,6 @@ class bike {
   getSimulationRouteIndex() {
     const run = this.simulationRuns[this.simulationRunIndex];
     return run.routeIndex;
-  }
-
-  getSimulationRunSnapshots() {
-    return this.simulationRuns[this.simulationRunIndex].snapshots;
   }
 
   moveBy() {
@@ -157,25 +155,11 @@ class bike {
     this.battery = Math.max(0, this.battery - 0.05);
     const [long, lat] = run.route[run.routeIndex];
     
-    const oldLat = this.position.lat;
-    const oldLong = this.position.long;
-
     this.position.lat = lat;
     this.position.long = long;
     
     run.routeIndex++;
     this.lastUpdate = new Date()
-
-    run.snapshots.push(
-      {
-        beforeMove: {lat: oldLat, long: oldLong},
-        afterMove: {lat: lat, long: long},
-        at: new Date(),
-        lat: lat,
-        long: long,
-        battery: this.battery
-      }
-    )
 
     return {status: 2};
   }

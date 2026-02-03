@@ -10,13 +10,13 @@ async function createUsers() {
     helpers.print("Database", "Adding users.")
 
     let db = await database.getDb("users");
-    const minLength = standardData.users.length;
+/*     const minLength = standardData.users.length;
     const currentLength = await db.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Users already exist. Skipping.")
         return;
     }
-    
+     */
     await db.collection.deleteMany({});
 
     for (const user of standardData.users) {

@@ -209,13 +209,11 @@ class simulation {
                             bike.setZoneInformation(null, null);
                         }
 
-                        const snapshots = bike.getSimulationRunSnapshots()
-                        const distance = calculations.calculateDistance(snapshots);
+                        const run = bike.simulationRuns[bike.simulationRunIndex];
+                        const distance = calculations.twoPointDistance(run.endStamp.startPos.lat, run.endStamp.startPos.long, bike.position.lat, bike.position.long);
                         bike.setSimulationRunDone(distance, this.simulationMoveCounter);
-                        
                         this.finishedSimulatedRoutes++;
                         await this.stopRides(bike);
-                        //console.log(bike)
                         break;
                     case 2:
                         // steps left
@@ -342,12 +340,11 @@ class simulation {
                             bike.setZoneInformation(null, null);
                         }
 
-                        const snapshots = bike.getSimulationRunSnapshots()
-                        const distance = calculations.calculateDistance(snapshots);
+                        const distance = calculations.twoPointDistance(run.endStamp.startPos.lat, run.endStamp.startPos.long, bike.position.lat, bike.position.long);
                         bike.setSimulationRunDone(distance, this.simulationMoveCounter);
 
                         this.finishedSimulatedRoutes++;
-                        //await this.stopRides(bike);
+                        await this.stopRides(bike);
                         break;
                     case 2:
                         // steps left
@@ -362,11 +359,10 @@ class simulation {
                 try {
                     bike.simulationRunIndex++;
                     await this.setRandomRoute(bike);
-                    bike.reRouteNeeded = false;
-                    // this breaks for some reason
-                    /*longestRoute = calculations.findLongestRoute(this.bikes);
+                   /*  longestRoute = calculations.findLongestRoute(this.bikes);
                     shortestRoute = calculations.findShortestRoute(this.bikes); */
-                    //await this.startRides(bike.id);
+                    bike.reRouteNeeded = false;
+                    await this.startRides(bike);
                 } catch (e) {
                     this.log.errors.push(`Bike routing error: ${e.message}`)
                 }
@@ -402,9 +398,9 @@ class simulation {
         }, this.configuration.simulationRate);   
     }
 
-    async startRides(id = null) {
+    async startRides(bike = null) {
 
-        if (!id) {
+        if (!bike) {
             let count = 0;
             for(const bike of this.bikes.values()) {
                 let res = await helpers.startRide(bike.id, this.serviceToken, this.serviceTokenExpiresIn);
@@ -413,8 +409,8 @@ class simulation {
                 printer.staticPrint(`${count}/${this.bikes.size} bikes have been rented.`);
             }
         } else {
-            let res = await helpers.startRide(id, this.serviceToken, this.serviceTokenExpiresIn);
-            this.bike.rideID = res.data.data.rideID;
+            let res = await helpers.startRide(bike.id, this.serviceToken, this.serviceTokenExpiresIn);
+            bike.rideID = res.data.data.rideID;
         }
     }
 
@@ -519,12 +515,51 @@ class simulation {
 
     }
 
-    test() {
-        const d = this.bikes.values().next().value;
-        console.log(d);
-        console.log(d.simulationRuns.length)
+    getBikeInfo(number) {
+        let findBike = null;
+        for(const bike of this.bikes.values()) {
+            if (bike.number === Number(number)) {
+                findBike = bike;
+                break; 
+            }
+        }
+        this.print = false;
+        console.clear()
+        if (findBike) {
+            console.log(`Bike: ${findBike.number}`)
+            console.log(`Number of routes: ${findBike.simulationRuns.length}`)
+            for (const run of findBike.simulationRuns) {
+                console.log("-----------------------------------------")
+                console.log(`Route length: ${run.route.length}`)
+                console.log(`Pre calculated distance: ${run.preDefinedRouteDistance}`)
+                console.log(`End calculated distance: ${run.calcDistance ?? "N/A"}`)
+                console.log(`Expected end station: ${run.expectedEndStation}}`)
+                console.log(`Done: ${run.done}`)
+                console.log(`Start station: ${run.endStamp ? run.endStamp.startStationName : "N/A"}`)
+                console.log(`Start zone: ${run.endStamp ? run.endStamp.startZoneName : "N/A"}`)
+                console.log(`End station: ${run.endStamp ? run.endStamp.endStationName : "N/A"}`)
+                console.log(`End zone: ${run.endStamp ? run.endStamp.endZoneName : "N/A"}`)
+                console.log(`End pos: ${run.endStamp ? run.endStamp.endPos : "N/A"}`)
+                console.log(`Start pos: ${run.endStamp ? run.endStamp.startPos : "N/A"}`)
+            }
+            return
+        }
+
+        console.log(`\nBike '${number}' not found.`)
+
+    }
+
+    getBikeNums() {
+        let s = [];
+        for (const bike of this.bikes.values()) {
+            s.push(bike.number);
+        }
+        console.log(`\n\n${s}`);
+
+        return;
     }
 
 }
+
 
 module.exports = simulation;

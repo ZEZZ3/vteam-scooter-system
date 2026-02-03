@@ -80,7 +80,7 @@ async function startRide(bikeID, serviceToken, serviceTokenExpiresIn) {
         }
         return response;
     } catch(e) {
-        console.log(e.response.data.error)
+
         printer.print("Server: error", `Could not start ride for ${bikeID}: ${e.code || e.message}`)        
     }
 }
@@ -108,7 +108,7 @@ async function endRide(bikeID, rideID, distance, parkingType, serviceToken, serv
         }
         return response;
     } catch (e) {
-        console.log(e.response.data.error)
+
         printer.print("Server: error", `Could not end ride for ${bikeID}: ${e.code || e.message}`)
     }
 }

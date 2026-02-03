@@ -25,11 +25,11 @@ function twoPointDistance(lat1, long1, lat2, long2) {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const d = constants.EARTH_RADIUS * c;
-
     return d; 
 }
 
 function calculateDistance(travelSteps) {
+    
     let distance = 0;
     for(let i = 0; i < travelSteps.length; i++) {
         const point1 = travelSteps[i].beforeMove;

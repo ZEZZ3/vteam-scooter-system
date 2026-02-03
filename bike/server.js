@@ -361,9 +361,19 @@ function commandLine() {
                 rl.close();
                 process.exit(0);
 
-            /*case "debug":
-                console.log(simulation.test())
-                break;*/
+            case "debug":
+                if (!simulation) {
+                    console.log("No simulation found.")
+                    break;
+                }
+
+                if (subcommand.toLowerCase() === "nums") {
+                    simulation.getBikeNums();
+                    break;
+                }
+                
+                simulation.getBikeInfo(subcommand)
+                break;
 
             default: 
                 console.log("Unkown command")
