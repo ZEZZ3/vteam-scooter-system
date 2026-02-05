@@ -1,12 +1,41 @@
 {
   "name": "backend",
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:index": "jest index_integration.test.js --detectOpenHandles",
+    "test:users": "jest users_integration.test.js --detectOpenHandles",
+    "test:rent": "jest rent_integration.test.js --detectOpenHandles",
+    "test:payment": "jest payment_integration.test.js --detectOpenHandles",
+    "test:bikes": "jest bikes_integration.test.js --detectOpenHandles",
+    "test:history": "jest history_integration.test.js --detectOpenHandles",
+    "test:city": "jest city_integration.test.js --detectOpenHandles",
+    "test:zone": "jest zone_integration.test.js --detectOpenHandles",
+    "test:station": "jest station_integration.test.js --detectOpenHandles",
+    "test:watch": "jest --watch --detectOpenHandles",
+    "start": "node server.js",
+    "production": "NODE_ENV='production' node server.js",
+    "dev": "NODE_ENV='test' nodemon server.js",
+    "eslint": "eslint .",
+    "eslint:fix": "eslint . --fix"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globalTeardown": "<rootDir>/test/jest.teardown.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.1",
+    "express": "^4.19.2",
+    "jest": "^30.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.0.0",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.11",
+    "stripe": "^20.1.0",
+    "supertest": "^7.1.4",
+    "validator": "^13.15.23"
   }
 }

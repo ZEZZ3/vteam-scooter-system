@@ -1,13 +1,21 @@
-import express from "express";
-import cors from "cors";
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
+const app = require("./app");
+const initDB = require("./utils/initDB");
+require("dotenv").config();
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`API listening on http://localhost:${port}`));
+let server;
+
+(async () => {
+    try {
+        if (process.env.NODE_ENV !== "test") {
+            await initDB();
+            console.log("DB initiated")
+        }
+        server = app.listen(port, () => {console.log(`API running on port ${port}`);});
+    } catch (e) {
+        console.log(e);
+        process.exit(1);
+    }
+})();
+
+module.exports = server;
