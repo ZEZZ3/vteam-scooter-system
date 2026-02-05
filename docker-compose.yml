@@ -18,7 +18,7 @@ services:
     command: >
       osrm-routed
       --algorithm mld
-      /data/sweden.osrm
+      /data/sweden-latest.osrm
     restart: unless-stopped
     ports:
       - "5000:5000"
