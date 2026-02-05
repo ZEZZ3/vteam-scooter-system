@@ -1,16 +1,22 @@
-# React + Vite
+## Admin-webb
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+###  Förklaring
 
-Currently, two official plugins are available:
+Koden representerar en admin-frontend för scooter-systemet.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Användning
 
-## React Compiler
+Koden är menad att köras i kombination med andra systemkomponenter, främst bike och backend.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+För att få igång backend och admin-webb. Detta fungerar som ett interface mot databasen.
 
-## Expanding the ESLint configuration
+```bash
+docker-compose up -d mongo backend admin-webb
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+För mer komplett körning:
+
+```bash
+docker-compose up -d mongo osrm backend admin-webb user-webb user-mobile
+docker-compose run --rm bike
+```

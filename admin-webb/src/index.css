@@ -1,3 +1,10 @@
+@import './styles/table.css';
+@import './styles/form.css';
+@import './styles/error.css';
+@import './styles/loader.css';
+@import './styles/input.css';
+@import './styles/boxes.css';
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -24,9 +31,12 @@ a:hover {
 
 body {
   margin: 0;
+<<<<<<< HEAD
   display: flex;
   place-items: center;
   min-width: 320px;
+=======
+>>>>>>> bike-refactor
   min-height: 100vh;
 }
 
@@ -35,6 +45,13 @@ h1 {
   line-height: 1.1;
 }
 
+<<<<<<< HEAD
+=======
+h2 {
+  margin: 0.5rem 0;
+}
+
+>>>>>>> bike-refactor
 button {
   border-radius: 8px;
   border: 1px solid transparent;
