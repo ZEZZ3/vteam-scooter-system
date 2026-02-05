@@ -1,4 +1,5 @@
 services:
+<<<<<<< HEAD
   backend:
     build: ./backend
     ports:
@@ -12,6 +13,8 @@ services:
       - mongo
     restart: unless-stopped
 
+=======
+>>>>>>> bike-refactor
   mongo:
     image: mongo:6
     container_name: mongo
@@ -20,6 +23,53 @@ services:
       - mongo-data:/data/db
     ports:
       - "27017:27017"
+    networks:
+      - scooter-network 
+
+  osrm:
+    image: osrm/osrm-backend
+    container_name: osrm
+    volumes:
+      - ./osrm-data:/data
+    command: >
+      osrm-routed
+      --algorithm mld
+      /data/sweden.osrm
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - scooter-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    command: > 
+      sh -c "node server.js"
+    networks:
+      - scooter-network
+  backend-test:
+    build: ./backend
+    profiles:
+      - test
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./.env
+    depends_on:
+      - mongo
+    command: "npm run test"
+    environment:
+      - NODE_ENV=test
+      - MONGO_URI=mongodb://mongo:27017/test
+    networks:
+      - scooter-network
 
   admin-webb:
     build: ./admin-webb
@@ -27,7 +77,17 @@ services:
       - "8081:80"
     depends_on:
       - backend
+<<<<<<< HEAD
     restart: unless-stopped
+=======
+    env_file:
+      - ./.env
+    environment:
+      VITE_API_BASE: http://localhost:3000
+    restart: unless-stopped
+    networks:
+      - scooter-network
+>>>>>>> bike-refactor
 
   user-webb:
     build: ./user-webb
@@ -35,6 +95,13 @@ services:
       - "8080:80"
     depends_on:
       - backend
+<<<<<<< HEAD
+=======
+    env_file:
+      - ./.env
+    environment:
+      BASE_API_URL: http://backend:3000
+>>>>>>> bike-refactor
     restart: unless-stopped
 
   user-mobile:
@@ -43,10 +110,18 @@ services:
       - "8082:80"
     depends_on:
       - backend
+<<<<<<< HEAD
+=======
+    env_file:
+      - ./.env
+    environment:
+      BASE_API_URL: http://backend:3000
+>>>>>>> bike-refactor
     restart: unless-stopped
 
   bike:
     build: ./bike
+<<<<<<< HEAD
     environment:
       API_BASE: http://backend:3000
     depends_on:
@@ -60,6 +135,24 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+=======
+    depends_on:
+      - backend
+      - osrm
+    environment:
+      BASE_API_URL: http://backend:3000
+    env_file:
+      - ./.env
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    networks:
+      - scooter-network
+
+networks:
+  scooter-network:
+    driver: bridge
+>>>>>>> bike-refactor
 
 volumes:
   mongo-data:
