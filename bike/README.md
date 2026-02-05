@@ -27,10 +27,14 @@ docker-compose run --rm bike
 
 Detta kommer köra igång osrm och backend också. Om allt går väl så skapas en koppling mot backend och systemet är redo att skicka uppdateringar till databasen.
 
-Alternativt kör man igång hela systemet för att även ha tillgång till adminvyn där cyklar kan ses live.
+Bäst är om man kör igång hela systemet för att även ha tillgång till adminvyn där cyklar kan ses live.
 
 ```bash
 docker-compose up -d mongo osrm backend admin-webb
+```
+
+```bash
+docker-compose run --rm bike
 ```
 
 För att se vad som händer på backend:ens sida kan det vara nyttigt att koppla upp via:
