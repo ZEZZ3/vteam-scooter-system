@@ -59,4 +59,3 @@ Alternativt
 | /v1/service/zones                         |  Yes  | -    | -   |   -   |  -     |   **No**   |
 | /v1/service/rent/start/{bikeid}           |  -    | Yes  | -   |   -   |  -     |   **No**   |
 | /v1/service/rent/stop/{bikeid}            |  -    | Yes  | -   |   -   |  -     |   **No**   |    
-*************************************************************************************************/
