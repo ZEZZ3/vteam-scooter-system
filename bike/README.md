@@ -12,9 +12,12 @@ Säg att vi har en rutt med 300 koordinater. Rutten kan vara 5000m, med en medel
 
 ### Användning
 
-![Demo](../assets/simulation.gif)
+För att komma igång krävs en .env-fil i roten av github-repot.
 
-.env fil krävs i roten av projektet.
+Nedan syns ett exempelflöde för delsystemet.
+
+![Demo1](../assets/simulation.gif)
+
 
 Enklast kommer man igång genom att köra:
 
