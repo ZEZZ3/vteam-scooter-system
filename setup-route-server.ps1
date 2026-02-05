@@ -8,5 +8,5 @@ if (-not (Test-Path $osrmFile)) {
 }
 
 docker run --rm -t -v "${PWD}/osrm-data:/data" osrm/osrm-backend osrm-extract -p /opt/bicycle.lua /data/sweden-latest.osm.pbf
-docker run --rm -t -v "${PWD}/osrm-data:/data" osrm/osrm-backend osrm-partition /data/sweden.osrm
-docker run --rm -t -v "${PWD}/osrm-data:/data" osrm/osrm-backend osrm-customize /data/sweden.osrm
+docker run --rm -t -v "${PWD}/osrm-data:/data" osrm/osrm-backend osrm-partition /data/sweden-latest.osrm
+docker run --rm -t -v "${PWD}/osrm-data:/data" osrm/osrm-backend osrm-customize /data/sweden-latest.osrm

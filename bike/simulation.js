@@ -142,10 +142,13 @@ class simulation {
     }
 
     async setRandomRoutes() {
-
+        let count = 0;
         for(const [_, bike] of this.bikes) {
+            
             try {
                 await this.setRandomRoute(bike);
+                count++;
+                printer.staticPrint(`${count}/${this.bikes.size} routes have been set.`);
             } catch (e) {
                 printer.print("Simulation: warn", `Bike routing error: ${e.message}`);
                 continue;

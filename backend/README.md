@@ -6,6 +6,19 @@
 Bike-servern kopplar upp sig med socket och uppdaterar cyklarnas data i realtid.  
 För detaljer på hur simuleringen fungerar se `./bike`.
 
+Databasen fylls med data via ./utils/initDB.js och det innehåll som finns i ./utils/stadardData.json. initDB körs vid varje uppstart av servern, och för att skydda den data som finns används:
+
+```javascript
+    const minLength = standardData.users.length;
+    const currentLength = await db.collection.countDocuments({});
+    if (currentLength >= minLength) {
+        helpers.print("Database", "Users already exist. Skipping.")
+        return;
+    }
+```
+
+Med nuvarande konfiguration så läses städer, zoner och stationer in på nytt varje gång. Så här är det fritt fram att lägga till eller ta bort data i standardData.json som man vill, då datan kommer läsas in på nytt. Om man av någon anledning vill lägga till data i standardData.json så måste man se till att ovanstående koddel i motsvarande funktion kommenteras ut.
+
 ### Användning
 
 Som en testgrund finns en kartläggning av stockholmsområdet. Det inkluderar 7 olika zoner, med omkring 60 olika stationer spridda i de olika zonerna.
