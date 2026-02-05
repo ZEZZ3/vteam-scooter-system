@@ -1,20 +1,4 @@
 services:
-<<<<<<< HEAD
-  backend:
-    build: ./backend
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      MONGO_URI: mongodb://mongo:27017/scooterdb
-      STRIPE_KEY: ${STRIPE_KEY:-test_dummy}
-      API_BASE: http://backend:3000
-    depends_on:
-      - mongo
-    restart: unless-stopped
-
-=======
->>>>>>> bike-refactor
   mongo:
     image: mongo:6
     container_name: mongo
@@ -77,9 +61,6 @@ services:
       - "8081:80"
     depends_on:
       - backend
-<<<<<<< HEAD
-    restart: unless-stopped
-=======
     env_file:
       - ./.env
     environment:
@@ -87,7 +68,6 @@ services:
     restart: unless-stopped
     networks:
       - scooter-network
->>>>>>> bike-refactor
 
   user-webb:
     build: ./user-webb
@@ -95,13 +75,10 @@ services:
       - "8080:80"
     depends_on:
       - backend
-<<<<<<< HEAD
-=======
     env_file:
       - ./.env
     environment:
       BASE_API_URL: http://backend:3000
->>>>>>> bike-refactor
     restart: unless-stopped
 
   user-mobile:
@@ -110,32 +87,14 @@ services:
       - "8082:80"
     depends_on:
       - backend
-<<<<<<< HEAD
-=======
     env_file:
       - ./.env
     environment:
       BASE_API_URL: http://backend:3000
->>>>>>> bike-refactor
     restart: unless-stopped
 
   bike:
     build: ./bike
-<<<<<<< HEAD
-    environment:
-      API_BASE: http://backend:3000
-    depends_on:
-      - backend
-    restart: unless-stopped
-
-  simulation:
-    build: ./simulation
-    environment:
-      API_BASE: http://backend:3000
-    depends_on:
-      - backend
-    restart: unless-stopped
-=======
     depends_on:
       - backend
       - osrm
@@ -152,7 +111,6 @@ services:
 networks:
   scooter-network:
     driver: bridge
->>>>>>> bike-refactor
 
 volumes:
   mongo-data:

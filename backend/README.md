@@ -6,6 +6,8 @@
 Bike-servern kopplar upp sig med socket och uppdaterar cyklarnas data i realtid.  
 För detaljer på hur simuleringen fungerar se `./bike`.
 
+Databasen fylls med data via ./utils/initDB.js och det innehåll som finns i ./utils/stadardData.json.
+
 ### Användning
 
 Som en testgrund finns en kartläggning av stockholmsområdet. Det inkluderar 7 olika zoner, med omkring 60 olika stationer spridda i de olika zonerna.
