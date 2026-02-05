@@ -31,9 +31,6 @@ Bäst är om man kör igång hela systemet för att även ha tillgång till admi
 
 ```bash
 docker-compose up -d mongo osrm backend admin-webb
-```
-
-```bash
 docker-compose run --rm bike
 ```
 
