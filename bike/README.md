@@ -84,13 +84,13 @@ Tvingar en simulering att avbryta. Loggen kommer visa data upp till att man avbr
 
 #### Konfiguration
 
-För att konfigurera olika variabler:
+För att konfigurera olika parametrar:
 
 ```
 set 'parameter' <value>
 ```
 
-Tillgängliga variabler:
+Tillgängliga parametrar:
 
 - `broadcastEnable`: true/false (default=true) – Slår på/av kommunikation med backend. Om kommunikationen är av så är det en helt lokal körning och den påverkar inte datan i databasen.
 - `broadcastRate`: rate in ms (default=4000) – Ställer in hur ofta data skickas till backend.
