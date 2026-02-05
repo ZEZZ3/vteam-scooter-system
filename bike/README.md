@@ -12,7 +12,7 @@ Säg att vi har en rutt med 300 koordinater. Rutten kan vara 5000m, med en medel
 
 ### Användning
 
-![Demo](assets/simulation.gif)
+![Demo](../assets/simulation.gif)
 
 .env fil krävs i roten av projektet.
 
