@@ -2,15 +2,19 @@
 
 ### Förklaring
 
-Bike fungerar som en express server och är tänkt att kommunicera cyklars/scootrars rörelse. Uppdateringar skickas med hjälp av sockets till backend som lagrar ändringar i databasen.
+Bike fungerar som en express server och är tänkt att kommunicera cyklars/scootrars rörelse. Uppdateringar skickas med hjälp av sockets till backend som lagrar ändringar i databasen. Bike-servern startar som en CLI, där man kan göra allmäna konfigureringar live, eller starta en simulation. 
 
 Eftersom vi inte har någon riktig hårdvara så krävs att detta genereras. För att generera rörelse finns det några möjligheter, man kan till exempel välja slumpmässiga koordinater och därefter låta en cykel/scooter vandra runt i olika riktningar. Svårigheten är då att man kan hamna lite varsomhelts och man får kanske inte jättevärdefull data. För att motverka detta används en osrm-server för att skapa olika rutter inom ett specifikt land (sverige). I och med att denna kan köras lokalt så slipper man olika begränsningar som t.ex. Google Maps API har.
 
-Simuleringar fungerar med hjälp av interval som går baserat på en "tickspeed" vilket då motsvarar hur fort en scooter byter koordinat längts sin definierade rutt. Tickspeed kan justeras dynamiskt mellan simuleringar. Det samma gäller med sändningsfrekvensen, alltså hur ofta en uppdatering av en cykels data skickas och uppdateras.
+Simuleringar utgår från en simulerings-klass, där majoriteten av simuleringslogiken ligger. Simuleringar fungerar med hjälp av interval som går baserat på en "tickspeed" vilket då motsvarar hur fort en scooter byter koordinat längts sin definierade rutt. Tickspeed kan justeras dynamiskt mellan simuleringar. Det samma gäller med sändningsfrekvensen, alltså hur ofta en uppdatering av en cykels data skickas och uppdateras.
 
 Säg att vi har en rutt med 300 koordinater. Rutten kan vara 5000m, med en medelsnitts hastighet på 10km/h tar denna rutt 30 minuter att genomföra. 300/60*30 = 0.167 punkter/sekund. 1/0.167≈6 ger alltså att en punkt bör ta omkring 6 sekunder. För att ha en approximativt real-tid simulering kan man alltså sätta tickspeed till 6000ms. Man får justera hastigheterna lite efter behov, med hänsyn till hur många scootrar man vill simulera.
 
 ### Användning
+
+![Demo](assets/simulation.gif)
+
+.env fil krävs i roten av projektet.
 
 Enklast kommer man igång genom att köra:
 
@@ -19,6 +23,12 @@ docker-compose run --rm bike
 ```
 
 Detta kommer köra igång osrm och backend också. Om allt går väl så skapas en koppling mot backend och systemet är redo att skicka uppdateringar till databasen.
+
+Alternativt kör man igång hela systemet för att även ha tillgång till adminvyn där cyklar kan ses live.
+
+```bash
+docker-compose up -d mongo osrm backend admin-webb
+```
 
 För att se vad som händer på backend:ens sida kan det vara nyttigt att koppla upp via:
 
@@ -97,7 +107,7 @@ För att slå på sändning för alla cyklar:
 enable
 ```
 
-Skulle man ha riktig hårdvara så skulle det vara detta läge man vill ha. Cyklar som är "live" skickar kontinuerligt sin data.
+Skulle man ha riktig hårdvara så skulle det vara detta läge man vill ha. Cyklar som är "live" skickar kontinuerligt sin data. Logiken för att detta ska fungera finns implementerad som en grund i simuleringsklassen, men bike-servern implementerar inte funktionaliteten i nuläget.
 
 #### Exit
 

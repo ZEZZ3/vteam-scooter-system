@@ -56,8 +56,8 @@ let lastUpdate = null;
             });
 
             socket.on("bike-update", async (data) =>{
+                const bikeID = data.id;
                 try {
-                    const bikeID = data.id;
                     const position = data.position;
                     const battery = Number(data.battery.toFixed(2));
                     const status = data.status;

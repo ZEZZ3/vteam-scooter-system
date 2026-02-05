@@ -93,7 +93,7 @@ class simulation {
                 allBikes = allBikes.slice(0, limit)
                 printer.print("Server", `Set bike limit to: ${limit}/${allBikes.length}`)
             }
-            //console.log(allBikes)
+
             for (const bikeData of allBikes) {
                 if (bikeData.position) {
                     const bikeID = bikeData._id;
@@ -103,7 +103,6 @@ class simulation {
             printer.print("Server", `Mapped: ${this.bikes.size} bikes.`)
             printer.print("Server", "Bikes initialized.")
         } catch (e) {
-            //console.log(e.stack)
             printer.print("Server: warn", `Could not initialize bikes. Error: ${e.message}`)
         }
     }
@@ -146,7 +145,6 @@ class simulation {
 
         for(const [_, bike] of this.bikes) {
             try {
-                //console.log(bike)
                 await this.setRandomRoute(bike);
             } catch (e) {
                 printer.print("Simulation: warn", `Bike routing error: ${e.message}`);
@@ -155,13 +153,18 @@ class simulation {
         }
     }
 
+    /**
+     * Main logic for simulating bikes. Creates an interval that continuosly updates the bikes status and properties.
+     * Used when running 'simulate start bikes <number>'
+     */
     createSimulationIntervalSingle() {
         this.finishedSimulatedRoutes = 0;
         this.longestRoute = calculations.findLongestRoute(this.bikes);
         this.shortestRoute = calculations.findShortestRoute(this.bikes);
 
         this.simulationInterval = setInterval(async () => {
-            
+            const stopRidesPromises = [];
+
             const log = {
                 tick: this.simulationMoveCounter,
                 shortestRoute: this.shortestRoute,
@@ -174,6 +177,7 @@ class simulation {
 
             if (this.checkIfDone()) {
                 this.log.status = `Ending simulation, passed tick-limit (${this.simulationMoveCounter}/${this.configuration.simulationMoveLimit})`;
+                this.simulationLog.push(log)
                 this.stopSimulationSingle();
                 return;
             }
@@ -192,6 +196,7 @@ class simulation {
                         this.log.errors.push(`B${bike.number} attempted to move without route!`) 
                         break;
                     case 1:
+                        // finish
                         const bikeLat = bike.position.lat;
                         const bikeLong = bike.position.long;
                         
@@ -213,7 +218,14 @@ class simulation {
                         const distance = calculations.twoPointDistance(run.endStamp.startPos.lat, run.endStamp.startPos.long, bike.position.lat, bike.position.long);
                         bike.setSimulationRunDone(distance, this.simulationMoveCounter);
                         this.finishedSimulatedRoutes++;
-                        await this.stopRides(bike);
+                        
+                        stopRidesPromises.push(
+                            this.stopRides(bike).catch(err => {
+                                console.error(`Failed to stop rides for bike ${bike.number}:`, err);
+                                this.log.errors.push(`Failed to stop rides for B${bike.number}: ${err.message}`);
+                            })
+                        );
+
                         break;
                     case 2:
                         // steps left
@@ -221,6 +233,8 @@ class simulation {
                         break;
                 }
             }
+
+            await Promise.all(stopRidesPromises);
 
             printer.runtimePrint(
                 this.simulationMoveCounter, this.configuration.simulationMoveLimit, 
@@ -264,6 +278,10 @@ class simulation {
 
     }
 
+    /**
+     * Main logic for simulating bikes. Creates an interval that continuosly updates the bikes status and properties.
+     * Used when running 'simulate start bikes <number>'
+     */
     createSimulationIntervalLoop() {
         this.finishedSimulatedRoutes = 0;
         this.longestRoute = calculations.findLongestRoute(this.bikes);

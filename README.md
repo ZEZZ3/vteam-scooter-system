@@ -1,6 +1,15 @@
 # Svenska Elsparkcyklar – Vteam Scooter System
 
-System för uthyrning av elsparkcyklar i flera svenska städer. Det här repot innehåller backend/API, kundgränssnitt, admin, mobil webbapp, simulator och dokumentation (SDS).
+System för uthyrning av elsparkcyklar i flera svenska städer. Det här repot innehåller backend/API, kundgränssnitt (ej implementerad), admin, mobil webbapp (ej implementerad), scooter-server samt simulator.
+
+## Översikt
+
+- **Backend/API:** [Express-server & MongoDB](backend/)
+- **Frontend:** [Webbläsar-UI för kunder](frontend/)
+- **Admin:** [Webbläsar-UI för drift & zoner](admin-webb/)
+- **Mobile webapp:** [Mobilanpassad kundvy](user-mobile/)
+- **Webapp:** [Mobilanpassad kundvy](user-webb/)
+- **Bike:** [Server som kommunicerar rörelse till backend och hanterar simulering](bike/)
 
 ## Setup
 
@@ -24,11 +33,27 @@ chmod +x setup-route-server.sh
 ./setup-route-server.sh
 ```
 
+Efter installationen ska det finnas en mapp './osrm-data', med all nödvändig data för att osrm-servern ska fungera.
+
 ### .env
 
 .env fil krävs i roten av projektet. För att testerna av backend ska fungera med `npm run test` krävs att .env också finns där.
 
 ### Docker
+
+Projektet använder nedanstående containers.
+
+| Service        | Beskrivning                           |
+| -------------- | ------------------------------------- |
+| `mongo`        | MongoDB-databas                       |
+| `osrm`         | Routing-server för realistiska rutter |
+| `backend`      | Express API                           |
+| `backend-test` | Backend testmiljö                     |
+| `admin-webb`   | Admin-UI                              |
+| `user-webb`    | Kund-webb                             |
+| `user-mobile`  | Mobilanpassad webb                    |
+| `bike`         | Scooter-simulator                     |
+
 
 Kom igång genom att köra:
 
@@ -43,10 +68,12 @@ docker-compose up -d mongo osrm backend admin-webb user-webb user-mobile
 docker-compose run --rm bike
 ```
 
-## Översikt
+För att nå resurserna används:
 
-- **Backend/API:** Express-server & MongoDB
-- **Frontend:** Webbläsar-UI för kunder
-- **Admin:** Webbläsar-UI för drift & zoner
-- **Mobile webapp:** Mobilanpassad kundvy
-- **Bike:** Server som kommunicerar rörelse till backend
+| Service     | URL                                            |
+| ----------- | ---------------------------------------------- |
+| Backend API | [http://localhost:3000](http://localhost:3000) |
+| Admin Webb  | [http://localhost:8081](http://localhost:8081) |
+| User Webb   | [http://localhost:8080](http://localhost:8080) |
+| Mobile Webb | [http://localhost:8082](http://localhost:8082) |
+| OSRM        | [http://localhost:5000](http://localhost:5000) |

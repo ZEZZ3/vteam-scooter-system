@@ -44,7 +44,7 @@ export function SocketProvider({ children }) {
     });
 
     socketInst.on("bike-position", (data) => {
-        console.log(data)
+        //console.log(data)
         setBikes((p) =>
             p.map((b) =>
                 b._id === data.bikeID ? 

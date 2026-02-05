@@ -348,7 +348,8 @@ function commandLine() {
             // this would be normal operation if there were real life bikes.
             // defualt is for the simulation to do this and then clear it when done.
             case "enable":
-                /*                 await initializeBikes();
+                console.log("No physical bikes available.")
+                /*  await initializeBikes();
                     startBroadcast(); */
                 break;
 

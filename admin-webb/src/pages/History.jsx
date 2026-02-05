@@ -52,7 +52,7 @@ export default function History() {
                   <span className="loader-small"></span>
                 ) : (
                   <button
-                    disabled={selectedPayments.size === 0}
+                    disabled={selectedPayments.length === 0}
                     onClick={async () => {
                       setDeleteLoading(true)
                       await deletePayments(selectedPayments);
@@ -148,8 +148,9 @@ export default function History() {
                   <span className="loader-small"></span>
                 ) : (
                   <button
-                    disabled={selectedRides.size === 0}
+                    disabled={selectedRides.length === 0}
                     onClick={async () => {
+                      setDeleteLoading(true)
                       await deleteRides(selectedRides);
 
                       setRides(prev =>
@@ -157,8 +158,9 @@ export default function History() {
                           p => !selectedRides.some(s => s.rideID === p._id)
                         )
                       );
-
+                      
                       setSelectedRides([]);
+                      setDeleteLoading(false)
                     }}
                     style={{ padding: 8, marginBottom: 8 }}
                   >

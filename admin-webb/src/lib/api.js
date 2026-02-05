@@ -100,20 +100,34 @@ export async function getUserHistory(id) {
 }
 
 export async function deletePayments(payments) {
-  await Promise.all(
-    payments.map(p =>
-      client.delete(`api/v1/history/${p.userID}/payments/${p.paymentID}`)
-    )
-  );
+  const limit = 5;
+  
+  for (let i = 0; i < payments.length; i += limit) {
+    const batch = payments.slice(i, i + limit);
+    
+    await Promise.all(
+      batch.map(p =>
+        client.delete(`api/v1/history/${p.userID}/payments/${p.paymentID}`)
+      )
+    );
+  }
 }
 
 export async function deleteRides(rides) {
-  await Promise.all(
-    rides.map(r =>
-      client.delete(`api/v1/history/${r.userID}/rides/${r.rideID}`)
-    )
-  );
+  const limit = 5;
+  
+  for (let i = 0; i < rides.length; i += limit) {
+
+    const batch = rides.slice(i, i + limit);
+
+    await Promise.all(
+      batch.map(ride =>
+        client.delete(`/api/v1/history/${ride.userID}/rides/${ride.rideID}`)
+      )
+    );
+  }
 }
+
 
 /**
  * BIKES
@@ -126,7 +140,7 @@ export async function getBike(id) {
 
 export async function addBike(bikeData) {
   const { data } = await client.post(`/api/v1/bikes/`, bikeData);
-  console.log(data)
+  //console.log(data)
   return data.data;
 }
 
