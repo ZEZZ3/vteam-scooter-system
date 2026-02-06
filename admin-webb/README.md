@@ -20,3 +20,5 @@ För mer komplett körning:
 docker-compose up -d mongo osrm backend admin-webb user-webb user-mobile
 docker-compose run --rm bike
 ```
+
+**Obs** När man redigerar en cykel så finns det ett bugg där zoner och stationer inte vill ladda förän man ändrat något värde i dropdowns:en.

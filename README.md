@@ -13,12 +13,21 @@ System för uthyrning av elsparkcyklar i flera svenska städer. Det här repot i
 
 ## Setup
 
+För att komma igång, kör:
+
 ```bash
 git clone git@github.com:ZEZZ3/vteam-scooter-system.git
 cd vteam-scooter-system
 ```
 
-Simuleringen använder osrm för att generera realistiska "routes". För att osrm-servern ska fungera krävs det en osrm-fil (sweden.osrm), som byggs i tre steg. För att göra det enklare kan man använda de inkluderade setup-filerna.
+**Obs. Ibland kan man behöva refresha startsidan för att det ska fungera rätt vid första start.**
+
+### .env
+
+.env fil krävs i roten av projektet. För att testerna av backend ska fungera med `npm run test` krävs att .env också finns där. Se resurser filen i inlämningen för vad .env bör innehålla.
+
+
+Simuleringen använder osrm för att generera realistiska "routes". För att osrm-servern ska fungera krävs det en osrm-fil (sweden-latest.osrm), som byggs i tre steg. För att göra det enklare kan man använda de inkluderade setup-filerna.
 
 ### Windows
 
@@ -34,10 +43,6 @@ chmod +x setup-route-server.sh
 ```
 
 Efter installationen ska det finnas en mapp './osrm-data', med all nödvändig data för att osrm-servern ska fungera.
-
-### .env
-
-.env fil krävs i roten av projektet. För att testerna av backend ska fungera med `npm run test` krävs att .env också finns där.
 
 ### Docker
 
@@ -77,3 +82,26 @@ För att nå resurserna används:
 | User Webb   | [http://localhost:8080](http://localhost:8080) |
 | Mobile Webb | [http://localhost:8082](http://localhost:8082) |
 | OSRM        | [http://localhost:5000](http://localhost:5000) |
+
+
+## Felsökning
+
+Ifall något inte fungerar är det nyttigt att använda: 
+
+```bash
+docker-compose logs -f <container>
+```
+
+Som ett första felsökningssteg, kontrollera att OSRM-servern fungerar:
+
+```bash
+docker-compose up -d osrm
+docker-compose logs -f osrm
+```
+
+Om det indikeras att servern körs, och det hela fortfarande strular, kontrollera:
+
+```bash
+docker-compose up -d backend
+docker-compose logs -f backend
+```
