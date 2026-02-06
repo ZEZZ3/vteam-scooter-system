@@ -17,7 +17,7 @@ Databasen fylls med data via ./utils/initDB.js och det innehåll som finns i ./u
     }
 ```
 
-Med nuvarande konfiguration så läses städer, zoner och stationer in på nytt varje gång. Så här är det fritt fram att lägga till eller ta bort data i standardData.json som man vill, då datan kommer läsas in på nytt. Om man av någon anledning vill lägga till data i standardData.json så måste man se till att ovanstående koddel i motsvarande funktion kommenteras ut.
+Om man av någon anledning vill lägga till data i standardData.json så måste man se till att ovanstående koddel i motsvarande funktion kommenteras ut.
 
 ### Användning
 
