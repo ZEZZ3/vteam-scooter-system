@@ -5,10 +5,9 @@ System för uthyrning av elsparkcyklar i flera svenska städer. Det här repot i
 ## Översikt
 
 - **Backend/API:** [Express-server & MongoDB](backend/)
-- **Frontend:** [Webbläsar-UI för kunder](frontend/)
 - **Admin:** [Webbläsar-UI för drift & zoner](admin-webb/)
 - **Mobile webapp:** [Mobilanpassad kundvy](user-mobile/)
-- **Webapp:** [Mobilanpassad kundvy](user-webb/)
+- **Webapp:** [Webbläsar-UI för kunder](user-webb/)
 - **Bike:** [Server som kommunicerar rörelse till backend och hanterar simulering](bike/)
 
 ## Setup
