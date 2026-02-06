@@ -51,6 +51,20 @@ set tickrate 2000
 simulate start bikes 200
 ```
 
+**Obs.** För att köra en simulering med 1000+ cyklar så går det inte att ha sändning via socket på, detta KOMMER att överbelasta backenden, och förmodligen krascha. 
+För att kunna köra fler scootrar, kör:
+
+```bash
+set broadcastenable false
+simulate start bikes 1000
+```
+
+Därefter går det bra att köra
+
+```bash
+simulate start bikes 1000
+```
+
 #### Simulate
 
 Använd 'simulate' för att starta en simulering.

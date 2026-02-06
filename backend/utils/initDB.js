@@ -197,12 +197,12 @@ async function createBikes() {
     let dbZones = await database.getDb("zones");
     let dbStations = await database.getDb("stations");
 
-/*     const minLength = standardData.bikes.length;
+    const minLength = standardData.bikes.length;
     const currentLength = await dbBikes.collection.countDocuments({});
     if (currentLength >= minLength) {
         helpers.print("Database", "Bikes already exist. Skipping.")  
         return;
-    } */
+    }
    
     await dbBikes.collection.deleteMany({});
 

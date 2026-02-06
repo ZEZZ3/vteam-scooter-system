@@ -65,8 +65,6 @@ export default function EditBike() {
     }
   }
 
-
-
   useEffect(() => {
     setFormData(f => ({
       ...f,
@@ -184,7 +182,7 @@ export default function EditBike() {
         <label>Stad</label>
         <select
         
-            value={formData.cityID || bike.city}
+            value={formData.cityID || ""}
             onChange={(e) => {
             const cityID = e.target.value;
             const city = cities.find(c => c._id === cityID);
@@ -210,7 +208,7 @@ export default function EditBike() {
         <label>Zon</label>
         <select
         
-            value={formData.currentZone || bike.currentZoneName}
+            value={formData.currentZone || ""}
             onChange={(e) => {
             const zoneID = e.target.value;
             const zone = zones.find(z => z._id === zoneID);
@@ -236,7 +234,7 @@ export default function EditBike() {
         <label>Station</label>
         <select
         
-            value={formData.currentStation || bike.currentStationName}
+            value={formData.currentStation || ""}
             onChange={(e) => {
             const stationID = e.target.value;
             const station = stations.find(s => s._id === stationID);

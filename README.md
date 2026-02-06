@@ -20,7 +20,7 @@ git clone git@github.com:ZEZZ3/vteam-scooter-system.git
 cd vteam-scooter-system
 ```
 
-Obs. Av någon anledning kan man behöva refresha startsidan för att det ska fungera rätt vid första start.
+**Obs. Ibland kan man behöva refresha startsidan för att det ska fungera rätt vid första start.**
 
 ### .env
 
@@ -104,4 +104,8 @@ Om det indikeras att servern körs, och det hela fortfarande strular, kontroller
 ```bash
 docker-compose up -d backend
 docker-compose logs -f backend
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> bike-refactor
