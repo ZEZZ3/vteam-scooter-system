@@ -20,6 +20,11 @@ git clone git@github.com:ZEZZ3/vteam-scooter-system.git
 cd vteam-scooter-system
 ```
 
+### .env
+
+.env fil krävs i roten av projektet. För att testerna av backend ska fungera med `npm run test` krävs att .env också finns där. Se resurser filen i inlämningen för vad .env bör innehålla.
+
+
 Simuleringen använder osrm för att generera realistiska "routes". För att osrm-servern ska fungera krävs det en osrm-fil (sweden-latest.osrm), som byggs i tre steg. För att göra det enklare kan man använda de inkluderade setup-filerna.
 
 ### Windows
@@ -36,10 +41,6 @@ chmod +x setup-route-server.sh
 ```
 
 Efter installationen ska det finnas en mapp './osrm-data', med all nödvändig data för att osrm-servern ska fungera.
-
-### .env
-
-.env fil krävs i roten av projektet. För att testerna av backend ska fungera med `npm run test` krävs att .env också finns där.
 
 ### Docker
 
