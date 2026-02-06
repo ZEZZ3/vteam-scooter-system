@@ -97,6 +97,7 @@ let lastUpdate = null;
                 } catch (e) {
                     helpers.print("Socket", `Something went wrong when updating bike with ID: ${bikeID}`);
                     helpers.print("Socket", `${e.message}`);
+                    helpers.print("Socket", `${e}`);
                     io.emit("error", "Could not update bike")
                 }
             });

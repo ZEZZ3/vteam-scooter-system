@@ -44,6 +44,13 @@ i en egen ruta.
 
 När du nu har CLI:en mot bike så finns det ett antal kommandon man kan använda. Som en grund är det bra att köra `help`. En grundligare förklaring följer här nedan.
 
+För att enkelt komma igång och köra en simulering kan man köra:
+
+```bash
+set tickrate 2000
+simulate start bikes 200
+```
+
 #### Simulate
 
 Använd 'simulate' för att starta en simulering.
