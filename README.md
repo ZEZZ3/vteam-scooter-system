@@ -20,6 +20,8 @@ git clone git@github.com:ZEZZ3/vteam-scooter-system.git
 cd vteam-scooter-system
 ```
 
+Obs. Av någon anledning kan man behöva refresha startsidan för att det ska fungera rätt vid första start.
+
 ### .env
 
 .env fil krävs i roten av projektet. För att testerna av backend ska fungera med `npm run test` krävs att .env också finns där. Se resurser filen i inlämningen för vad .env bör innehålla.
